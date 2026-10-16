@@ -50,6 +50,8 @@ Die Einrichtung:
 - erlaubt dem aufrufenden SSH-Konto ausschließlich die drei festen Helferaktionen über sudo;
 - startet **nur die Simulator-Vorschau** auf Loopback-Port 8000. p4d läuft dabei weiter; der USB-Port wird nicht geöffnet.
 
+Docker wird ausschließlich über den lokalen Unix-Socket angesprochen, unabhängig von CLI-Kontexten. Sowohl `/usr/bin/docker` als auch das auf dem Zielhost vorgefundene `/snap/bin/docker` werden unterstützt. Beim Snap-Paket liegt eine zusätzliche root-geschützte Kopie der Container-Umgebungsdatei unter `/var/snap/docker/common/froeling-bridge-test.env`, damit dessen Dateizugriff nicht auf die private `/etc`-Konfiguration angewiesen ist.
+
 Die Einrichtung setzt funktionierendes Docker und `python3 -m venv`, außerdem `fuser`, `visudo` und die Gruppe `dialout` voraus. Sie installiert keine Betriebssystempakete automatisch. Bestehende Installationspfade, ein gleichnamiger Container oder ein gleichnamiges Volume führen zum Abbruch. Bei einem Einrichtungsfehler können angelegte neue Testressourcen verbleiben; Original-p4d wird dabei nicht gestoppt. Wiederholung/Upgrade muss diese Ressourcen vorher ausdrücklich prüfen.
 
 ## Browserzugriff

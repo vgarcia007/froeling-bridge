@@ -12,11 +12,22 @@ operator=${SUDO_USER:-}
 if [[ -z "$operator" || "$operator" == root || ! "$operator" =~ ^[a-zA-Z_][a-zA-Z0-9_-]*\$?$ ]]; then
   echo 'Run through sudo from the intended SSH account.' >&2; exit 2
 fi
-for executable in python3 docker systemctl fuser sha256sum visudo; do command -v "$executable" >/dev/null; done
+for executable in python3 systemctl fuser sha256sum visudo; do command -v "$executable" >/dev/null; done
+if [[ -x /usr/bin/docker ]]; then docker_cli=/usr/bin/docker
+elif [[ -x /snap/bin/docker ]]; then docker_cli=/snap/bin/docker
+else echo 'No supported local Docker client found.' >&2; exit 2; fi
+docker_local() { "$docker_cli" --host unix:///var/run/docker.sock "$@"; }
+docker_local info --format '{{.ServerVersion}}' >/dev/null
+envfile="$config/test-db.env"
+if [[ "$docker_cli" == /snap/bin/docker ]]; then
+  # Snap confinement cannot assume access to our private /etc directory.
+  envfile=/var/snap/docker/common/froeling-bridge-test.env
+  if [[ -e "$envfile" ]]; then echo 'Snap test environment file already exists; inspect it before reinstalling.' >&2; exit 2; fi
+fi
 if [[ -e "$release" || -e "$config" || -e "$coordinator" || -e /usr/local/sbin/froeling-bridge-test ]]; then
   echo 'An installation already exists; it will not be overwritten. Inspect it before upgrading.' >&2; exit 2
 fi
-if docker inspect froeling-bridge-test-db >/dev/null 2>&1 || docker volume inspect froeling-bridge-test-data >/dev/null 2>&1; then
+if docker_local inspect froeling-bridge-test-db >/dev/null 2>&1 || docker_local volume inspect froeling-bridge-test-data >/dev/null 2>&1; then
   echo 'The intended test container name is already in use; nothing was changed.' >&2; exit 2
 fi
 if ! systemctl is-active --quiet p4d.service || ! systemctl is-enabled --quiet p4d.service; then
@@ -59,9 +70,12 @@ os.chmod(path,0o640)
 os.chown(path,0,grp.getgrnam('froeling-bridge-test').gr_gid)
 PY
 # Refuse a Docker daemon failure; do not touch any existing container or database.
-docker run -d --name froeling-bridge-test-db --restart unless-stopped \
+if [[ "$envfile" != "$config/test-db.env" ]]; then
+  install -m 0600 "$config/test-db.env" "$envfile"
+fi
+docker_local run -d --name froeling-bridge-test-db --restart unless-stopped \
   --label org.froeling-bridge.role=hardware-test \
-  --env-file "$config/test-db.env" -p 127.0.0.1:33079:3306 \
+  --env-file "$envfile" -p 127.0.0.1:33079:3306 \
   -v froeling-bridge-test-data:/var/lib/mysql mariadb:10.11 >/dev/null
 "$release/venv/bin/python" -I - <<'PY'
 from dataclasses import replace

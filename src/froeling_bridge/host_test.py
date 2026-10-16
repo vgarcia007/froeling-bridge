@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import fcntl
 import json
 import os
+import pwd
 from pathlib import Path
 import socket
 import subprocess
@@ -73,7 +74,11 @@ class System:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                env={"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LC_ALL": "C.UTF-8"},
+                env={
+                    "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
+                    "LC_ALL": "C.UTF-8",
+                    "HOME": pwd.getpwuid(os.geteuid()).pw_dir,
+                },
             )
         except (OSError, subprocess.TimeoutExpired):
             raise TestControlError(
@@ -82,6 +87,19 @@ class System:
         if result.returncode not in accepted:
             raise TestControlError("system operation failed")
         return result
+
+    def docker(self, *arguments):
+        binary = next(
+            (
+                path
+                for path in ("/usr/bin/docker", "/snap/bin/docker")
+                if os.path.isfile(path)
+            ),
+            None,
+        )
+        if binary is None:
+            raise TestControlError("Docker client unavailable")
+        return self.run([binary, "--host", "unix:///var/run/docker.sock", *arguments])
 
     def active(self, unit):
         return (
@@ -160,9 +178,7 @@ class System:
         target.require_test()
         if target.host != "127.0.0.1" or target.port != 33079:
             raise TestControlError("unexpected test database endpoint")
-        container = self.run(
-            ["/usr/bin/docker", "inspect", "froeling-bridge-test-db"]
-        ).stdout
+        container = self.docker("inspect", "froeling-bridge-test-db").stdout
         info = json.loads(container)[0]
         if (
             info["Config"].get("Labels", {}).get("org.froeling-bridge.role")

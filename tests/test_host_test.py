@@ -1,9 +1,11 @@
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch, Mock
 
 from froeling_bridge.host_test import (
     read_report,
+    System,
     Coordinator,
     TestControlError,
     P4D,
@@ -144,3 +146,25 @@ class ReportTests(unittest.TestCase):
             self.assertEqual(read_report(path), {})
             path.write_text('{"fatal_reason":"RequestTimeout"}')
             self.assertEqual(read_report(path), {"fatal_reason": "RequestTimeout"})
+
+
+class DockerClientTests(unittest.TestCase):
+    def test_snap_client_uses_only_local_socket(self):
+        from froeling_bridge.host_test import System
+
+        system = System()
+        system.run = Mock()
+        with patch(
+            "froeling_bridge.host_test.os.path.isfile",
+            side_effect=lambda path: path == "/snap/bin/docker",
+        ):
+            system.docker("inspect", "froeling-bridge-test-db")
+        system.run.assert_called_once_with(
+            [
+                "/snap/bin/docker",
+                "--host",
+                "unix:///var/run/docker.sock",
+                "inspect",
+                "froeling-bridge-test-db",
+            ]
+        )
