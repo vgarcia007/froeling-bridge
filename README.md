@@ -16,13 +16,13 @@ Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, 
 
 ## Projektstand
 
-Version 0.1.0 enthält einen Python-Protokollkern und einen vollständig lokalen Simulator. Er liest Status, Messwerte, Parameter, Menü und Zeitprogramme und prüft simulierte Änderungen durch Nachlesen. Ein TTY-Transport, eine Datenbankanbindung und die HTTP-API sind noch nicht implementiert.
+Version 0.2.0 enthält den Python-Protokollkern, einen Simulator, eine HTTP-API und einen kontinuierlichen Datensammler. Dieser liest regelmäßig simulierte Heizungswerte und speichert sie auf Wunsch im p4d-0.10.2-Schema einer separaten Test-MariaDB. Eine bestehende p4d-Datenbank kann ausschließlich lesend angezeigt werden. Parameter- und Zeitprogrammänderungen werden am Simulator durch Nachlesen bestätigt. USB-/TTY-Transport und modernes Browsermenü folgen noch.
 
 Die bisherigen Protokollprüfungen erfolgen offline anhand des Referenzcodes und synthetischer Fixtures. Ein ausschließlich lesender [Abgleich mit dem bestehenden Datenbankschema](docs/live-database.md) und dem [installierten p4d-Stand](docs/live-server.md) ist dokumentiert. Das Simulationsprofil der Antwortcodes und die Schreibsemantik sind noch nicht an der realen Heizung bestätigt.
 
 ## Installieren und ausprobieren
 
-Python 3.9 oder neuer; keine externen Laufzeitabhängigkeiten:
+Python 3.9 oder neuer; der Protokollkern benötigt keine externen Laufzeitabhängigkeiten:
 
 ```bash
 python3 -m venv .venv
@@ -31,6 +31,16 @@ python3 -m venv .venv
 ```
 
 Die Demo verwendet ausschließlich fiktive Daten im Speicher. Sie benötigt keine Zugangsdaten, Datenbank oder angeschlossene Heizung. Die [Anleitung zum Python-Kern](docs/python-core.md) beschreibt Schnittstellen, Fehlerverhalten und Einschränkungen.
+
+Für API und dauerhafte Datensammlung:
+
+```bash
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install '.[service]'
+.venv/bin/froeling-bridge serve
+```
+
+Die API läuft unter `http://127.0.0.1:8000/api/v1/health`. Der Sammler startet sofort und liest danach alle 60 Sekunden. Ohne Konfiguration bleiben alle Daten fiktiv und im Speicher. Die [Dienstanleitung](docs/service.md) beschreibt Testdatenbank, Bestandsansicht, API-Beispiele und Integrationstests. Ein alter Webinterface-Schreibmitschnitt ist keine Voraussetzung für die Weiterentwicklung.
 
 ## Dokumentation
 
@@ -57,7 +67,7 @@ Für den Referenzcode gelten die ursprünglichen Copyright-Hinweise und die dort
 
 ## Offline-Prüfung
 
-Die Python-Tests laufen aus dem Checkout ohne weitere Abhängigkeiten:
+Die Kern- und Sammlertests laufen ohne weitere Abhängigkeiten; HTTP-Tests benötigen das Service-Extra, MariaDB-Tests eine ausdrücklich konfigurierte lokale Testdatenbank (siehe Dienstanleitung):
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v

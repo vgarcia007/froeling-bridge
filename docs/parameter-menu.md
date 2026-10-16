@@ -112,7 +112,7 @@ Beim Speichern lädt `performTimeParStore` alle vier Intervalle aus `timeranges`
 
 **Befund:** `performTimeParStore` beendet den Ablauf nach Konvertierungs- oder Übertragungsfehlern nicht zuverlässig. Nach einem Fehler kann es weiterhin die DB ändern und eine Erfolgsmeldung senden. Außerdem fehlt hier eine vollständige Prüfung `range in 1..4`. Das sind Quellcodebefunde, keine an der Anlage reproduzierten Fehler.
 
-**Empfehlung:** Vor einer Teiländerung alle vier Zeitintervalle frisch lesen; ungewollte Rundung offen behandeln; nach unklarer Antwort nicht blind erneut senden; Datenbank und Erfolgsmeldung erst nach bestätigtem Ergebnis aktualisieren. Die genaue Transaktionsstrategie wird mit echten Antwortmitschnitten festgelegt.
+**Empfehlung:** Vor einer Teiländerung alle vier Zeitintervalle frisch lesen; ungewollte Rundung offen behandeln; nach unklarer Antwort nicht blind erneut senden; Datenbank und Erfolgsmeldung erst nach bestätigtem Ergebnis aktualisieren. Der Python-Kern implementiert bereits frisches Einlesen, vollständige Transaktionen und bestätigtes Nachlesen; reale Antwortmitschnitte sind zusätzliche spätere Validierung.
 
 ## Anforderungen für den späteren Nachbau
 

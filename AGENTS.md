@@ -14,7 +14,7 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Bestehende MariaDB und historische Messreihen weiterführen; p4d als Rückfalloption erhalten.
 - Kein dauerhafter Parallelbetrieb zweier unabhängiger serieller Heizungsdienste als Default.
 - Charts, Dashboards, Pelletverwaltung und weitere Integrationen zunächst außerhalb des Kernumfangs.
-- Framework, API-Vertrag, Installation und neue Projektlizenz sind noch nicht entschieden. Nicht als bereits vereinbart darstellen.
+- Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Produktionsauthentifizierung, UI-Technik, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
 ## Live-Datenbank: ausdrücklich nur lesen
@@ -45,9 +45,9 @@ Der Benutzer stellt `live-server-ssh.con` für den zuvor angebotenen lesenden SS
 - Eigenes Remote: `git@github.com:vgarcia007/froeling-bridge.git`, öffentlich; keine persönlichen Betriebsdaten veröffentlichen.
 - Originalcode als Submodul: `reference/linux-p4d`, Herkunft `https://github.com/vgarcia007/linux-p4d.git`.
 - Untersuchte Referenz: `4d1176c4a9081893e4c2cc27a535bb2bc4737d0a`. Referenzcode unverändert lassen und nicht still aktualisieren.
-- Python-Kern: `src/froeling_bridge`, Anleitung `docs/python-core.md`. Python >=3.9, keine externen Laufzeitabhängigkeiten. Tests: `PYTHONPATH=src python3 -m unittest discover -s tests -v`.
+- Python-Kern: `src/froeling_bridge`, Anleitung `docs/python-core.md`. Python >=3.9, Kern ohne externe Laufzeitabhängigkeiten. Optional `.[service]` für API/DB; Anleitung `docs/service.md`. Tests: `PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v`; MariaDB-Integration nur mit explizitem `FROELING_TEST_DB_CONFIG` für separate lokale Test-DB.
 - Zusätzliche Offline-Prüfung: `python3 docs/tools/verify_protocol_examples.py`. Sie prüft Original-Bytecodierung, nicht die reale Schreibsemantik.
-- Default-Antwortcodes des Simulators sind unbestätigte Annahmen. Keinen TTY-Adapter oder Live-Betrieb daraus als bereits geprüft ableiten.
+- Reale Schreibmitschnitte dienen zusätzlicher Hardwarevalidierung, blockieren aber die quellenbasierte Implementierung nicht. Default-Antwortcodes des Simulators sind unbestätigte Annahmen. Keinen TTY-Adapter oder Live-Betrieb daraus als bereits geprüft ableiten.
 
 ## Kontinuität und Sicherung
 

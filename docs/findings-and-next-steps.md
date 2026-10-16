@@ -19,7 +19,7 @@ Dies sind statische Befunde. Sie sind weder an der realen Anlage reproduziert no
 | hoch | Zeitprogrammhandler läuft nach Fehlern weiter und kann DB-Update plus Erfolgsmeldung ausführen | vor DB-Änderung auf bestätigten Erfolg bestehen; Fehlerzweige im späteren Simulator prüfen |
 | hoch | Zeitprogrammhandler prüft `range` nicht vollständig auf 1..4 | vollständige Grenzenprüfung vor Arrayzugriff und Senden |
 | hoch | Normales Schreiben liest nach, vergleicht den nachgelesenen Wert aber nicht explizit mit dem Ziel | Transporterfolg von bestätigter Änderung trennen |
-| hoch | Die beiden Antworten auf `39` werden gelesen, ihre Bedeutung ist nicht erklärt | echte vollständige Schreibmitschnitte samt Vorher-/Nachherwerten erforderlich |
+| hoch | Die beiden Antworten auf `39` werden gelesen, ihre Bedeutung ist nicht erklärt | zusätzliche spätere Hardwarevalidierung; keine Voraussetzung für die quellenbasierte Implementierung |
 | hoch | `performParStore` ignoriert die erste fehlgeschlagene Metadatenabfrage vor Konvertierung | bei fehlenden aktuellen Metadaten vor dem Schreiben abbrechen |
 | hoch | Die meisten Antwortpfade konsumieren die Prüfsumme ohne Prüfung; Headercommand und Adresszuordnung werden nicht konsequent geprüft | zentralen Frame- und Transaktionsvalidator planen; echte Antwortcodes bestätigen |
 | mittel | Zeitprogramm-Teiländerungen senden auch drei weitere, aus der DB geladene Intervalle | aktuelle Gesamtgruppe vor Änderung einlesen; fremde Änderungen nicht überschreiben |
@@ -100,20 +100,17 @@ Quellcheckout und Dienstpfad-Binärdatei passen zu 0.10.2; das zugehörige Dicti
 
 Der [Python-Protokollkern mit Simulator](python-core.md) ist inzwischen implementiert und durch 72 Tests geprüft. Framing, typisierte Antworten, vollständige Transaktionen sowie bestätigtes Parameterschreiben und Zeitprogrammänderungen sind offline verfügbar. Der nächste unabhängige Baustein ist die Datenbankkompatibilität gegen lokale Fixtures; reale Antwortzuordnungen und Hardware-Schreibsemantik bleiben offen. Die folgende ursprüngliche Reihenfolge beschreibt weiterhin die späteren Integrationsschritte, nicht ausschließlich unerledigte Arbeit.
 
-## Empfohlene Reihenfolge der nächsten Arbeitsphasen
+## Aktueller Fortschritt und nächste Arbeitsphasen
 
-1. **Bestandsabgleich:** installierte Version und reales Schema ermitteln, Unterschiede zu dieser Referenz dokumentieren, vorhandene echte Telegramme zuordnen. Abschluss: eine benannte Hardware-/Firmware-/Schema-Kombination als Implementierungsziel.
-2. **Offline-Protokollplan:** auf Basis echter Beispiele die Parser, Transaktionsabläufe und einen simulierten Heizungsgegner spezifizieren. Antwortcodes, Schreibbestätigung, Listenabbruch und Wiederanlauf müssen geklärt oder als explizit ununterstützt begrenzt sein.
-3. **Python-Lesekern planen und bauen:** ein Besitzer für COM1, Discovery, Status und Messwerte; offline gegen Mitschnitte testen. Noch keine DB- oder Heizungsänderungen beim ersten Vergleich mit Bestandsdaten. Ein späterer Hardwaretest braucht exklusiven Portzugriff.
-4. **DB-Adapter planen und auf Kopie prüfen:** bestehende Sensoridentitäten/Skalierung/Zeitsemantik erhalten, keine automatischen Schemaänderungen. Historie lesen und synthetische Aufzeichnungen rückwärtskompatibel prüfen.
-5. **Schreibkern planen und verifizieren:** frische Metadaten, Typ-/Grenzenkontrolle, gesamte Transaktion, bestätigtes Nachlesen, unklarer Ausgang nach Timeout; zuerst Simulator, danach gesonderter Hardwaretest. Zeitprogramme separat behandeln.
-6. **API und modernes Menü gemeinsam festlegen:** dokumentierte HTTP-API für Discovery, Werte, Menü und Änderungen; Browser als API-Client. Authentifizierung, Installation und Dienstbetrieb konkret entscheiden. Charts, Pelletverwaltung und übrige Integrationen zunächst auslassen.
-7. **Umstieg und Rückkehr erproben:** Datenbanksicherung und Schemavergleich, alten Dienst stoppen, neuen Dienst exklusiv starten, Messreihen und Änderungen prüfen, Rückkehr auf p4d testen. Aggregationszuständigkeit dabei ausdrücklich bestimmen.
+API, Datenbankadapter und kontinuierliche Simulator-Aufzeichnung sind in Version 0.2.0 implementiert: [Dienstanleitung](service.md). Flask/Waitress und PyMySQL sind für diesen lokalen Prototyp gewählt. Die Tests umfassen auch eine separate lokale MariaDB mit bekanntem Schema. Live-DB/-Server und USB-Port bleiben in diesem Arbeitspaket unberührt.
 
-Diese Reihenfolge ist eine Empfehlung, kein bereits vollständig spezifizierter Implementierungsplan. Noch offen sind Python-Framework, Datenbanktreiber, Verpackung, Authentifizierung und UI-Technik. Sie werden nicht aus der heutigen C++-Struktur vorentschieden.
+1. **Hardwaretransport:** exklusiven USB-/TTY-Transport implementieren und offline prüfen; danach gesonderten kontrollierten Wechsel von p4d zum ersten realen Lesetest vorbereiten. Antwortprofil, Firmware und Wiederanlauf dabei validieren. Ein Schreibmitschnitt über die alte Weboberfläche ist keine Voraussetzung.
+2. **Modernes Menü:** Browser als Client der vorhandenen API; Hierarchie, Parametereditor, eindeutige Auftragszustände und Zeitprogramme. Charts und Fremdintegrationen bleiben nachrangig.
+3. **Produktiver Betrieb:** Authentifizierung, persistentes Auftragsjournal, Serviceinstallation und kontrollierter Produktivwriter; Hardware-Schreibtest gesondert vereinbaren. Aggregation/Aufbewahrung und bisher nicht unterstützte benötigte Sensortypen vor vollständiger Ablösung berücksichtigen.
+4. **Umstieg und Rückkehr:** Bestandsbackup/Schemavergleich, exklusiver Portzugriff, Messreihenvergleich und getestete Rückkehr auf p4d. Keine zwei gleichzeitigen Logger oder Aggregationswriter.
 
 ## Prüfstand und Grenzen dieser Lieferung
 
 Ausgeführt wurden die Original-Encoder-/Decoderprüfungen aus [README](README.md#reproduzierbare-prüfung), der Commitvergleich, die Quellstellenprüfung und eine Prüfung der lokalen Dokumentationsverweise. Der Referenzcheckout ist unverändert. Im ursprünglichen Offline-Arbeitspaket wurde keine produktive DB-Verbindung hergestellt. Im anschließenden, gesondert autorisierten Live-Abgleich wurde ausschließlich lesend auf die DB zugegriffen. Es wurden kein Daemon gebaut oder installiert und keine Heizungsbefehle gesendet.
 
-Die Prüfung beweist Bytecodierung und den dokumentierten Quellbezug. Sie beweist noch nicht die gesamte reale Antwortsemantik, Hardwareverträglichkeit oder Kompatibilität mit der unbekannten installierten Version. Insbesondere ist keine Aussage darüber möglich, warum das Webinterface der laufenden Anlage derzeit ausfällt.
+Die Prüfung beweist Bytecodierung und den dokumentierten Quellbezug. Sie beweist noch nicht die gesamte reale Antwortsemantik, Hardwareverträglichkeit oder vollständige produktive Kompatibilität mit der inzwischen identifizierten Altinstallation. Insbesondere ist keine Aussage darüber möglich, warum das Webinterface der laufenden Anlage derzeit ausfällt.

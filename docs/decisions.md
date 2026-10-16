@@ -46,4 +46,18 @@ Hier stehen dauerhafte Vereinbarungen, keine ungeprüften Annahmen. Neuere Entsc
 
 ## Noch nicht entschieden
 
-Python-/API-Framework, endgültiger DB-Treiber, API-Vertrag, Frontendtechnik, Authentifizierung, Installations-/Deploymentweg und Lizenz für neu geschriebene Projektteile. PyMySQL in der lokalen Untersuchungsumgebung ist keine Architekturentscheidung.
+Frontendtechnik, Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Projektteile. Framework, DB-Treiber und API-Vertrag für den lokalen Prototyp wurden inzwischen wie unten beschrieben entschieden.
+
+
+## 16.10.2026 — Kontinuierliche Datensammlung und lokale API
+
+- Benutzer beauftragt Umsetzung des erweiterten Plans: kompatible DB-Anbindung, kontinuierliche Sammlung/Speicherung, HTTP-API und simuliertes Parameterschreiben; modernes Browsermenü folgt.
+- Ein Schreibmitschnitt aus dem alten Webinterface ist keine Voraussetzung. Code ist die Implementierungsgrundlage; unbekannte Antwortdetails ausdrücklich kennzeichnen und später gesondert an der Hardware prüfen.
+- Python >=3.9 erhalten. Flask >=3.1,<3.2, Waitress >=3,<4 und PyMySQL >=1.1,<1.2 im optionalen Service-Extra. Protokollkern bleibt unabhängig.
+- Lokaler Prototyp bindet ausschließlich an 127.0.0.1; kein Debugger/Reload. Drei getrennte Modi demo/demo-db/database. Bestandsansicht ausschließlich lesend, kein vermischter Live-/Simulatorbetrieb.
+- Aufzeichnungsintervall standardmäßig 60 Sekunden, keine Überlappung oder Aufholbursts. Einzelner Heizungsbesitzer mit vollständigen Transaktionen und FIFO; Datenbankarbeit getrennt davon.
+- Lokales Schreiben ausschließlich auf benannte Testdatenbanken unter Loopback. Kein Produktivwriter, keine automatische Migration und keine Initialisierung beim Dienststart. Testwerkzeug erzeugt bekannten Schemaausschnitt und synthetische Fixtures ausdrücklich separat.
+- samples und peaks transaktional; Sensoridentität, bereits skalierte Werte, S-Kennung, lokale Europe/Berlin-Zeit und Unix-Metafelder erhalten. Schlüsselkonflikte aktualisieren Werte und updsp, erhalten inssp. Kein Daten-Nachlieferungspuffer; unklare Commit-Ergebnisse nicht wiederholen.
+- Unterstützte Sammlung: VA, DO/DI/AO, UD 1–3; weitere Typen sichtbar überspringen. Aggregation/Bereinigung vor vollständiger Ablösung gesondert implementieren. Bestehende Historie/Metadaten und Fremdintegrationen nicht verändern.
+- /api/v1 mit dokumentiertem OpenAPI-Vertrag. Jobs queued/running/completed/failed, Schreibbestätigung weiterhin ausschließlich durch Nachlesen. FIFO 64, maximal 1.000 flüchtige Jobresultate; keine Wiederholung nach Neustarts.
+- Kein Zugriff auf Live-DB/-Server und kein Portzugriff im Implementierungspaket. Keine neue Freigabe für produktive Schreibtests oder Dienstaktionen abgeleitet.

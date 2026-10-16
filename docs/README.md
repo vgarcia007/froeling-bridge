@@ -1,6 +1,6 @@
 # p4d: Bestandsaufnahme für einen Python-Nachbau
 
-Stand der Untersuchung: 16.10.2026. Ziel ist ein einfacher installierbarer Heizungsdienst mit API und modernem Servicemenü, der die vorhandene p4d-Datenbank weiterführen kann. Die Bestandsaufnahme ist inzwischen durch einen [Offline-Python-Kern mit Simulator](python-core.md) ergänzt. Ein Live-Heizungsdienst und ein API-Framework sind weiterhin nicht implementiert.
+Stand der Untersuchung: 16.10.2026. Ziel ist ein einfacher installierbarer Heizungsdienst mit API und modernem Servicemenü, der die vorhandene p4d-Datenbank weiterführen kann. Die Bestandsaufnahme ist inzwischen durch einen [Offline-Python-Kern mit Simulator](python-core.md) ergänzt. Inzwischen sind auch [API, Datenbankadapter und kontinuierliche Simulator-Aufzeichnung](service.md) implementiert. Ein Live-Heizungsdienst ist noch nicht vorhanden.
 
 ## Referenz und Aussagekraft
 
@@ -19,7 +19,7 @@ Der installierte Quellstand und die Versionskennung der Dienstpfad-Binärdatei w
 
 ## Lesereihenfolge
 
-Für Installation, Demo und Python-Schnittstellen direkt zur [Anleitung des Offline-Kerns](python-core.md).
+Für Installation und API zur [Dienstanleitung](service.md), für Protokollschnittstellen zur [Anleitung des Offline-Kerns](python-core.md).
 
 1. [Heizungsprotokoll](protocol.md): Transport, Telegramme, Befehle, Lesen und Fehlerfälle.
 2. [Parametermenü und Schreiben](parameter-menu.md): kompletter Bedien- und Schreibpfad, einschließlich Zeitprogrammen.

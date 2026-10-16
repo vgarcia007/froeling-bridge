@@ -1,0 +1,136 @@
+"""Versioned local HTTP API. The physical controller is never opened here."""
+from datetime import datetime
+from importlib.resources import files
+import json
+
+from .errors import ValidationError
+from .messages import ParameterType
+from .service import QueueBusy, ServiceStopped, public
+from .storage import DatabaseUnavailable, ZONE
+
+
+def create_app(service):
+    from flask import Flask, jsonify, request
+    from werkzeug.exceptions import HTTPException
+    app = Flask(__name__)
+    app.config["MAX_CONTENT_LENGTH"] = 16384
+    if not hasattr(app, "json"):
+        raise ImportError("Flask 3.1 service dependencies required")
+    app.json.ensure_ascii = False
+    prefix = "/api/v1"
+
+    def response(value, status=200):
+        return jsonify(public(value)), status
+
+    def integer(name, default=None):
+        value = request.args.get(name, default)
+        try:
+            if value is None:
+                raise ValueError()
+            return int(value)
+        except (TypeError, ValueError):
+            raise ValidationError(f"{name} must be an integer") from None
+
+    def args_only(*names):
+        if set(request.args) - set(names) or any(len(request.args.getlist(k)) != 1 for k in request.args):
+            raise ValidationError("unknown or repeated query parameter")
+
+    @app.errorhandler(ValidationError)
+    def invalid(exc):
+        return response(dict(error=dict(code="validation_error", message=str(exc))), 400)
+
+    @app.errorhandler(DatabaseUnavailable)
+    def unavailable(exc):
+        return response(dict(error=dict(code="database_unavailable", message="database operation failed")), 503)
+
+    @app.errorhandler(QueueBusy)
+    @app.errorhandler(ServiceStopped)
+    def busy(exc):
+        return response(dict(error=dict(code="service_busy", message="worker unavailable or queue full")), 503)
+
+    @app.errorhandler(HTTPException)
+    def http_error(exc):
+        return response(dict(error=dict(code=exc.name, message=exc.description)), exc.code)
+
+    @app.errorhandler(Exception)
+    def internal_error(exc):
+        # Never expose driver errors, connection configuration or traceback data.
+        return response(dict(error=dict(code="internal_error", message="request failed")), 500)
+
+    @app.get(prefix + "/health")
+    def health():
+        return response(dict(mode=service.mode, hardware_verified=False,
+                             worker="unavailable" if not service.worker else (
+                                 "running" if service.worker.thread.is_alive() else "stopped"),
+                             database_available=service.repository.available,
+                             jobs_persistent=False, timezone="Europe/Berlin"))
+
+    @app.get(prefix + "/collector")
+    def collector():
+        return response(service.collector_status())
+
+    @app.get(prefix + "/menu")
+    def menu():
+        args_only("parent")
+        parent = integer("parent", 1)
+        if not 0 <= parent <= 65535:
+            raise ValidationError("invalid menu parent")
+        items = service.repository.menu(parent)
+        for item in items:
+            item["editable"] = service.worker is not None and item["type"] in set(ParameterType)
+        return response(dict(source=service.repository.source, parent=parent, items=items,
+                             cached=True, timezone="Europe/Berlin"))
+
+    @app.get(prefix + "/sensors")
+    def sensors():
+        args_only()
+        return response(dict(source=service.repository.source, items=service.repository.sensors()))
+
+    @app.get(prefix + "/values")
+    def values():
+        args_only()
+        if service.mode == "database":
+            return response(dict(error=dict(code="controller_unavailable", message="use history for stored database values")), 409)
+        rows = service.cached_values()
+        state = service.collector_status()
+        failures = {(e.get("address"), e.get("type")) for e in state["errors"]}
+        now = datetime.now(ZONE)
+        for row in rows:
+            row["age_seconds"] = max(0, (now - datetime.fromisoformat(row["observed_at"])).total_seconds())
+            row["stale"] = row["age_seconds"] > service.interval * 2 or (row["address"], row["type"]) in failures
+        return response(dict(source="simulator", items=rows))
+
+    @app.get(prefix + "/history")
+    def history():
+        args_only("address", "type", "start", "end", "aggregate", "limit")
+        try:
+            start = datetime.fromisoformat(request.args["start"])
+            end = datetime.fromisoformat(request.args["end"])
+        except (KeyError, ValueError):
+            raise ValidationError("start/end must be ISO local timestamps") from None
+        rows = service.repository.history(integer("address"), request.args.get("type"), start, end,
+                                          request.args.get("aggregate", "S"), integer("limit", 1000))
+        return response(dict(source=service.repository.source, timezone="Europe/Berlin", items=rows))
+
+    @app.post(prefix + "/jobs")
+    def submit_job():
+        if service.mode == "database":
+            return response(dict(error=dict(code="controller_unavailable", message="database mode is read-only")), 409)
+        data = request.get_json()
+        identifier = service.submit_job(data)
+        result, code = response(dict(id=identifier, url=prefix + "/jobs/" + identifier), 202)
+        result.headers["Location"] = prefix + "/jobs/" + identifier
+        return result, code
+
+    @app.get(prefix + "/jobs/<identifier>")
+    def job(identifier):
+        item = service.get_job(identifier)
+        if item is None:
+            return response(dict(error=dict(code="not_found", message="job absent or expired")), 404)
+        return response(item)
+
+    @app.get(prefix + "/openapi.json")
+    def openapi():
+        return response(json.loads(files("froeling_bridge").joinpath("openapi.json").read_text(encoding="utf-8")))
+
+    return app

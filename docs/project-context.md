@@ -19,7 +19,7 @@ Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`.
 - Offline-Prüfwerkzeug für Original-C++-Encoder/Decoder und acht synthetische Telegramme vorhanden.
 - Python-Paket 0.1.0 unter `src/froeling_bridge` implementiert: Framing, typisierte Payloads, exklusive Transaktionen, Client, Simulator und Offline-CLI. Python >=3.9, keine externen Laufzeitabhängigkeiten. Installation per `pip install .`; Dokumentation: [Python-Kern](python-core.md).
 - Leseoperationen für Status, Firmware/Zeit, Messwerte, I/O, Parameter, Discovery, Fehler und Zeitprogramme. Parameter-/Zeitprogrammänderungen nur gegen Simulator implementiert; striktes Nachlesen und keine automatischen Wiederholungen.
-- Kein TTY-Transport, keine HTTP-API und kein DB-Adapter. Dieser Implementierungsschritt hat den Live-Server, die Live-DB und den Port nicht kontaktiert.
+- In Version 0.2.0: lokale HTTP-API (Flask 3.1/Waitress 3), DB-Adapter (PyMySQL 1.1), kontinuierlicher Sammler und Test-DB-Initialisierung ergänzt. Optionales Extra `.[service]`; Protokollkern weiterhin ohne Zusatzabhängigkeiten. Noch kein TTY-Transport und kein modernes Browsermenü. Dieser Implementierungsschritt hat Live-Server, Live-DB und Port nicht kontaktiert.
 - Live-Datenbank am 16.10.2026 mit ausdrücklicher Nur-Lesen-Erlaubnis untersucht: Transaktion `READ ONLY`, ausschließlich SELECT/SHOW, abschließend ROLLBACK und Verbindung geschlossen.
 - Lesender SSH-Abgleich durchgeführt: Quellcheckout `1bc324dc46296a6bd1f8bbeffe2527efe3da2446` / `0.10.2`, keine getrackten Änderungen; Binärdatei am Dienstpfad enthält `0.10.2-GIT1bc324d`. Prozessabbild und Prozess-Locale waren nicht direkt lesbar. Details: [Live-Server](live-server.md).
 - Bereinigte Live-Schemastruktur und Unterschiede in [Live-Datenbankbefund](live-database.md) und [Schemasnapshot](live-schema.json) erfasst. Keine Produktivdaten geändert.
@@ -29,7 +29,7 @@ Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`.
 - COM1, 57.600 Baud, 8N1, Big-Endian-Words, eigene Byte-Maskierung und XOR-Prüfsumme.
 - Messwerte (`30`) und Parameter (`55`) haben unterschiedliche Metadaten. Historienwerte sind bereits skaliert.
 - Menüstruktur wird entdeckt; manche Darstellungen und Zeitprogrammzuordnungen sind in p4d fest codiert.
-- Normaler Parameterschreibpfad: frische Abfragen → `39` → zwei Antworten → `55` nachlesen. Die fachliche Bedeutung der beiden Antworten muss durch echte Mitschnitte belegt werden.
+- Normaler Parameterschreibpfad: frische Abfragen → `39` → zwei Antworten → `55` nachlesen. Die fachliche Bedeutung der beiden Antworten ist offen; spätere Mitschnitte können sie zusätzlich belegen, sind aber keine Voraussetzung für die Implementierung.
 - Zeitprogramme verwenden `42`/`43`/`50`, vier Intervalle und Zehn-Minuten-Schritte. Alter Handler kann nach Fehlern trotzdem DB und Erfolgsmeldung aktualisieren.
 - DATETIME wird als lokale Hostzeit gespeichert; genaue Hostzeitzone nicht allein aus der SQL-Systemabkürzung ableiten.
 - Live-Schema stimmt bei Namen, SQL-Typen und Primärschlüsselkennungen vollständig mit dem installierten 0.10.2-Dictionary überein. Es weicht vom jüngeren Referenzdictionary ab: `peaks.timemin/timemax` fehlen, `valuefacts.parameter` fehlt, `valuefacts.invert` und Tabelle `scripts` sind zusätzlich vorhanden. Ein Start des aktuellen p4d gegen die Alt-DB könnte sie verändern und ist nicht Teil der Freigabe.
@@ -68,13 +68,27 @@ Das belegt keinen funktionierenden Browserablauf oder WebSocket-Nachrichtenausta
 
 Der installierte Browser-Watchdog erzwingt nach vier Sekunden ohne Anwendungs-Ping einen Reconnect. Diese Pings entstehen in derselben Daemon-Schleife, die Clientanfragen und `initmenu` synchron ausführt. Verzögerte Pings bei langen seriellen Aufrufen sind daher eine konkrete, zum Verlauf passende Erklärung; keine abschließende Diagnose aller Abbrüche. Der direkte JS-Sendepfad prüft außerdem keinen `readyState`. Details und alte Quellstellen: [Live-Server-Abgleich](live-server.md#ergänzung-browserbefund-und-reconnect-schleife).
 
+Der Benutzer hat klargestellt: Ein realer Schreibmitschnitt ist zusätzliche spätere Validierung, keine Voraussetzung für die quellenbasierte Implementierung. Die alte Weboberfläche blockiert die Entwicklung nicht.
+
 Der Benutzer unterstreicht, dass dieses Verhalten ein Grund für den Neubau ist. Kein weiteres Debug-/Reparaturprojekt am alten Webinterface daraus machen. Für den Neubau festhalten: unabhängige API/Verbindungsüberwachung, Cache mit Aktualitätsangabe, lange Aufgaben als Jobs, ein kontrollierter Reconnectpfad und keine automatische Wiederholung von Schreibaufträgen.
 
 ## Nächster sinnvoller Schritt
 
-1. Den DB-Kompatibilitätsadapter gegen das bekannte 0.10.2-Schema und lokale Fixtures planen/implementieren; zunächst keine Live-Schreibanbindung. Danach API und modernes Menü darauf aufbauen.
+1. DB-Adapter, lokale API und kontinuierliche Simulator-Aufzeichnung sind umgesetzt; Bedienung und Betriebsarten stehen in [service.md](service.md). Nächste Bausteine: exklusiver TTY-Transport mit kontrolliertem Hardwaretest und modernes API-basiertes Menü. Vor vollständiger Ablösung Aggregation/Aufbewahrung und Rückkehr zu p4d klären.
 2. Der Offline-Protokollkern ist vorhanden. Sein Default-Antwortprofil (Requestcode = Antwortcode, zwei 0x39-Antworten) ist ausdrücklich nur Simulation; echte Zuordnungen weiter anhand von Mitschnitten belegen.
 3. Heizungsmodell/Firmware und eine vollständige reale Schreibfolge noch gesondert ermitteln. Dafür keinen Schreibversuch, keine Änderung der Logkonfiguration und kein paralleles Öffnen von COM1 eigenständig auslösen.
-4. HTTP-/UI-Framework, Produktionsinstallation, Authentifizierung und Lizenz für neue Projektteile sind weiter offen. Der Standardbibliotheks-Kern trifft diese Entscheidungen nicht vorweg.
+4. Flask 3.1/Waitress 3 und PyMySQL 1.1 sind für den lokalen API-Prototyp gewählt. UI-Technik, Produktionsinstallation, Authentifizierung und Lizenz für neue Projektteile sind weiter offen. Der Standardbibliotheks-Kern trifft diese Entscheidungen nicht vorweg.
 
 Die ausführliche Reihenfolge und die Befundliste stehen in [findings-and-next-steps.md](findings-and-next-steps.md). Entscheidungen werden in [decisions.md](decisions.md) fortgeführt.
+
+
+## Fortschritt: Datensammler und API 0.2.0
+
+- Benutzer hat den erweiterten Plan ausdrücklich zur Umsetzung freigegeben, einschließlich kontinuierlichem Einsammeln und kompatiblem Speichern. Live-Zugriffsgrenzen bleiben bestehen.
+- Betriebsarten: `demo` (Simulator/flüchtiger Speicher), `demo-db` (Simulator/separate lokale Test-MariaDB), `database` (Bestandsansicht, ausschließlich lesend). Keine automatische Verwendung der lokalen `live-*.con`.
+- CLI `serve` startet Waitress auf 127.0.0.1:8000. Standardintervall 60 Sekunden, Sammler startet sofort. Einzelner Heizungsworker, begrenzte FIFO, separate Sammler-/DB-Arbeit; API bleibt während langer Vorgänge erreichbar.
+- Aufzeichnung unterstützt VA, DO/DI/AO und UD 1–3. Auswahl aus valuefacts; nur erfolgreich frisch gelesene record=A-Werte speichern, inklusive unveränderter Werte. samples und peaks gemeinsam transaktional, bestehende Schlüssel, Skalierung und lokale Zeit erhalten. Keine Aggregation oder historische Löschung.
+- Schreiber/Initialisierung ausschließlich für Loopback und `froeling_bridge_test_<name>`. Bestandsansicht nutzt Read-only-Transaktionen, Rollback und begrenzte Abfragen. Synthetischer Schemaausschnitt paketiert; keine Startup-Migration.
+- Versionierte API für Health, Sammlerstatus, Menü, Sensoren, Cachewerte, Historie und asynchrone Heizungsjobs. Auftragsergebnisse flüchtig, keine automatische Wiederholung von Schreibaufträgen. OpenAPI liegt im Paket; Beispiele in der Dienstanleitung und `docs/tools/exercise_api.py`.
+- Integrationsprüfung gegen einen ausschließlich für dieses Arbeitspaket gestarteten lokalen MariaDB-10.11-Dockercontainer. Zugangsdaten und Testberichte bleiben in .local; keine produktiven Verbindungen.
+- Geprüft: 109 Tests einschließlich HTTP und sechs realer MariaDB-Integrationstests sowie weiterhin Original-C++-Vektoren. Zusätzlich: Wheel mit Service-Extra in frischer Umgebung installiert, Tests gegen das installierte Paket bestanden (sechs DB-Tests dort bewusst übersprungen); echtes HTTP samt Beispiel-Schreibjobs, OpenAPI und fortlaufender Test-DB-Speicherung außerhalb des Checkouts geprüft. SIGTERM beendet den Dienst sauber. Testcontainer anschließend entfernt. Git-Sicherungsstand bei Sessionbeginn stets separat prüfen.

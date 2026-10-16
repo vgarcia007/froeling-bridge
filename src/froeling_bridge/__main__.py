@@ -1,4 +1,4 @@
-"""Offline CLI. No connection settings or physical device options exist."""
+"""Offline protocol tools and local simulator/database API. No TTY access."""
 import argparse
 from dataclasses import asdict
 from datetime import datetime, time
@@ -56,7 +56,7 @@ def demo():
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Fröling Bridge: offline protocol tools (no hardware access)")
+    parser = argparse.ArgumentParser(description="Fröling Bridge: protocol tools, simulator collector and local API (no hardware access)")
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("demo", help="read and change fictional in-memory controller data")
@@ -65,8 +65,17 @@ def main(argv=None):
     encoder.add_argument("payload_hex", nargs="?", default="", help="hex payload, for example '12 34'")
     decoder = commands.add_parser("decode", help="validate and decode exactly one hex frame")
     decoder.add_argument("wire_hex")
+    server = commands.add_parser("serve", help="run local API and simulated collector")
+    server.add_argument("--mode", choices=("demo", "demo-db", "database"), default="demo")
+    server.add_argument("--config", help="local JSON database configuration")
+    server.add_argument("--port", type=int, default=8000)
+    server.add_argument("--interval", type=float, default=60)
+    setup = commands.add_parser("init-test-db", help="initialize an empty loopback test database")
+    setup.add_argument("--config", required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command in ("serve", "init-test-db"):
+            return run_service(args)
         if args.command == "demo":
             print(json.dumps(demo(), default=json_value, ensure_ascii=False, indent=2))
         elif args.command == "encode":
@@ -79,6 +88,56 @@ def main(argv=None):
         print(f"Error: {exc}", file=sys.stderr)
         return 2
     return 0
+
+
+def run_service(args):
+    try:
+        from .storage import DatabaseConfig, ReadOnlyDatabase, TestDatabase
+        if args.command == "init-test-db":
+            from .testdb import initialize
+            config = DatabaseConfig.load(args.config)
+            config.require_test()
+            initialize(config)
+            print("Synthetic test database initialized.")
+            return 0
+        from .api import create_app
+        from .service import BridgeService
+        from waitress import serve
+        if not 1 <= args.port <= 65535:
+            raise ValidationError("port must be 1..65535")
+        if args.mode == "demo":
+            if args.config:
+                raise ValidationError("demo mode does not use a database configuration")
+            repository = None
+        else:
+            if not args.config:
+                raise ValidationError("database mode requires --config")
+            config = DatabaseConfig.load(args.config)
+            repository = TestDatabase(config) if args.mode == "demo-db" else ReadOnlyDatabase(config)
+        service = BridgeService(repository, args.mode, args.interval)
+        try:
+            print(f"Fröling Bridge: {args.mode} on http://127.0.0.1:{args.port}", flush=True)
+            import signal
+            previous = signal.getsignal(signal.SIGTERM)
+            def terminate(signum, frame):
+                raise KeyboardInterrupt()
+            signal.signal(signal.SIGTERM, terminate)
+            try:
+                serve(create_app(service), host="127.0.0.1", port=args.port, threads=4)
+            finally:
+                signal.signal(signal.SIGTERM, previous)
+        finally:
+            service.close()
+        return 0
+    except ImportError:
+        print('Service dependencies missing; install with pip install ".[service]"', file=sys.stderr)
+    except ValidationError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+    except KeyboardInterrupt:
+        return 0
+    except Exception:
+        print("Service/database operation failed; check local configuration and database availability.", file=sys.stderr)
+    return 2
 
 
 if __name__ == "__main__":
