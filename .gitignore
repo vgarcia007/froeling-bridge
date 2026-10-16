@@ -1,0 +1,34 @@
+# Local connection settings and secrets
+live-db.con
+live-db.*
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+
+# Database backups and local captures
+*.sql
+*.sql.gz
+*.dump
+captures/
+
+# Python and build artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+
+# Private inspection results
+.local/

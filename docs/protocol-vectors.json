@@ -1,0 +1,66 @@
+[
+  {
+    "name": "read-value-0x002b",
+    "command": "30",
+    "payload": "00 2B",
+    "checksum": "29",
+    "wire": "02 FD 00 03 30 00 2B 00 29",
+    "origin": "synthetic, derived from reference code; not a hardware capture"
+  },
+  {
+    "name": "read-parameter-0x1234",
+    "command": "55",
+    "payload": "12 34",
+    "checksum": "91",
+    "wire": "02 FD 00 03 55 12 34 91",
+    "origin": "synthetic, derived from reference code; not a hardware capture"
+  },
+  {
+    "name": "write-parameter-synthetic",
+    "command": "39",
+    "payload": "12 34 02 8A",
+    "checksum": "B7",
+    "wire": "02 FD 00 05 39 12 34 02 00 8A B7",
+    "origin": "synthetic, derived from reference code; not a hardware capture"
+  },
+  {
+    "name": "read-menu-first",
+    "command": "37",
+    "payload": "",
+    "checksum": "5B",
+    "wire": "02 FD 00 01 37 5B",
+    "origin": "synthetic, derived from reference code; not a hardware capture"
+  },
+  {
+    "name": "response-value-minus-12",
+    "command": "30",
+    "payload": "FF F4",
+    "checksum": "49",
+    "wire": "02 FD 00 03 30 FF F4 49",
+    "origin": "synthetic, derived from reference code; not a hardware capture"
+  },
+  {
+    "name": "response-parameter-synthetic",
+    "command": "55",
+    "payload": "00 12 34 B0 01 00 0A 02 8A 00 14 00 5A 00 3C 00 00 00",
+    "checksum": "62",
+    "wire": "02 FD 00 FE 14 55 00 12 34 B0 01 00 0A 02 00 8A 00 14 00 5A 00 3C 00 00 00 62",
+    "origin": "synthetic, derived from reference code; not a hardware capture"
+  },
+  {
+    "name": "write-time-ranges-synthetic",
+    "command": "50",
+    "payload": "00 38 3C 50 FF FF FF FF FF FF",
+    "checksum": "10",
+    "wire": "02 FD 00 0B 50 00 38 3C 50 FF FF FF FF FF FF 10",
+    "origin": "synthetic, derived from reference code; not a hardware capture"
+  },
+  {
+    "name": "escaping-all-special-bytes",
+    "command": "22",
+    "payload": "02 2B FE 11 13",
+    "checksum": "12",
+    "wire": "02 FD 00 06 22 02 00 2B 00 FE 00 FE 12 FE 14 12",
+    "origin": "synthetic, derived from reference code; not a hardware capture"
+  }
+]

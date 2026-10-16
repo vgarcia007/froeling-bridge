@@ -1,0 +1,1703 @@
+{
+  "inspected_on": "2026-10-16",
+  "reference_commit": "4d1176c4a9081893e4c2cc27a535bb2bc4737d0a",
+  "scope": "Structural metadata only; no credentials, database identifiers, row data, defaults, cardinalities or auto-increment counters. Indexes collected for core tables only.",
+  "columns": [
+    {
+      "table_name": "config",
+      "column_name": "owner",
+      "column_type": "varchar(40)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "config",
+      "column_name": "name",
+      "column_type": "varchar(40)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "config",
+      "column_name": "inssp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "config",
+      "column_name": "updsp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "config",
+      "column_name": "value",
+      "column_type": "text",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboards",
+      "column_name": "id",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "dashboards",
+      "column_name": "inssp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboards",
+      "column_name": "updsp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboards",
+      "column_name": "title",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboards",
+      "column_name": "grp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboards",
+      "column_name": "symbol",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboards",
+      "column_name": "ord",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboards",
+      "column_name": "opts",
+      "column_type": "varchar(200)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboardwidgets",
+      "column_name": "dashboardid",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboardwidgets",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboardwidgets",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboardwidgets",
+      "column_name": "inssp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboardwidgets",
+      "column_name": "updsp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboardwidgets",
+      "column_name": "widgetopts",
+      "column_type": "varchar(1000)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "dashboardwidgets",
+      "column_name": "ord",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "uuid",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "kind",
+      "column_type": "varchar(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "name",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "options",
+      "column_type": "varchar(1000)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "dztype",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "manufacturer",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzl",
+      "column_name": "model",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "uuid",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "kind",
+      "column_type": "varchar(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "name",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "options",
+      "column_type": "varchar(1000)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "dztype",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "manufacturer",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "deconzs",
+      "column_name": "model",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "id",
+      "column_type": "int(11) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "errors",
+      "column_name": "inssp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "updsp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "time1",
+      "column_type": "datetime",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "time4",
+      "column_type": "datetime",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "time2",
+      "column_type": "datetime",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "number",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "info",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "state",
+      "column_type": "varchar(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "text",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "errors",
+      "column_name": "mailcnt",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "groups",
+      "column_name": "id",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "groups",
+      "column_name": "name",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "homematic",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "homematic",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "homematic",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "homematic",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "homematic",
+      "column_name": "uuid",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "homematic",
+      "column_name": "kind",
+      "column_type": "varchar(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "homematic",
+      "column_name": "name",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "homematic",
+      "column_name": "options",
+      "column_type": "varchar(1000)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "id",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "menu",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "parent",
+      "column_type": "int(5) unsigned",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "child",
+      "column_type": "int(5) unsigned",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "type",
+      "column_type": "int(1) unsigned",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "title",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "state",
+      "column_type": "varchar(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "unit",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "digits",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "min",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "max",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "def",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "factor",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "value",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "pub1",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "pub2",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "pub3",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "puw1",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "unknown1",
+      "column_type": "int(4)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "menu",
+      "column_name": "unknown2",
+      "column_type": "int(4)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "peaks",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "peaks",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "peaks",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "peaks",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "peaks",
+      "column_name": "minv",
+      "column_type": "float(14,2)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "peaks",
+      "column_name": "maxv",
+      "column_type": "float(14,2)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "pellets",
+      "column_name": "id",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "pellets",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "pellets",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "pellets",
+      "column_name": "time",
+      "column_type": "datetime",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "pellets",
+      "column_name": "amount",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "pellets",
+      "column_name": "price",
+      "column_type": "float(14,2)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "pellets",
+      "column_name": "comment",
+      "column_type": "varchar(200)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "aggregate",
+      "column_type": "varchar(1)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "time",
+      "column_type": "datetime",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "value",
+      "column_type": "float(14,2)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "text",
+      "column_type": "varchar(50)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "samples",
+      "column_name": "samples",
+      "column_type": "int(3)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "state",
+      "column_type": "varchar(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "kind",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "width",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "height",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "showunit",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "showtitle",
+      "column_type": "int(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "usrtext",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "function",
+      "column_type": "text",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "schemaconf",
+      "column_name": "properties",
+      "column_type": "text",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "scripts",
+      "column_name": "id",
+      "column_type": "int(11) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "scripts",
+      "column_name": "inssp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "scripts",
+      "column_name": "updsp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "scripts",
+      "column_name": "path",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "MUL",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "id",
+      "column_type": "int(11) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": "auto_increment"
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "kind",
+      "column_type": "varchar(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "subid",
+      "column_type": "int(11) unsigned",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "lgop",
+      "column_type": "int(11) unsigned",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "state",
+      "column_type": "varchar(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "min",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "max",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "rangem",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "delta",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "maddress",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "msubject",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "mbody",
+      "column_type": "text",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "lastalert",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "sensoralert",
+      "column_name": "maxrepeat",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "states",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "states",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "states",
+      "column_name": "value",
+      "column_type": "float(14,2)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "states",
+      "column_name": "state",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "states",
+      "column_name": "battery",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "states",
+      "column_name": "reachable",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "from1",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "to1",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "from2",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "to2",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "from3",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "to3",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "from4",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "timeranges",
+      "column_name": "to4",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "user",
+      "column_type": "varchar(40)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "inssp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "updsp",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "passwd",
+      "column_type": "varchar(40)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "token",
+      "column_type": "varchar(200)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "rights",
+      "column_type": "int(200)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "address",
+      "column_type": "int(4) unsigned",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "groupid",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "state",
+      "column_type": "varchar(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "record",
+      "column_type": "varchar(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "unit",
+      "column_type": "varchar(5)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "options",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "invert",
+      "column_type": "varchar(1)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "factor",
+      "column_type": "int(4)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "name",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "title",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "usrtitle",
+      "column_type": "varchar(100)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "res1",
+      "column_type": "int(4)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "choices",
+      "column_type": "varchar(250)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "rights",
+      "column_type": "int(11)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuefacts",
+      "column_name": "calibration",
+      "column_type": "text",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuetypes",
+      "column_name": "type",
+      "column_type": "varchar(8)",
+      "is_nullable": "NO",
+      "column_key": "PRI",
+      "extra": ""
+    },
+    {
+      "table_name": "valuetypes",
+      "column_name": "inssp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuetypes",
+      "column_name": "updsp",
+      "column_type": "int(10)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    },
+    {
+      "table_name": "valuetypes",
+      "column_name": "title",
+      "column_type": "varchar(30)",
+      "is_nullable": "YES",
+      "column_key": "",
+      "extra": ""
+    }
+  ],
+  "core_indexes": {
+    "valuefacts": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "address",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 2,
+        "column_name": "type",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "samples": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "address",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 2,
+        "column_name": "type",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 3,
+        "column_name": "aggregate",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 4,
+        "column_name": "time",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "idxtime",
+        "non_unique": 1,
+        "seq_in_index": 1,
+        "column_name": "time",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "idxtype",
+        "non_unique": 1,
+        "seq_in_index": 1,
+        "column_name": "type",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "idxaggregate",
+        "non_unique": 1,
+        "seq_in_index": 1,
+        "column_name": "aggregate",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "idxaddr_type_time",
+        "non_unique": 1,
+        "seq_in_index": 1,
+        "column_name": "address",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "idxaddr_type_time",
+        "non_unique": 1,
+        "seq_in_index": 2,
+        "column_name": "type",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "idxaddr_type_time",
+        "non_unique": 1,
+        "seq_in_index": 3,
+        "column_name": "time",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "peaks": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "address",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 2,
+        "column_name": "type",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "menu": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "id",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "timeranges": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "address",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "config": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "owner",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 2,
+        "column_name": "name",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "errors": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "id",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "valuetypes": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "type",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "groups": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "id",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "users": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "user",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ],
+    "states": [
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 1,
+        "column_name": "address",
+        "sub_part": null,
+        "index_type": "BTREE"
+      },
+      {
+        "key_name": "PRIMARY",
+        "non_unique": 0,
+        "seq_in_index": 2,
+        "column_name": "type",
+        "sub_part": null,
+        "index_type": "BTREE"
+      }
+    ]
+  }
+}
