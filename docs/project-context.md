@@ -56,9 +56,15 @@ Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`.
 
 ## Vorbereiteter manueller Logvergleich
 
-Der Benutzer hat angeboten, über die alte Installation selbst einen Parameter zu ändern. Ein lesender Ausgangsstand des aktiven Dateilogs liegt lokal unter `.local/write-capture-before.json` (Dateigröße, Inode und begrenzter Logauszug). Es wurde kein Schreibbefehl durch Fröling Bridge gesendet und keine Logstufe geändert. Der Versuch ist noch nicht als durchgeführt oder erfolgreich belegt.
+Der Benutzer hat angeboten, über die alte Installation selbst einen Parameter zu ändern, kann den Versuch aktuell aber wegen der gestörten alten Weboberfläche nicht durchführen. Der Schreibversuch ist daher vorerst ausgesetzt. Ein lesender Ausgangsstand des aktiven Dateilogs liegt lokal unter `.local/write-capture-before.json` (Dateigröße, Inode und begrenzter Logauszug). Es wurde kein Schreibbefehl durch Fröling Bridge gesendet und keine Logstufe geändert. Der Versuch ist noch nicht als durchgeführt oder erfolgreich belegt.
 
 Nach Rückmeldung des Benutzers die seit dieser Baseline angehängten Logbytes begrenzt lesen und gegebenenfalls Rotation berücksichtigen. Die Baseline vorher nicht überschreiben. Für die Zuordnung werden Parametername/Adresse, alter und neuer Wert sowie Zeitpunkt und die Anzeige der alten Installation benötigt. Ob die vorhandene Logstufe eine vollständige Telegrammfolge liefert, ist offen. Rohdaten und konkrete Betriebswerte bleiben lokal; nur bereinigte Protokollbefunde tracken. Das manuelle Testangebot erteilt keine Freigabe für eigene Schreibbefehle, Portzugriffe oder Änderungen am Live-Dienst.
+
+## Lesende Prüfung der alten Weboberfläche
+
+Die HTML-Seite und alle 42 lokal eingebundenen JS-/CSS-Dateien liefern am Server HTTP 200. Ein WebSocket-Upgrade mit Subprotokoll `p4d` ergibt HTTP 101; es wurden keine Anwendungsnachrichten, Anmeldung oder Heizungsbefehle gesendet. Die zentralen Dateien `main.js`, `menu.js`, `websocket.js`, `const.js`, `setup.js` stimmen mit 0.10.2 überein und bestehen eine lokale JavaScript-Syntaxprüfung. Im begrenzten neuen Logbereich wurden keine passenden Rechte-, Anmelde-, SQL-, Statuskommunikations- oder langen Loop-Fehler gefunden.
+
+Das belegt keinen funktionierenden Browserablauf oder WebSocket-Nachrichtenaustausch. Das konkrete Fehlerbild des Benutzers (leere Seite, Anmeldung/Bedienung oder Erreichbarkeit) wurde angefragt und ist noch offen. Keine Server-/DB-Konfiguration geändert; Rohberichte `.local/live-web-inspection.json` und `.local/web-followup.json` bleiben lokal. Die gespeicherte Logauswahl heißt `Debug,`; daraus keinen vollständigen Debug2-Telegrammmitschnitt zusagen.
 
 ## Nächster sinnvoller Schritt
 

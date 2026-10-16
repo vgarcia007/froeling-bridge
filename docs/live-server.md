@@ -57,6 +57,17 @@ Die letzte Journalstichprobe enthielt keine Hex-Telegramme. Drei vorhandene Date
 
 Die Rohlogs, deren Kontext und eventuell enthaltene Betriebswerte bleiben lokal unter `.local/` und werden nicht eingecheckt. In dieser Bestandsaufnahme wurde keine neue Heizungsinteraktion für Mitschnitte ausgelöst.
 
+## Ergänzung: alte Weboberfläche
+
+Der angebotene manuelle Schreibversuch ist vorerst ausgesetzt, weil die alte Weboberfläche laut Benutzer nicht richtig funktioniert. Ein anschließender lesender Servercheck ergab:
+
+- HTML-Einstieg und alle 42 lokal eingebundenen JS-/CSS-Dateien liefern HTTP 200.
+- Der WebSocket-Upgrade mit Subprotokoll `p4d` liefert HTTP 101. Es wurden keine Anwendungsnachrichten oder Logins gesendet; damit ist nur der Verbindungsaufbau geprüft.
+- Die zentralen Dateien `main.js`, `menu.js`, `websocket.js`, `const.js` und `setup.js` stimmen mit 0.10.2 überein und bestehen eine lokale Syntaxprüfung mit Node.
+- Im begrenzt gelesenen neuen Logbereich wurden keine passenden Anmelde-/Rechte-, SQL-, Statuskommunikations- oder langen Loop-Fehler gefunden.
+
+Eine Browserlaufzeitstörung, ein Zugriffs-/Proxyproblem auf dem Weg vom Browser zum Server oder ein Fehler der Anwendungsnachrichten sind damit weder bestätigt noch ausgeschlossen. Das konkrete Fehlerbild im Browser fehlt noch. Der Check hat weder Konfiguration noch Logstufe geändert und den seriellen Port nicht geöffnet. Er liefert noch keinen realen Parameterschreibmitschnitt.
+
 ## Nächster Schritt
 
 Die Version und das passende Schema waren ausreichend eingegrenzt, um den inzwischen [implementierten Offline-Python-Protokollkern](python-core.md) zu planen. Für dessen Tests benötigen wir zunächst Framing, Prüfsumme, signed/unsigned-Werte, fragmentierte Eingaben und die Ablehnung unpassender Antworten. Die Schreibzustandsmaschine bleibt vorerst auf Codebefunde und Simulation begrenzt. Ein realer vollständiger Schreibmitschnitt und Modell/Firmware fehlen weiterhin; dafür einen gesonderten, mit dem Benutzer abgestimmten nächsten Schritt wählen, statt selbst einen Parameter zu ändern.
