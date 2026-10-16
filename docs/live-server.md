@@ -68,6 +68,24 @@ Der angebotene manuelle Schreibversuch ist vorerst ausgesetzt, weil die alte Web
 
 Eine Browserlaufzeitstörung, ein Zugriffs-/Proxyproblem auf dem Weg vom Browser zum Server oder ein Fehler der Anwendungsnachrichten sind damit weder bestätigt noch ausgeschlossen. Das konkrete Fehlerbild im Browser fehlt noch. Der Check hat weder Konfiguration noch Logstufe geändert und den seriellen Port nicht geöffnet. Er liefert noch keinen realen Parameterschreibmitschnitt.
 
+## Ergänzung: Browserbefund und Reconnect-Schleife
+
+Der Benutzer hat inzwischen den Browserablauf beschrieben: Der Socket öffnet sich wiederholt, zwischendurch kommen Systemdaten an. Beim Wechsel ins Menü und nach `initmenu` erscheinen fortlaufend Reconnect-Warnungen und teilweise „closed before the connection is established“. Außerdem ist eine nicht näher ausgeführte Exception an `websocket.js:44` protokolliert. Der rohe Browserdump mit Betriebsdaten wird nicht ins Repository übernommen.
+
+Belegter Codepfad im installierten 0.10.2-Stand:
+
+- [main.js:139](https://github.com/vgarcia007/linux-p4d/blob/1bc324dc46296a6bd1f8bbeffe2527efe3da2446/htdocs/main.js#L139): `updateSocketState` erzwingt nach vier Sekunden ohne empfangenes Anwendungs-Ping `socket.reopen()`. Das ist zusätzlich zum automatischen Reconnect des WebSocket-Wrappers aktiv.
+- [main.js:325](https://github.com/vgarcia007/linux-p4d/blob/1bc324dc46296a6bd1f8bbeffe2527efe3da2446/htdocs/main.js#L325): Erst das empfangene Ereignis `ping` aktualisiert den betreffenden Zeitstempel regulär. Ein erfolgreicher WebSocket-Handshake allein beweist diesen Nachrichtenfluss nicht.
+- [daemon.c:1760](https://github.com/vgarcia007/linux-p4d/blob/1bc324dc46296a6bd1f8bbeffe2527efe3da2446/daemon.c#L1760): `meanwhile` erzeugt die Anwendungs-Pings und dispatcht anschließend die Clientanfragen synchron.
+- [specific.c:1593](https://github.com/vgarcia007/linux-p4d/blob/1bc324dc46296a6bd1f8bbeffe2527efe3da2446/specific.c#L1593): Der Befehl `initmenu` führt `initMenu()` synchron aus; die Funktion liest die Menüeinträge seriell und schreibt sie in die DB. Während dieses Aufrufs wird nicht erneut in die äußere Ping-Schleife zurückgekehrt.
+- [websocket.js:40](https://github.com/vgarcia007/linux-p4d/blob/1bc324dc46296a6bd1f8bbeffe2527efe3da2446/htdocs/websocket.js#L40): `send` prüft in seinem direkten Sendepfad nicht den `readyState`. `reopen` ersetzt die Verbindung; der Queuezustand wird dabei nicht explizit neu aufgebaut. Das erlaubt einen Sendefehler während eines Verbindungswechsels, erklärt aber die konkrete Exception ohne deren Typ nicht abschließend.
+
+**Einordnung:** Ein langer Heizungs-/Menüaufruf kann die Anwendungs-Pings verzögern und dadurch den Vier-Sekunden-Watchdog auslösen. Die Browserfolge passt zu dieser Kopplung und zu nachgelagerten Verbindungswechseln. Eine vollständige Ursachendiagnose jedes Abbruchs liegt weiterhin nicht vor; Netzwerk-/Proxyeinflüsse und weitere Fehler sind damit nicht ausgeschlossen. Aus dem Browserdump ist kein Parameterschreibvorgang belegt; `initmenu` ist eine Menüinitialisierung.
+
+**Anforderungen an Fröling Bridge:** API und Verbindungsüberwachung müssen unabhängig von langen seriellen Aufgaben reagieren. Menü und Messwerte aus einem Cache mit expliziter Aktualität bereitstellen; lange Discovery als verfolgbaren Auftrag ausführen. Der Browser benötigt einen eindeutigen Verbindungszustand, kontrollierten Reconnect mit begrenztem Backoff und abgebrochene/veraltete Requests dürfen nicht als aktuelle Ergebnisse erscheinen. Schreibaufträge dürfen nach einem Verbindungsabbruch nicht automatisch erneut gesendet werden. Konkrete HTTP-Endpunkte und die Umsetzung der Jobverwaltung werden im API-Arbeitspaket festgelegt.
+
+Es wird daraus keine Reparatur des alten Systems abgeleitet. Der manuelle Schreibtest bleibt ausgesetzt; der neue Offline-Kern und der folgende DB-/API-Aufbau können unabhängig davon weiterentwickelt werden.
+
 ## Nächster Schritt
 
 Die Version und das passende Schema waren ausreichend eingegrenzt, um den inzwischen [implementierten Offline-Python-Protokollkern](python-core.md) zu planen. Für dessen Tests benötigen wir zunächst Framing, Prüfsumme, signed/unsigned-Werte, fragmentierte Eingaben und die Ablehnung unpassender Antworten. Die Schreibzustandsmaschine bleibt vorerst auf Codebefunde und Simulation begrenzt. Ein realer vollständiger Schreibmitschnitt und Modell/Firmware fehlen weiterhin; dafür einen gesonderten, mit dem Benutzer abgestimmten nächsten Schritt wählen, statt selbst einen Parameter zu ändern.

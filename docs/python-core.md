@@ -97,6 +97,10 @@ Der Simulator verwendet standardmäßig den Requestcode als Antwortcode und bei 
 
 Die Rohbeobachtungen aus vorhandenen Logs und die Beleggrenzen stehen in [live-server.md](live-server.md). Echte Antwortzuordnungen, die Bedeutung der zwei Schreibantworten sowie Heizungsmodell/Firmware fehlen weiterhin. Deshalb enthält dieses Paket keinen TTY-Transport. Es schreibt weder Heizungsuhr noch Force-/I/O-Manipulationsbefehle.
 
+## Anforderung an die spätere Web- und API-Schicht
+
+Der [Browserbefund der Altinstallation](live-server.md#ergänzung-browserbefund-und-reconnect-schleife) zeigt wiederholte Reconnects. Der dortige Vier-Sekunden-Watchdog ist an Anwendungs-Pings gekoppelt, deren Erzeugung durch synchrone Heizungsaufgaben verzögert werden kann. Die neue API muss deshalb unabhängig vom seriellen Worker reagieren, gecachte Daten samt Aktualität liefern und lange Vorgänge als verfolgbaren Auftrag behandeln. Verbindungsabbruch und Abschluss eines Heizungsauftrags sind getrennte Zustände. Ein Reconnect darf insbesondere keinen Schreibauftrag automatisch wiederholen. Der Offline-Kern erzwingt bereits exklusive Transaktionen und verzichtet auf automatische Wiederholungen; die HTTP-/Job-Schicht ist noch zu implementieren.
+
 ## Prüfen und weiterarbeiten
 
 ```bash
