@@ -43,7 +43,7 @@ Die Hauptschleife führt Polling, Verarbeitung, Speicherung und nachgelagerte Au
 
 | Benötigt | Warum / mögliche lesende Quelle |
 | --- | --- |
-| Installierte p4d-Version, Paket oder Commit | Paketmetadaten, vorhandener Quellcheckout, Startlog; der heutige GitHub-Stand belegt nicht die installierte Version |
+| Installierter Stand / laufendes Prozessabbild | Quellcheckout und Dienstpfad-Binärdatei inzwischen als 0.10.2 eingegrenzt; direktes Prozessabbild noch nicht abgeglichen, siehe Live-Server-Abgleich |
 | Heizungsmodell, S3200-Ausführung, Firmware | Typenschild/Steuerungsanzeige, vorhandene Versionslogs oder bekannte Daten; keine neue Direktverbindung parallel zu p4d |
 | Betriebssystem, Architektur, Python-Verfügbarkeit | Paket-/Hostinformationen; Grundlage für späteren einfachen Installationsweg |
 | Anschluss und Gerätepfad | vorhandene Konfiguration/Serviceinformationen, USB-Seriell-Adaptertyp |
@@ -53,7 +53,7 @@ Die Hauptschleife führt Polling, Verarbeitung, Speicherung und nachgelagerte Au
 | Tatsächliche Telegramme | bereits vorhandene Debuglogs mit Sende-/Empfangsbytes, Reihenfolge und Zeitabständen; Adressen, Typen, Werte und Grenzen erhalten |
 | Laufende DB-Nutzer/Integrationen | prüfen, welche anderen Tools von bestehenden Tabellen oder Auswahlflags abhängen |
 
-Inzwischen hat der Benutzer lokale DB-Zugangsdaten und ausdrücklich ausschließlich lesenden Zugriff bereitgestellt; ein erster [Live-Schemaabgleich](live-database.md) ist erfolgt. Ein SSH-Zugriff ist noch nicht vereinbart. Für die nächste Stufe genügen zunächst lokal erzeugte, bereinigte Bestandsinformationen; Passwörter, Token und ein kompletter `config`-/`users`-Dump werden nicht benötigt.
+Inzwischen hat der Benutzer lokale DB-Zugangsdaten und ausdrücklich ausschließlich lesenden Zugriff bereitgestellt; ein erster [Live-Schemaabgleich](live-database.md) ist erfolgt. Anschließend wurde lesender SSH-Zugriff bereitgestellt und [der installierte Stand abgeglichen](live-server.md). Für die nächste Stufe genügen zunächst lokal erzeugte, bereinigte Bestandsinformationen; Passwörter, Token und ein kompletter `config`-/`users`-Dump werden nicht benötigt.
 
 ### Vorlage für lesende Datenbankabfragen
 
@@ -91,6 +91,10 @@ Die Abfragen lesen Schema und wenige benannte Konfigurationswerte, keine Zugangs
 `P4Request::show` protokolliert `->` und `<-` als Hexbytes auf Debugstufe 2 (`0x08`). Vorhandene Mitschnitte lassen sich ohne neuen Zugriff auf COM1 untersuchen. Quellen: [p4io.h:114](https://github.com/vgarcia007/linux-p4d/blob/4d1176c4a9081893e4c2cc27a535bb2bc4737d0a/p4io.h#L114) [lib/common.h:104](https://github.com/vgarcia007/linux-p4d/blob/4d1176c4a9081893e4c2cc27a535bb2bc4737d0a/lib/common.h#L104).
 
 Ein Schreibmitschnitt muss alle Vorabfragen, beide Antworten, das Nachlesen und den angezeigten Zielwert enthalten. Reine letzte Antwortzeilen reichen nicht. Es wird in dieser Phase kein Schreibexperiment vorgeschlagen oder ausgeführt. Wenn später ein bewusst gewählter Parameterschreibtest vereinbart wird, gehören Auswahl des Parameters und erwartetes Vorher-/Nachherverhalten in diesen gesonderten Testplan.
+
+## Fortschritt nach SSH-Abgleich
+
+Quellcheckout und Dienstpfad-Binärdatei passen zu 0.10.2; das zugehörige Dictionary stimmt im geprüften Strukturumfang mit der Live-DB überein. Die Kernprotokollquellen sind identisch mit der jüngeren Referenz. Vorhandene Logs liefern einzelne reale Empfangsframes, jedoch keinen vollständigen Parameterschreibvorgang. Damit kann als Nächstes der Offline-Protokollkern geplant werden; Heizungsmodell, Firmware und Schreibsemantik bleiben offen. Siehe [Live-Server-Abgleich](live-server.md).
 
 ## Empfohlene Reihenfolge der nächsten Arbeitsphasen
 

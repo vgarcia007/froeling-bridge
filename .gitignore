@@ -32,3 +32,6 @@ dist/
 
 # Private inspection results
 .local/
+
+# Private SSH connection settings
+live-server-ssh.con

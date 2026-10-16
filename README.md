@@ -25,7 +25,7 @@ Bisher dokumentiert sind:
 - Schreibabläufe für Parameter und Zeitprogramme
 - Menüstruktur und Anforderungen an die Datenbankkompatibilität
 
-Die bisherigen Protokollprüfungen erfolgen offline anhand des Referenzcodes. Ein erster ausschließlich lesender [Abgleich mit dem bestehenden Datenbankschema](docs/live-database.md) ist dokumentiert. Die Kompatibilität mit der bestehenden Installation und deren Firmware muss noch überprüft werden.
+Die bisherigen Protokollprüfungen erfolgen offline anhand des Referenzcodes. Ein erster ausschließlich lesender [Abgleich mit dem bestehenden Datenbankschema](docs/live-database.md) und dem [installierten p4d-Stand](docs/live-server.md) ist dokumentiert. Die Kompatibilität mit der bestehenden Installation und deren Firmware muss noch überprüft werden.
 
 ## Dokumentation
 

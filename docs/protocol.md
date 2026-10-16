@@ -1,6 +1,6 @@
 # Heizungsprotokoll: COM1 / S3200
 
-Diese Beschreibung wurde aus dem [Referenzstand](README.md#referenz-und-aussagekraft) abgeleitet. Es liegen keine echten Telegrammmitschnitte vor. Die COM2-Konstanten in `service.h` beschreiben einen anderen Pfad und sind nicht Grundlage des untersuchten Servicemenüs.
+Diese Beschreibung wurde aus dem [Referenzstand](README.md#referenz-und-aussagekraft) abgeleitet. Die ursprüngliche Analyse erfolgte ohne echte Telegrammmitschnitte. Inzwischen sind einzelne vorhandene Empfangsframes offline geprüft; ein vollständiger Parameterschreibmitschnitt fehlt weiter. Siehe [Live-Server-Abgleich](live-server.md). Die COM2-Konstanten in `service.h` beschreiben einen anderen Pfad und sind nicht Grundlage des untersuchten Servicemenüs.
 
 ## Transport und Synchronisation
 

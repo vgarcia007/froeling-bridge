@@ -29,6 +29,17 @@ Der Benutzer hat am 16.10.2026 Zugang zur laufenden Original-p4d-Datenbank über
 - Repository-Dokumentation darf bereinigte Schema-/Kompatibilitätsbefunde enthalten. Raw-Ergebnisse und Mitschnitte bleiben lokal und ignoriert.
 - Schreibversuche gehören später ausschließlich auf eine separate DB-Kopie; direkte Heizungs-Schreibtests müssen gesondert mit dem Benutzer vereinbart werden.
 
+## Live-Server per SSH: ausschließlich Bestandsaufnahme
+
+Der Benutzer stellt `live-server-ssh.con` für den zuvor angebotenen lesenden SSH-Zugriff bereit. Auch diese Datei bleibt ignoriert und wird nicht ausgegeben. Private SSH-Ergebnisse und Hostschlüssel liegen unter `.local/`, nicht im Repository.
+
+- Zulässig sind lesende Prüfungen von Quellcheckout, Binärdatei, Dienstmetadaten, Locale/Zeitzone und vorhandenen Logs. Keine Installationen, Dateiänderungen oder Dienstaktionen auf dem Live-Server.
+- Keinen weiteren p4d-Prozess starten; auch keine vermeintlichen Versions-/Hilfeflags ausführen, solange deren Nebenwirkungsfreiheit nicht belegt ist.
+- Der RS232-USB-Adapter liegt laut Benutzer auf dem Live-Server unter `/dev/ttyUSB0`. Den Port nicht öffnen, konfigurieren oder parallel zum laufenden p4d benutzen. Ein `stat` auf den Gerätepfad ist eine reine Metadatenprüfung.
+- Vorhandener Quellcommit, lokale Änderungen und tatsächlich laufende Binärdatei sind getrennte Belege. Eine Gleichheit nicht allein aus einem vorhandenen Checkout folgern.
+- Bestehende Logs dürfen begrenzt gelesen werden; keine Logstufe ändern oder neuen Heizungsverkehr für Mitschnitte auslösen.
+- Nur bereinigte fachliche Befunde dokumentieren; keine privaten Hostnamen, IPs, Benutzerpfade, Zugangsdaten oder ungefilterten Logs committen.
+
 ## Repository und Referenz
 
 - Eigenes Remote: `git@github.com:vgarcia007/froeling-bridge.git`, öffentlich; keine persönlichen Betriebsdaten veröffentlichen.

@@ -1699,5 +1699,11 @@
         "index_type": "BTREE"
       }
     ]
+  },
+  "installed_source_commit": "1bc324dc46296a6bd1f8bbeffe2527efe3da2446",
+  "installed_source_version": "0.10.2",
+  "installed_dictionary_comparison": {
+    "scope": "active application table names, column names, SQL types, primary key flags",
+    "differences": []
   }
 }

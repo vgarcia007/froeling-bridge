@@ -27,6 +27,14 @@ Hier stehen dauerhafte Vereinbarungen, keine ungeprüften Annahmen. Neuere Entsc
 - Nur bereinigte Schema-/Kompatibilitätsbefunde tracken. Private Rohdaten lokal ignorieren.
 - Die DB-Zugriffserlaubnis enthält keine Freigabe für Heizungs-Schreibversuche oder Hoständerungen.
 
+## 16.10.2026 — Lesender SSH-Zugang und installierter Zielstand
+
+- Benutzer stellt `live-server-ssh.con` für die angebotene lesende Bestandsaufnahme bereit. Keine Änderungen am Live-Host, Dienst oder Port.
+- Benutzer bestätigt den RS232-USB-Adapter auf dem Live-Server unter `/dev/ttyUSB0`; kein paralleles Öffnen zu p4d.
+- Als vorhandener Zielstand ist nun p4d 0.10.2 / Commit `1bc324dc46296a6bd1f8bbeffe2527efe3da2446` belegt (Quellcheckout und Versionskennung der Dienstpfad-Binärdatei). Beleggrenzen stehen in `live-server.md`.
+- Der jüngere Referenz-Submodul-Pin bleibt erhalten. Für DB-Kompatibilität das tatsächliche 0.10.2-Schema verwenden, keine automatische Migration auf den jüngeren Stand.
+- Existierende Logausschnitte nur offline analysieren. Kein neuer Schreibtest und keine Änderung der Logstufe.
+
 ## Noch nicht entschieden
 
 Python-/API-Framework, endgültiger DB-Treiber, API-Vertrag, Frontendtechnik, Authentifizierung, Installations-/Deploymentweg und Lizenz für neu geschriebene Projektteile. PyMySQL in der lokalen Untersuchungsumgebung ist keine Architekturentscheidung.

@@ -18,6 +18,7 @@ Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`.
 - Protokoll, Menü-/Schreibabläufe und Referenz-Datenbank dokumentiert; [Einstieg](README.md).
 - Offline-Prüfwerkzeug für Original-C++-Encoder/Decoder und acht synthetische Telegramme vorhanden. Keine Python-Kommunikationsbibliothek implementiert.
 - Live-Datenbank am 16.10.2026 mit ausdrücklicher Nur-Lesen-Erlaubnis untersucht: Transaktion `READ ONLY`, ausschließlich SELECT/SHOW, abschließend ROLLBACK und Verbindung geschlossen.
+- Lesender SSH-Abgleich durchgeführt: Quellcheckout `1bc324dc46296a6bd1f8bbeffe2527efe3da2446` / `0.10.2`, keine getrackten Änderungen; Binärdatei am Dienstpfad enthält `0.10.2-GIT1bc324d`. Prozessabbild und Prozess-Locale waren nicht direkt lesbar. Details: [Live-Server](live-server.md).
 - Bereinigte Live-Schemastruktur und Unterschiede in [Live-Datenbankbefund](live-database.md) und [Schemasnapshot](live-schema.json) erfasst. Keine Produktivdaten geändert.
 
 ## Wichtigste Erkenntnisse
@@ -28,15 +29,17 @@ Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`.
 - Normaler Parameterschreibpfad: frische Abfragen → `39` → zwei Antworten → `55` nachlesen. Die fachliche Bedeutung der beiden Antworten muss durch echte Mitschnitte belegt werden.
 - Zeitprogramme verwenden `42`/`43`/`50`, vier Intervalle und Zehn-Minuten-Schritte. Alter Handler kann nach Fehlern trotzdem DB und Erfolgsmeldung aktualisieren.
 - DATETIME wird als lokale Hostzeit gespeichert; genaue Hostzeitzone nicht allein aus der SQL-Systemabkürzung ableiten.
-- Live-Schema weicht vom Referenzdictionary ab: `peaks.timemin/timemax` fehlen, `valuefacts.parameter` fehlt, `valuefacts.invert` und Tabelle `scripts` sind zusätzlich vorhanden. Ein Start des aktuellen p4d gegen die Alt-DB könnte sie verändern und ist nicht Teil der Freigabe.
+- Live-Schema stimmt bei Namen, SQL-Typen und Primärschlüsselkennungen vollständig mit dem installierten 0.10.2-Dictionary überein. Es weicht vom jüngeren Referenzdictionary ab: `peaks.timemin/timemax` fehlen, `valuefacts.parameter` fehlt, `valuefacts.invert` und Tabelle `scripts` sind zusätzlich vorhanden. Ein Start des aktuellen p4d gegen die Alt-DB könnte sie verändern und ist nicht Teil der Freigabe.
 
 ## Zugriff, private Dateien und Grenzen
 
 - `live-db.con` wurde vom Benutzer lokal angelegt und enthält DB-Zugangsdaten. Sie ist ignoriert; nicht ausgeben oder committen. Die Nur-Lesen-Beschränkung gilt auch in zukünftigen Sessions.
 - `.local/live-db-inspection.json` enthält den privaten Rohbericht einschließlich begrenzter Beispielzeilen; er ist ignoriert und nicht Teil der Git-Sicherung.
 - `.venv` enthält für die Untersuchung PyMySQL 1.1.2. Das ist ein lokales Hilfsmittel, keine getroffene Entscheidung zum Datenbanktreiber der Anwendung.
-- Kein SSH-Zugriff auf den Originalrechner vereinbart. DB-Zugang ersetzt keine Freigabe für Heizungsschreiben, Service-Neustarts oder Änderungen am Originalrechner.
-- Keine realen seriellen Mitschnitte vorhanden. Heizungsmodell, genaue Firmware, installierte p4d-Version/Commit und Host-Locale sind noch unbekannt.
+- `live-server-ssh.con` enthält den bereitgestellten SSH-Zugang und bleibt ignoriert. SSH ist nur für lesende Bestandsaufnahme freigegeben, nicht für Heizungsschreiben, Service-Neustarts oder Hoständerungen. Private Berichte und SSH-Hostschlüssel liegen unter `.local/`.
+- Der Benutzer bestätigt den Adapter unter `/dev/ttyUSB0` auf dem Live-Server. Port nicht öffnen oder parallel zu p4d verwenden.
+- Vorhandene Dateilog-Ausschnitte enthalten reale Empfangsframes, darunter gültige `0x39`-Frames bei fehlgeschlagenen Statusabfragen. Kein vollständiger Parameterschreibmitschnitt. Rohlogs bleiben lokal.
+- Heizungsmodell, genaue Firmware und Locale des p4d-Prozesses sind noch unbekannt. Die Hostzeitzone ist als `Europe/Berlin` belegt; SSH-Shell-Locale nicht mit Prozess-Locale gleichsetzen.
 
 ## Prüfungen
 
@@ -47,9 +50,9 @@ Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`.
 
 ## Nächster sinnvoller Schritt
 
-1. Installierte p4d-Version und Hardware/Firmware ermitteln; dafür zunächst den Benutzer nach vorhandenen Informationen oder lesendem Hostzugriff fragen. Nicht aus dem DB-Schema eine genaue Versionsnummer behaupten.
-2. Relevante Unterschiede gezielt gegen ältere p4d-Historie prüfen und den DB-Kompatibilitätsumfang konkret festlegen. Schema und Anwendungsversion getrennt behandeln.
-3. Vorhandene echte Protokolllogs beschaffen, besonders eine vollständige Parameteränderung mit beiden Antworten und anschließendem Nachlesen. Noch keinen Schreibtest auslösen.
-4. Danach den ersten Python-Protokollbaustein samt Simulator und Testfällen gemeinsam planen. API-/UI-Framework, Installation und Authentifizierung sind noch offen.
+1. Mit dem Benutzer den ersten Offline-Python-Protokollkern und Simulator planen. Das installierte 0.10.2-Protokoll ist im Kern bytegleich mit unserer Referenz; Datenbankkompatibilität an 0.10.2 ausrichten.
+2. Besonders unerwartete Antwortbefehle, fragmentierte Daten, Timeouts und mehrteilige Schreibfolgen als Testszenarien berücksichtigen. Die gefundenen 0x39-Empfangsframes ohne Requestkontext nicht als vollständigen Schreibnachweis verwenden.
+3. Heizungsmodell/Firmware und eine vollständige reale Schreibfolge noch gesondert ermitteln. Dafür keinen Schreibversuch oder eine Änderung der Logkonfiguration eigenständig auslösen.
+4. API-/UI-Framework, Installation und Authentifizierung sind weiter offen. Kein neuer Live-Dienst und keine Live-DB-Schreibanbindung implementiert.
 
 Die ausführliche Reihenfolge und die Befundliste stehen in [findings-and-next-steps.md](findings-and-next-steps.md). Entscheidungen werden in [decisions.md](decisions.md) fortgeführt.

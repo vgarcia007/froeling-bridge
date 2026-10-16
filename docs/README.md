@@ -15,7 +15,7 @@ Stand der Untersuchung: 16.10.2026. Ziel ist ein einfacher installierbarer Heizu
 | Vergleich | `git ls-remote https://github.com/horchi/linux-p4d.git HEAD refs/heads/master` lieferte am Untersuchungstag ebenfalls diesen Commit. Damit stimmen die beiden geprüften Branchspitzen einschließlich Historie überein; es gibt dort keinen Fork-spezifischen Protokoll-, Menü- oder Schema-Diff. Andere Branches sind damit nicht bewertet. |
 | Original-Lizenz | [`GPLv2`](../reference/linux-p4d/LICENSE); Copyright-Hinweise im Referenzcode bleiben erhalten. |
 
-Die Version der tatsächlich laufenden Installation, das Heizungsmodell und die Firmware sind noch unbekannt. Die ursprüngliche Quellcodeanalyse erfolgte offline; anschließend wurde das reale Datenbankschema mit ausdrücklicher Nur-Lesen-Erlaubnis untersucht: [Live-Abgleich](live-database.md). Die Heizung wurde nicht angesprochen. Die Dokumentation beschreibt **belegtes Verhalten des Referenzcodes**, keine vom Hersteller bestätigte Protokollspezifikation.
+Der installierte Quellstand und die Versionskennung der Dienstpfad-Binärdatei wurden inzwischen lesend als p4d 0.10.2 eingegrenzt: [Live-Server-Abgleich](live-server.md). Heizungsmodell und Firmware sind noch unbekannt. Die ursprüngliche Quellcodeanalyse erfolgte offline; anschließend wurde das reale Datenbankschema mit ausdrücklicher Nur-Lesen-Erlaubnis untersucht: [Live-Abgleich](live-database.md). Die Heizung wurde nicht angesprochen. Die Dokumentation beschreibt **belegtes Verhalten des Referenzcodes**, keine vom Hersteller bestätigte Protokollspezifikation.
 
 ## Lesereihenfolge
 
@@ -23,7 +23,8 @@ Die Version der tatsächlich laufenden Installation, das Heizungsmodell und die 
 2. [Parametermenü und Schreiben](parameter-menu.md): kompletter Bedien- und Schreibpfad, einschließlich Zeitprogrammen.
 3. [Datenbankkompatibilität](database-compatibility.md): Tabellen, Identitäten, Werte und Zeitsemantik.
 4. [Live-Abgleich](live-database.md): bereinigte Strukturunterschiede zur laufenden Datenbank.
-5. [Befunde und nächste Schritte](findings-and-next-steps.md): priorisierte offene Punkte und nächste gemeinsame Entscheidungen.
+5. [Live-Server-Abgleich](live-server.md): installierte Version, Quellvergleich und vorhandene Empfangstelegramme.
+6. [Befunde und nächste Schritte](findings-and-next-steps.md): priorisierte offene Punkte und nächste gemeinsame Entscheidungen.
 
 Quellverweise zeigen auf den unveränderlichen Commit. **Belegt** bedeutet im Code nachvollzogen. **Offen** bedeutet ohne weitere Untersuchung oder echte Mitschnitte nicht geklärt. **Empfehlung** bezeichnet einen Vorschlag für den Nachbau, keine bereits beschlossene Architektur.
 

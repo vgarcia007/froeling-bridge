@@ -27,10 +27,14 @@ Die Live-Datenbank läuft in der MariaDB-10.11-Reihe. Für die Kern-Tabellen wur
 
 Die begrenzte Sensorstichprobe enthält mehrere Faktoren, auch andere als Zehnerpotenzen, und mehrere Datentypkennungen. Daher weder Faktor aus `digits` ableiten noch Vorzeichen pauschal annehmen. Die Menüstichprobe enthält außerdem Typen, die die aktuelle Referenz nicht benennt. Solche Einträge zunächst erhalten und als unbekannt behandeln.
 
+## Ergänzung nach lesendem SSH-Abgleich
+
+Der inzwischen ermittelte Quellstand 0.10.2 erklärt die Strukturunterschiede. Sein aktives Dictionary stimmt bei Tabellen-/Spaltennamen, SQL-Typen und Primärschlüsselkennungen mit dem Live-Schema überein. Details und Beleggrenzen stehen im [Live-Server-Abgleich](live-server.md).
+
 ## Konsequenzen für den nächsten Plan
 
 - Ein schemaabhängiger Kompatibilitätsadapter ist erforderlich; keine automatische Migration auf den neuesten p4d-Stand.
 - Die vorhandene `samples`-Struktur kann als konkretes Ziel für erste Tests auf einer separaten Kopie dienen.
-- Vor Arbeiten an Metadaten, Peaks oder Alt-Skripten die tatsächlich installierte Version ermitteln.
+- Vor Arbeiten an Metadaten, Peaks oder Alt-Skripten den nun bekannten 0.10.2-Stand als Vergleich verwenden.
 - Die Bedeutung fehlender/zusätzlicher Spalten nicht allein aus ihrem Namen erschließen.
 - Noch keine Tests mit Schreibzugriffen oder ein neuer Daemon gegen diese Live-Datenbank. Eine Datenbankkopie ist bisher nicht angelegt.
