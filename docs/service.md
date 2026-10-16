@@ -13,7 +13,7 @@ python3 -m venv .venv
 .venv/bin/froeling-bridge serve
 ```
 
-Der Dienst läuft unter `http://127.0.0.1:8000`, ohne Debugger/Reload. Das Aufzeichnungsintervall beträgt 60 Sekunden; `--interval 5` und `--port 8001` ändern die lokalen Demo-Einstellungen. SIGINT/SIGTERM beenden den Dienst. Es gibt absichtlich keine Bindung an öffentliche Interfaces, kein Produktions-Authentifizierungsverfahren und im Defaultmodus keinen Zugriff auf `/dev/ttyUSB0`.
+Der Dienst ist über `http://SERVER-IP:8000` im LAN erreichbar und bindet standardmäßig an `0.0.0.0`, ohne Debugger/Reload. `--host 127.0.0.1` beschränkt ihn bei Bedarf auf lokale Zugriffe. Das Aufzeichnungsintervall beträgt 60 Sekunden; `--interval 5` und `--port 8001` ändern die lokalen Demo-Einstellungen. SIGINT/SIGTERM beenden den Dienst. Ein Produktions-Authentifizierungsverfahren ist noch offen. Im Defaultmodus gibt es keinen Zugriff auf `/dev/ttyUSB0`.
 
 | Modus | Datenquelle | Aufzeichnung | Heizungsjobs |
 | --- | --- | --- | --- |

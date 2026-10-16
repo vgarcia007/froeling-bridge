@@ -162,7 +162,7 @@ class System:
             raise TestControlError("hardware test already running or device missing")
         with socket.socket() as sock:
             try:
-                sock.bind(("127.0.0.1", 8001))
+                sock.bind(("0.0.0.0", 8001))
             except OSError:
                 raise TestControlError("test HTTP port unavailable") from None
         # Original is only read. The destination is a fresh empty test schema.

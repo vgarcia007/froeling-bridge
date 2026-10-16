@@ -72,6 +72,7 @@ def main(argv=None):
     server.add_argument("--device", help="exclusive TTY device (hardware-read only)")
     server.add_argument("--trace-file", help="new private raw trace file (hardware-read only)")
     server.add_argument("--reply-profile", help="explicit JSON request-to-reply command mapping")
+    server.add_argument("--host", default="0.0.0.0", help="listen address (default: all IPv4 interfaces)")
     server.add_argument("--port", type=int, default=8000)
     server.add_argument("--interval", type=float, default=60)
     setup = commands.add_parser("init-test-db", help="initialize an empty loopback test database")
@@ -148,7 +149,7 @@ def run_service(args):
         service = BridgeService(repository, args.mode, args.interval, client=client)
         service.read_connection_verified = args.mode == "hardware-read"
         try:
-            print(f"Fröling Bridge: {args.mode} on http://127.0.0.1:{args.port}", flush=True)
+            print(f"Fröling Bridge: {args.mode} on http://{args.host}:{args.port}", flush=True)
             import signal
             previous = signal.getsignal(signal.SIGTERM)
             def terminate(signum, frame):
@@ -163,7 +164,7 @@ def run_service(args):
                         if service.fatal.is_set():
                             os.kill(os.getpid(), signal.SIGTERM)
                     Thread(target=abort_test, name="fatal-exit", daemon=True).start()
-                serve(create_app(service), host="127.0.0.1", port=args.port, threads=4)
+                serve(create_app(service), host=args.host, port=args.port, threads=4)
             finally:
                 signal.signal(signal.SIGTERM, previous)
         finally:

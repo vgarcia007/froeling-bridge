@@ -80,3 +80,8 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Fehlgeschlagene Einrichtung ist kein fertiges Release. Identischer Release-Marker erlaubt kontrolliertes Fortsetzen; fremde oder abweichende Ressourcen bleiben geschützt. Ein Upgrade wird daraus nicht abgeleitet.
 - Fehlende venv-Unterstützung vor dauerhaften Installationsschritten erkennen. Wiederholung erhält Passwörter, Testvolume und vorhandene Testzeilen. Keine automatische Bereinigung als Reparatur.
 - Installationshilfen liegen im privaten Bundle, ohne Änderung des Anwendungswheels. Der vorhandene 0.3.0-Teilstand kann dadurch mit unverändertem Release-Marker fortgesetzt werden.
+
+## 16.10.2026 — Direkter LAN-Zugriff
+
+- Benutzer verlangt direkten Zugriff über die Server-IP. Webmenü/API standardmäßig 0.0.0.0, Vorschau 8000, Hardwaretest 8001; SSH-Tunnel ist optional. CLI --host erlaubt abweichende Bindung. Testdatenbank bleibt Loopback.
+- Administrative Arbeiten erfordern vorhandene Autorisierung und passende Rechte; die konkrete Zugriffslage bleibt privat. Notwendige Einrichtungsschritte als prüfbare Aktion vorbereiten.

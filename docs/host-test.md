@@ -48,7 +48,7 @@ Die Einrichtung:
 - legt geschützte Konfiguration unter `/etc/froeling-bridge-test` und private Testberichte an;
 - installiert genau vier neue systemd-Einheiten und einen root-eigenen Helfer;
 - erlaubt dem aufrufenden SSH-Konto ausschließlich die drei festen Helferaktionen über sudo;
-- startet **nur die Simulator-Vorschau** auf Loopback-Port 8000. p4d läuft dabei weiter; der USB-Port wird nicht geöffnet.
+- startet **nur die Simulator-Vorschau** auf LAN-Port 8000. p4d läuft dabei weiter; der USB-Port wird nicht geöffnet.
 
 Docker wird ausschließlich über den lokalen Unix-Socket angesprochen, unabhängig von CLI-Kontexten. Sowohl `/usr/bin/docker` als auch das auf dem Zielhost vorgefundene `/snap/bin/docker` werden unterstützt. Beim Snap-Paket liegt eine zusätzliche root-geschützte Kopie der Container-Umgebungsdatei unter `/var/snap/docker/common/froeling-bridge-test.env`, damit dessen Dateizugriff nicht auf die private `/etc`-Konfiguration angewiesen ist.
 
@@ -56,16 +56,14 @@ Die Einrichtung setzt funktionierendes Docker und `python3 -m venv`, außerdem `
 
 ## Browserzugriff
 
-Vom eigenen Rechner einen SSH-Tunnel mit dem vorhandenen SSH-Zugang öffnen:
+Für bereits eingerichtete 0.3.0-Pakete mit Loopback-Bindung liegt die vorbereitete Umstellung unter `deploy/update-lan.sh`. Nach Übertragung des aktualisierten privaten Pakets: `sudo bash ~/froeling-bridge-test-0.3.0/update-lan.sh`. Sie aktualisiert das Wheel und beide Webdienstdefinitionen, startet ausschließlich die Vorschau neu und lässt p4d weiterlaufen.
 
-```bash
-ssh -N -L 8000:127.0.0.1:8000 -L 8001:127.0.0.1:8001 SSH_BENUTZER@ZIELHOST
-```
+Die Dienste sind direkt über die IP des Servers erreichbar:
 
-- Demo: `http://127.0.0.1:8000/`
-- Während des Hardwaretests: `http://127.0.0.1:8001/`
+- Demo: `http://SERVER-IP:8000/`
+- Während des Hardwaretests: `http://SERVER-IP:8001/`
 
-Beide Dienste binden ausschließlich an Loopback; es gibt keine neue LAN-/Internetfreigabe. Der Tunnel kann für die Browseransicht nötig sein, beeinflusst aber die Rückkehr zu p4d nicht.
+Beide Webdienste binden an `0.0.0.0`. Ein SSH-Tunnel ist nicht erforderlich. Die separate Testdatenbank bleibt ausschließlich über Loopback erreichbar. Mit `serve --host 127.0.0.1` kann bei Bedarf ausdrücklich nur lokal gebunden werden.
 
 ## Start, Status und sofortige Rückkehr
 

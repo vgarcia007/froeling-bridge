@@ -40,7 +40,7 @@ Für API und dauerhafte Datensammlung:
 .venv/bin/froeling-bridge serve
 ```
 
-Das Webmenü läuft unter `http://127.0.0.1:8000/`, die API unter `http://127.0.0.1:8000/api/v1/health`. Der Sammler startet sofort und liest danach alle 60 Sekunden. Ohne Konfiguration bleiben alle Daten fiktiv und im Speicher. Die [Dienstanleitung](docs/service.md) beschreibt Testdatenbank, Bestandsansicht, API-Beispiele und Integrationstests. Die [Host-Testanleitung](docs/host-test.md) beschreibt die einmalige Einrichtung, SSH-Zugriff und den begrenzten Test mit automatischer Rückkehr. Ein alter Webinterface-Schreibmitschnitt ist keine Voraussetzung für die Weiterentwicklung.
+Das Webmenü läuft im LAN unter `http://SERVER-IP:8000/`, die API unter `http://SERVER-IP:8000/api/v1/health`. Standardbindung ist `0.0.0.0`; `--host 127.0.0.1` beschränkt den Zugriff bei Bedarf auf den eigenen Rechner. Der Sammler startet sofort und liest danach alle 60 Sekunden. Ohne Konfiguration bleiben alle Daten fiktiv und im Speicher. Die [Dienstanleitung](docs/service.md) beschreibt Testdatenbank, Bestandsansicht, API-Beispiele und Integrationstests. Die [Host-Testanleitung](docs/host-test.md) beschreibt die einmalige Einrichtung, SSH-Zugriff und den begrenzten Test mit automatischer Rückkehr. Ein alter Webinterface-Schreibmitschnitt ist keine Voraussetzung für die Weiterentwicklung.
 
 ## Dokumentation
 

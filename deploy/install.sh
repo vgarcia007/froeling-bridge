@@ -71,7 +71,7 @@ import socket,sys
 skip={int(port) for port in sys.argv[1].split()}
 for port in set((8000,8001,33079))-skip:
  with socket.socket() as sock:
-  sock.bind(('127.0.0.1',port))
+  sock.bind(('127.0.0.1' if port == 33079 else '0.0.0.0',port))
 PY
 phase=files
 getent group dialout >/dev/null
@@ -128,5 +128,5 @@ systemctl daemon-reload
 systemctl start froeling-bridge-preview.service
 systemctl is-active --quiet p4d.service
 systemctl is-active --quiet froeling-bridge-preview.service
-echo 'Setup complete. p4d is still running. Simulator preview: loopback port 8000.'
+echo 'Setup complete. p4d is still running. Simulator preview: http://SERVER-IP:8000 (LAN).'
 echo 'Hardware test is NOT started. Use the fixed helper when ready.'
