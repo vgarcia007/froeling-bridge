@@ -194,7 +194,7 @@ class HeatingClient:
                 values = list(before.ranges)
                 values[index] = interval
                 target = replace(before, ranges=tuple(values))
-                if target.ranges == before.ranges:
+                if target.values_bytes() == before.values_bytes():
                     return TimeWriteResult(WriteStatus.UNCHANGED, before, before)
                 stage = "send/acknowledgement"
                 try:
@@ -206,7 +206,7 @@ class HeatingClient:
                     raise UnexpectedReply("time-program acknowledgement address differs")
                 stage = "readback"
                 after = next((item for item in self._times(tx) if item.address == address), None)
-                if after is None or after.ranges != target.ranges:
+                if after is None or after.values_bytes() != target.values_bytes():
                     raise WriteVerificationError("time-program write", address, after)
                 stage = "transaction completion"
                 return TimeWriteResult(WriteStatus.CONFIRMED, before, after)

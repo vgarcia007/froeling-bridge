@@ -37,7 +37,7 @@ def public(value):
     if is_dataclass(value):
         result = {f.name: public(getattr(value, f.name)) for f in fields(value)}
         # Parameter.value and .unit are properties, not dataclass fields.
-        for name in ("description", "unit", "version_text"):
+        for name in ("description", "unit", "version_text", "start", "end"):
             if hasattr(value, name):
                 result[name] = public(getattr(value, name))
         if hasattr(value, "effective_factor"):

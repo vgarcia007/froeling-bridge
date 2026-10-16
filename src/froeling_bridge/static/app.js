@@ -611,12 +611,12 @@ function renderTimes() {
       const form = element("form", "", "interval-row");
       const prefix = `time-${program.address}-${index}`;
       const start = element("input");
-      start.type = "time";
+      start.type = state.health.capabilities.heating_write ? "time" : "text";
       start.step = "600";
       start.value = interval.start || "";
       start.id = prefix + "-start";
       const end = element("input");
-      end.type = "time";
+      end.type = state.health.capabilities.heating_write ? "time" : "text";
       end.step = "600";
       end.value = interval.end || "";
       end.id = prefix + "-end";

@@ -9,7 +9,7 @@ from decimal import Decimal, InvalidOperation, localcontext
 from enum import IntEnum
 import re
 import struct
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 from .codec import uint
 from .errors import MalformedPayload, ValidationError
@@ -402,9 +402,45 @@ def parse_range(raw: bytes) -> TimeRange:
 
 
 @dataclass(frozen=True)
+class RawTimeRange:
+    """Lossless controller data outside the editable Python-time domain.
+
+    p4d formats each byte independently as byte/10 : byte%10*10. Reading
+    must preserve those values rather than applying user-input validation.
+    """
+    raw: bytes
+
+    def __post_init__(self):
+        if not isinstance(self.raw, bytes):
+            raise ValidationError("time range must contain bytes")
+        exact(self.raw, 2, "time range")
+
+    @property
+    def start(self):
+        return f"{self.raw[0] // 10:02d}:{self.raw[0] % 10 * 10:02d}"
+
+    @property
+    def end(self):
+        return f"{self.raw[1] // 10:02d}:{self.raw[1] % 10 * 10:02d}"
+
+    def to_bytes(self):
+        return self.raw
+
+
+def read_range(raw):
+    try:
+        return parse_range(raw)
+    except MalformedPayload:
+        return RawTimeRange(raw)
+
+
+DecodedTimeRange = Union[TimeRange, RawTimeRange]
+
+
+@dataclass(frozen=True)
 class TimeRanges:
     address: int
-    ranges: Tuple[TimeRange, TimeRange, TimeRange, TimeRange]
+    ranges: Tuple[DecodedTimeRange, DecodedTimeRange, DecodedTimeRange, DecodedTimeRange]
     unknown_prefix: int = 0x0100
 
     def __post_init__(self):
@@ -413,7 +449,7 @@ class TimeRanges:
             raise ValidationError("FF is not a usable time-program address")
         uint(self.unknown_prefix, 16, "time-program prefix")
         if not isinstance(self.ranges, tuple) or len(self.ranges) != 4 or not all(
-            isinstance(r, TimeRange) for r in self.ranges
+            isinstance(r, (TimeRange, RawTimeRange)) for r in self.ranges
         ):
             raise ValidationError("time program requires exactly four immutable ranges")
 
@@ -439,4 +475,4 @@ def parse_time_ranges(payload, write_reply=False) -> TimeRanges:
         address = payload[2]
         if address == 255:
             raise MalformedPayload("invalid time-program address FF")
-    return TimeRanges(address, tuple(parse_range(payload[i:i+2]) for i in range(3, 11, 2)), prefix)
+    return TimeRanges(address, tuple(read_range(payload[i:i+2]) for i in range(3, 11, 2)), prefix)

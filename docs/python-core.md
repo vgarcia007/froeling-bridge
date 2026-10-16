@@ -111,3 +111,7 @@ python3 docs/tools/verify_protocol_examples.py
 Die ursprünglichen 72 Protokoll-/CLI-Tests prüfen bekannte C++-Vektoren, alle Chunk-Splitpositionen, alle Bytewerte, alle 65.536 Messwert-Bitmuster signed/unsigned, Typ-/Grenzen-/Skalierungsfehler, vollständige simulierte Abläufe, beide ACKs, falsche Adressen/Befehle, verlorene Antworten, falsches Nachlesen, verzögerte Daten, Session-Sperre, Lock-Konkurrenz und Gesamtdeadline. Die Original-C++-Prüfung benötigt zusätzlich einen C++17-Compiler; die Python-Suite nicht.
 
 Nächste unabhängige Arbeitspakete sind der DB-Kompatibilitätsadapter gegen lokale Schema-/Datenfixtures und eine darauf aufbauende API. Der gemeinsame Protokollkern kann dafür ohne Hardware verwendet werden. Direkte Live-Schreibtests, eine Logstufenänderung oder ein konkurrierender Prozess an COM1 bleiben außerhalb der bisherigen Freigabe.
+
+## Ergänzung: verlustfreies Lesen von Zeitdaten
+
+`read_range` erhält wie p4d alle Zeitbytepaare. Reguläre Zeitintervalle nutzen weiterhin `TimeRange`; Werte außerhalb dessen Eingabebereichs werden als `RawTimeRange` mit Originalbytes und p4d-Darstellung erhalten. Das betrifft beispielsweise `24:00` oder gemischte `FF`-Paare. Nur `FF FF` gilt insgesamt als unbelegt. `parse_range`, `parse_time` und neu erzeugte Eingabeintervalle behalten ihre strengen Eingabeprüfungen. Unveränderte Rohslots bleiben bei Offline-Teiländerungen bytegleich; reale Schreibfreigabe entsteht daraus nicht.

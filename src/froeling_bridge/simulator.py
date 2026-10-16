@@ -12,7 +12,7 @@ from .codec import Frame, StreamDecoder, encode_frame
 from .errors import MalformedPayload, ValidationError
 from .messages import (
     Command, ErrorEntry, MenuItem, Parameter, Status, TimeRange, TimeRanges,
-    ValueSpec, exact, parse_parameter_ack, parse_range, parse_word,
+    ValueSpec, exact, parse_parameter_ack, read_range, parse_word,
 )
 
 
@@ -83,7 +83,7 @@ class HeaterSimulator:
             address = int.from_bytes(payload[:2], "big")
             if address not in self.time_programs:
                 raise MalformedPayload("simulator has no time program at that address")
-            ranges = tuple(parse_range(payload[i:i+2]) for i in range(2, 10, 2))
+            ranges = tuple(read_range(payload[i:i+2]) for i in range(2, 10, 2))
             self.time_programs[address] = replace(self.time_programs[address], ranges=ranges)
             self.time_write_count += 1
             result = b"\x00" + payload

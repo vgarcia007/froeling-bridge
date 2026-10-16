@@ -142,3 +142,9 @@ Eine spätere unerwartete Antwort führte zum kontrollierten Abbruch. Die automa
 Der private Mitschnitt des ersten echten Lesetests zeigt gültige Antworten `42` sowohl auf die erste Anfrage `42` als auch auf die Folgeanfrage `43`. Beide gelieferten Zeitgruppen sind identisch und tragen Adresse `00`. Der alte Simulationsstandard Requestcode = Antwortcode war hier falsch. Das Zielhostprofil unter `deploy/heating-reply-profile.json` legt daher `43 -> 42` fest; vollständige Zeitlisten und andere Firmwarevarianten sind noch nicht damit validiert.
 
 Der Originalpfad `P4d::updateTimeRangeData` führt zuerst `check()` mit dem Text `Tescht ;-)` aus. Anschließend fragt er First/Next bis Adresse `DF` ab und speichert nach Adresse, sodass ein weiterer Eintrag derselben Adresse den vorherigen ersetzt. `P4Request::getTimeRanges` prüft dabei den Antwortcommand nicht. Der Python-Lesepfad übernimmt nun Check und Ersetzen nach Adresse, zusätzlich mit vorhandener Gesamtdeadline und begrenzter Antwortzahl. Das ist keine Freigabe für echte Zeitprogrammänderungen.
+
+### Zeitdaten lesen und Eingaben prüfen
+
+Der nächste Hardwaretest bestätigte, dass die korrigierte Befehlsfolge den vorherigen Antwortcodefehler überwindet. Er wurde anschließend durch die bisher zu strenge Uhrzeitdekodierung abgebrochen; automatische Rückkehr und Originalaufzeichnung sind erneut bestätigt.
+
+p4d liest die Zeitbytes unverändert und formatiert sie mit Ganzzahldivision durch 10 und Rest mal 10. Nur das Paar `FF FF` gilt als unbelegt. Deshalb muss Lesen auch Werte außerhalb des Python-Uhrzeitbereichs erhalten, ohne sie zu korrigieren oder die Messwerterfassung deswegen abzubrechen. Der Python-Lesepfad übernimmt dies nun verlustfrei; `RawTimeRange` erhält bei Bedarf Originalbytes und Darstellung. Beispielsweise bleibt `F0` als `24:00` erhalten; das ist ein Testbeispiel, kein belegter konkreter Anlagenwert. Die Prüfung neuer Benutzereingaben bleibt davon getrennt und unverändert streng.
