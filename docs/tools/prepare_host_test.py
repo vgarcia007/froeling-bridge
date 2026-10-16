@@ -78,6 +78,7 @@ def prepare(root, upload=False):
         "install_state.py",
         "update-lan.sh",
         "repair-test.sh",
+        "export-traces.sh",
         "froeling-bridge-test",
     ):
         shutil.copy2(root / "deploy" / name, bundle / name)
