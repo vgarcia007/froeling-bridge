@@ -73,7 +73,7 @@ def prepare(root, upload=False):
         + "\n"
     )
     shutil.copytree(root / "deploy/systemd", bundle / "systemd")
-    for name in ("install.sh", "froeling-bridge-test"):
+    for name in ("install.sh", "install_state.py", "froeling-bridge-test"):
         shutil.copy2(root / "deploy" / name, bundle / name)
     wheels = bundle / "wheels"
     wheels.mkdir()

@@ -34,7 +34,7 @@ PYTHONPATH=src .venv/bin/python docs/tools/prepare_host_test.py --upload
 
 Das Werkzeug liest die bestehenden ignorierten `live-db.con` und `live-server-ssh.con`. Es schreibt die Verbindung ausschließlich in eine private Datei, prüft die JSON-Struktur ohne Live-DB-Verbindung und überträgt das Paket per SSH in einen neuen privaten Ordner `~/froeling-bridge-test-0.3.0`. Keine Überschreibung vorhandener Pakete, kein sudo und keine Dienstaktion bei der Übertragung.
 
-**Auf dem Zielhost**, nach Durchsicht von `install.sh`, einmal ausführen:
+**Auf dem Zielhost**, nach Durchsicht von `install.sh`, ausführen (auch zum Fortsetzen eines abgebrochenen Versuchs):
 
 ```bash
 sudo bash ~/froeling-bridge-test-0.3.0/install.sh
@@ -52,7 +52,7 @@ Die Einrichtung:
 
 Docker wird ausschließlich über den lokalen Unix-Socket angesprochen, unabhängig von CLI-Kontexten. Sowohl `/usr/bin/docker` als auch das auf dem Zielhost vorgefundene `/snap/bin/docker` werden unterstützt. Beim Snap-Paket liegt eine zusätzliche root-geschützte Kopie der Container-Umgebungsdatei unter `/var/snap/docker/common/froeling-bridge-test.env`, damit dessen Dateizugriff nicht auf die private `/etc`-Konfiguration angewiesen ist.
 
-Die Einrichtung setzt funktionierendes Docker und `python3 -m venv`, außerdem `fuser`, `visudo` und die Gruppe `dialout` voraus. Sie installiert keine Betriebssystempakete automatisch. Bestehende Installationspfade, ein gleichnamiger Container oder ein gleichnamiges Volume führen zum Abbruch. Bei einem Einrichtungsfehler können angelegte neue Testressourcen verbleiben; Original-p4d wird dabei nicht gestoppt. Wiederholung/Upgrade muss diese Ressourcen vorher ausdrücklich prüfen.
+Die Einrichtung setzt funktionierendes Docker und `python3 -m venv`, außerdem `fuser`, `visudo` und die Gruppe `dialout` voraus. Sie installiert keine Betriebssystempakete automatisch. Venv-Unterstützung wird durch eine temporäre Probe vor dem Anlegen der Installation geprüft. Bei fehlender Unterstützung unter Ubuntu zuerst `sudo apt install python3.12-venv` ausführen. Nach einem Abbruch denselben Installationsbefehl erneut ausführen; nichts manuell löschen. Ein identisches Release wird fortgesetzt: vorhandene Zugangsdaten und Testdaten bleiben erhalten, ein passender eigener Container wird wiederverwendet und fehlende Testtabellen werden ergänzt. Abweichende Releases, Konfigurationen, Tabellen oder fremde Container/Volumes werden nicht übernommen. Auch ein bereits vollständig eingerichteter Stand kann erneut durchlaufen werden. Ein laufender Hardwaretest blockiert die Einrichtung. Das Skript stoppt p4d zu keinem Zeitpunkt. Die Python-Umgebung erhält explizit Leserechte für die Dienstgruppe.
 
 ## Browserzugriff
 

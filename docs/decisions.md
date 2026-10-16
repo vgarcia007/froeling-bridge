@@ -74,3 +74,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Testfenster 15 Minuten. Rückkehrtimer vor p4d-Stop scharfstellen; OnFailure und RuntimeMaxSec ergänzen ihn. Protokoll-/DB-Fehler und Sammlerdeadline 120 Sekunden brechen früher ab. Original-Autostart bleibt enabled, Hardwaretest ohne Boot-Aktivierung.
 - Rückkehr: Testdienst vollständig stoppen, exklusiven Port freigeben, Originaldienst starten, neue Messpunkte ausschließlich lesend nachweisen. Keine pauschale Garantie bei Host-/Hardwareausfall oder fremdem Portbesitzer; Fehler sichtbar melden.
 - Benutzerautorisiert sind jetzt auch das Bereitstellen des privaten Pakets auf dem Host und später der konkrete Helferablauf nach erfolgreicher Einrichtung. Der fehlende administrative Zugriff wird nicht umgangen. Tatsächlicher Heizungs-/Original-DB-Schreibzugriff bleibt ausgeschlossen.
+
+## 16.10.2026 — Einrichtung nach Abbruch fortsetzen
+
+- Fehlgeschlagene Einrichtung ist kein fertiges Release. Identischer Release-Marker erlaubt kontrolliertes Fortsetzen; fremde oder abweichende Ressourcen bleiben geschützt. Ein Upgrade wird daraus nicht abgeleitet.
+- Fehlende venv-Unterstützung vor dauerhaften Installationsschritten erkennen. Wiederholung erhält Passwörter, Testvolume und vorhandene Testzeilen. Keine automatische Bereinigung als Reparatur.
+- Installationshilfen liegen im privaten Bundle, ohne Änderung des Anwendungswheels. Der vorhandene 0.3.0-Teilstand kann dadurch mit unverändertem Release-Marker fortgesetzt werden.
