@@ -95,7 +95,7 @@ Diese Frische gilt nur innerhalb unseres exklusiven Kommunikationsbesitzes. Ein 
 
 Der Simulator verwendet standardmäßig den Requestcode als Antwortcode und bei `39` zwei Antworten desselben Codes. **Das ist ein explizites Simulationsprofil, keine bestätigte Hardwareeigenschaft.** `HeatingClient(..., reply_commands={request_code: (reply_code, ...)})` kann eine belegte Zuordnung aufnehmen; Lesebefehle benötigen einen Code, `39` zwei. Das Defaultprofil darf nicht ungeprüft auf die Anlage übertragen werden.
 
-Die Rohbeobachtungen aus vorhandenen Logs und die Beleggrenzen stehen in [live-server.md](live-server.md). Echte Antwortzuordnungen, die Bedeutung der zwei Schreibantworten sowie Heizungsmodell/Firmware fehlen weiterhin. Der neue TTY-Transport ist nur für den lesenden Hardwaretest freigegeben; diese offenen Punkte blockieren die quellenbasierte Weiterentwicklung nicht. Es schreibt weder Heizungsuhr noch Force-/I/O-Manipulationsbefehle.
+Die Rohbeobachtungen aus vorhandenen Logs und die Beleggrenzen stehen in [live-server.md](live-server.md). Der korrigierte Hardwaretest bestätigt inzwischen erfolgreiche konkrete Lesepfade für Status, Firmware, Messwerte und einen Zahlenparameter mit dem Defaultprofil; eine spätere UnexpectedReply wird noch am Mitschnitt untersucht. Vollständige Antwortzuordnungen und die Bedeutung der zwei Schreibantworten bleiben offen. Der neue TTY-Transport ist nur für den lesenden Hardwaretest freigegeben; diese offenen Punkte blockieren die quellenbasierte Weiterentwicklung nicht. Es schreibt weder Heizungsuhr noch Force-/I/O-Manipulationsbefehle.
 
 ## Anforderung an die spätere Web- und API-Schicht
 

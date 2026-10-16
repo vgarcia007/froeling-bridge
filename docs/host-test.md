@@ -116,7 +116,7 @@ sudo .venv/bin/python -I docs/tools/verify_host_rollback.py --run-local-spares
 
 Er startet ausschließlich eindeutig benannte `/bin/sleep`-Ersatzdienste, prüft Rückkehr durch Timer und nach SIGKILL und entfernt seine Einheiten wieder. Nicht mit dem echten Hardwaretest verwechseln.
 
-Bereits lokal geprüft: Browserabläufe in Chromium inklusive mobiler Darstellung, Protokoll-/Client-/HTTP-Schreibsperren, Pseudo-Terminal mit echten seriellen Bytes, unabhängige Rückkehr mit echten systemd-Ersatzdiensten sowie Sammlung in separater MariaDB bei unveränderter Metadaten-Quelldatenbank. Der tatsächliche Test am Zielhost steht bis zur administrativen Einrichtung noch aus.
+Bereits lokal geprüft: Browserabläufe in Chromium inklusive mobiler Darstellung, Protokoll-/Client-/HTTP-Schreibsperren, Pseudo-Terminal mit echten seriellen Bytes, unabhängige Rückkehr mit echten systemd-Ersatzdiensten sowie Sammlung in separater MariaDB bei unveränderter Metadaten-Quelldatenbank. Der korrigierte Test am Zielhost lieferte inzwischen zwei erfolgreiche Sammeldurchläufe und lesbare Status-/Firmware-/Parameterdaten. Eine folgende UnexpectedReply löste erfolgreich die automatische OnFailure-Rückkehr samt nachgewiesener Originalaufzeichnung aus. Die genaue Ursache und ein stabiler Test über mindestens fünf Zyklen sowie der tatsächliche Timerablauf bleiben offen; aktueller Stand in project-context.md.
 
 ## Reparatur des ersten abgebrochenen Tests
 
