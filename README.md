@@ -16,16 +16,21 @@ Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, 
 
 ## Projektstand
 
-Aktuell befindet sich das Projekt in der Analysephase. Eine eigene Kommunikation mit der Heizung ist noch nicht implementiert.
+Version 0.1.0 enthält einen Python-Protokollkern und einen vollständig lokalen Simulator. Er liest Status, Messwerte, Parameter, Menü und Zeitprogramme und prüft simulierte Änderungen durch Nachlesen. Ein TTY-Transport, eine Datenbankanbindung und die HTTP-API sind noch nicht implementiert.
 
-Bisher dokumentiert sind:
+Die bisherigen Protokollprüfungen erfolgen offline anhand des Referenzcodes und synthetischer Fixtures. Ein ausschließlich lesender [Abgleich mit dem bestehenden Datenbankschema](docs/live-database.md) und dem [installierten p4d-Stand](docs/live-server.md) ist dokumentiert. Das Simulationsprofil der Antwortcodes und die Schreibsemantik sind noch nicht an der realen Heizung bestätigt.
 
-- Aufbau und Codierung der seriellen Telegramme
-- Lesen von Messwerten und Parameter-Metadaten
-- Schreibabläufe für Parameter und Zeitprogramme
-- Menüstruktur und Anforderungen an die Datenbankkompatibilität
+## Installieren und ausprobieren
 
-Die bisherigen Protokollprüfungen erfolgen offline anhand des Referenzcodes. Ein erster ausschließlich lesender [Abgleich mit dem bestehenden Datenbankschema](docs/live-database.md) und dem [installierten p4d-Stand](docs/live-server.md) ist dokumentiert. Die Kompatibilität mit der bestehenden Installation und deren Firmware muss noch überprüft werden.
+Python 3.9 oder neuer; keine externen Laufzeitabhängigkeiten:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install .
+.venv/bin/froeling-bridge demo
+```
+
+Die Demo verwendet ausschließlich fiktive Daten im Speicher. Sie benötigt keine Zugangsdaten, Datenbank oder angeschlossene Heizung. Die [Anleitung zum Python-Kern](docs/python-core.md) beschreibt Schnittstellen, Fehlerverhalten und Einschränkungen.
 
 ## Dokumentation
 
@@ -52,7 +57,13 @@ Für den Referenzcode gelten die ursprünglichen Copyright-Hinweise und die dort
 
 ## Offline-Prüfung
 
-Benötigt werden Python 3, Git und ein C++17-Compiler (`c++`).
+Die Python-Tests laufen aus dem Checkout ohne weitere Abhängigkeiten:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+```
+
+Für den zusätzlichen Vergleich mit extrahierten Originalfunktionen werden Git und ein C++17-Compiler (`c++`) benötigt:
 
 ```bash
 python3 docs/tools/verify_protocol_examples.py

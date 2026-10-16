@@ -6,7 +6,7 @@
 2. `docs/project-context.md` und `docs/decisions.md` lesen. Falls vorhanden, zusätzlich `.local/operator-context.md` lesen; dort liegen ausschließlich lokale Betreiberangaben. Öffentliche Beispieladressen sind keine Live-Ziele.
 3. Für Fachfragen `docs/README.md` und die dort verlinkte Bestandsaufnahme lesen. Quellcode ist die Autorität für Bestandsverhalten; Annahmen und Empfehlungen davon unterscheiden.
 
-Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise gemeinsam einen Python-Nachbau entwickeln, zuerst auf Grundlage belegter Protokoll- und Datenbankkenntnisse.
+Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise einen Python-Nachbau auf Grundlage belegter Protokoll-/Datenbankkenntnisse entwickeln und hat die autonome Umsetzung des Offline-Kerns beauftragt. Routineentscheidungen selbst treffen und dokumentieren; nur bei tatsächlich fehlenden Freigaben oder blockierenden Informationen nachfragen.
 
 ## Ziel und feste Grenzen
 
@@ -45,7 +45,9 @@ Der Benutzer stellt `live-server-ssh.con` für den zuvor angebotenen lesenden SS
 - Eigenes Remote: `git@github.com:vgarcia007/froeling-bridge.git`, öffentlich; keine persönlichen Betriebsdaten veröffentlichen.
 - Originalcode als Submodul: `reference/linux-p4d`, Herkunft `https://github.com/vgarcia007/linux-p4d.git`.
 - Untersuchte Referenz: `4d1176c4a9081893e4c2cc27a535bb2bc4737d0a`. Referenzcode unverändert lassen und nicht still aktualisieren.
-- Offline-Prüfung: `python3 docs/tools/verify_protocol_examples.py`. Sie prüft Bytecodierung, nicht die reale Schreibsemantik.
+- Python-Kern: `src/froeling_bridge`, Anleitung `docs/python-core.md`. Python >=3.9, keine externen Laufzeitabhängigkeiten. Tests: `PYTHONPATH=src python3 -m unittest discover -s tests -v`.
+- Zusätzliche Offline-Prüfung: `python3 docs/tools/verify_protocol_examples.py`. Sie prüft Original-Bytecodierung, nicht die reale Schreibsemantik.
+- Default-Antwortcodes des Simulators sind unbestätigte Annahmen. Keinen TTY-Adapter oder Live-Betrieb daraus als bereits geprüft ableiten.
 
 ## Kontinuität und Sicherung
 

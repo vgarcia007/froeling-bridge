@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "froeling-bridge"
+version = "0.1.0"
+description = "Offline S3200 protocol core and simulator, based on linux-p4d"
+readme = "README.md"
+requires-python = ">=3.9"
+
+[project.scripts]
+froeling-bridge = "froeling_bridge.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

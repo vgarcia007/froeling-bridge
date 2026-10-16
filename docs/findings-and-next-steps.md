@@ -96,6 +96,10 @@ Ein Schreibmitschnitt muss alle Vorabfragen, beide Antworten, das Nachlesen und 
 
 Quellcheckout und Dienstpfad-Binärdatei passen zu 0.10.2; das zugehörige Dictionary stimmt im geprüften Strukturumfang mit der Live-DB überein. Die Kernprotokollquellen sind identisch mit der jüngeren Referenz. Vorhandene Logs liefern einzelne reale Empfangsframes, jedoch keinen vollständigen Parameterschreibvorgang. Damit kann als Nächstes der Offline-Protokollkern geplant werden; Heizungsmodell, Firmware und Schreibsemantik bleiben offen. Siehe [Live-Server-Abgleich](live-server.md).
 
+## Fortschritt nach Offline-Implementierung
+
+Der [Python-Protokollkern mit Simulator](python-core.md) ist inzwischen implementiert und durch 72 Tests geprüft. Framing, typisierte Antworten, vollständige Transaktionen sowie bestätigtes Parameterschreiben und Zeitprogrammänderungen sind offline verfügbar. Der nächste unabhängige Baustein ist die Datenbankkompatibilität gegen lokale Fixtures; reale Antwortzuordnungen und Hardware-Schreibsemantik bleiben offen. Die folgende ursprüngliche Reihenfolge beschreibt weiterhin die späteren Integrationsschritte, nicht ausschließlich unerledigte Arbeit.
+
 ## Empfohlene Reihenfolge der nächsten Arbeitsphasen
 
 1. **Bestandsabgleich:** installierte Version und reales Schema ermitteln, Unterschiede zu dieser Referenz dokumentieren, vorhandene echte Telegramme zuordnen. Abschluss: eine benannte Hardware-/Firmware-/Schema-Kombination als Implementierungsziel.
