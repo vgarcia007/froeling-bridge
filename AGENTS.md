@@ -10,6 +10,9 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 
 ## Ziel und feste Grenzen
 
+- p4d ist die verbindliche funktionale Vorlage. Vor Änderungen den vollständigen relevanten Ablauf in Protokoll, Dienst, Datenbank und Webmenü sowie die bestehenden Fachnotizen abgleichen. Namen, Menüpfade, Adress-/Wochentagszuordnung und Cacheverhalten gehören zum Funktionsumfang, nicht zu späteren kosmetischen Extras. Benutzer möchte nicht erneut auf bereits dokumentiertes Originalverhalten hinweisen müssen.
+- Empfangene Heizungsdaten nach dem Original verlustfrei lesen; keine Eingabevalidierung auf Rohantworten anwenden. Abweichungen ausdrücklich belegen, begründen und testen. Moderne Darstellung darf keine namenlosen Rohadressen oder zusätzliche manuelle Leseschritte anstelle vorhandener p4d-Funktionen einführen.
+
 - Schwerpunkt: Heizung lesen, Parameter zuverlässig schreiben, moderne API und Servicemenü; einfache Installation.
 - Bestehende MariaDB und historische Messreihen weiterführen; p4d als Rückfalloption erhalten.
 - Kein dauerhafter Parallelbetrieb zweier unabhängiger serieller Heizungsdienste als Default.

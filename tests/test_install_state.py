@@ -79,6 +79,27 @@ class InstallRecoveryTests(unittest.TestCase):
                 setup.source_config(a, b)
             self.assertEqual(json.loads(b.read_text())["database"], "two")
 
+    def test_setup_after_a_hardware_window_preserves_its_database_and_password(self):
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(setup.os, "chown"),
+        ):
+            root = Path(directory)
+            setup.credentials(root, os.getgid())
+            path = root / "test-db.json"
+            config = json.loads(path.read_text())
+            config["database"] = "froeling_bridge_test_012345abcdef"
+            path.write_text(json.dumps(config))
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            setup.credentials(root, os.getgid())
+            self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+            config["database"] = "p4"
+            path.write_text(json.dumps(config))
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            with self.assertRaises(ValueError):
+                setup.credentials(root, os.getgid())
+            self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+
     def test_foreign_container_or_changed_binding_is_refused(self):
         item = dict(
             Config=dict(

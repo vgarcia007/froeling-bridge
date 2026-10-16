@@ -4,6 +4,7 @@ import argparse
 import grp
 import json
 import os
+import re
 from pathlib import Path
 import secrets
 
@@ -67,7 +68,10 @@ def credentials(root, gid):
             existing.get("host") != "127.0.0.1"
             or existing.get("port") != 33079
             or existing.get("user") != "root"
-            or existing.get("database") != "froeling_bridge_test_initial"
+            or not isinstance(existing.get("database"), str)
+            or not re.fullmatch(
+                r"froeling_bridge_test_[a-z0-9_]+", existing["database"]
+            )
         ):
             raise ValueError("Unexpected test DB configuration; preserved.")
         if password is not None and password != existing.get("password"):

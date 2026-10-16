@@ -97,3 +97,10 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Benutzer unterstreicht den zuverlässigen bisherigen p4d-Lesebetrieb und verlangt keine unnötige Zusatzkomplexität. Lesesequenzen und Datenübernahme am Original ausrichten; Abweichungen ausdrücklich begründen.
 - Zeitprogramme: ursprünglicher Check, First/Next und Speicherung nach Adresse; wiederholte Adresse ersetzt wie beim Original den vorherigen Eintrag. Auf dem Zielhost beobachtetes Antwortprofil 43 -> 42 ausdrücklich konfigurieren, statt alle Antwortcodes pauschal zu akzeptieren.
 - Frame-/CRC-Prüfung, Schreibsperren und begrenzte Laufzeit beibehalten. Noch nicht beobachtete Firmwareeigenschaften nicht als gesichert ausgeben.
+
+## 16.10.2026 — Vollständige Menüzuordnung und Cache als Funktionsumfang
+
+- Benutzer fordert verbindlichen p4d-Funktionsabgleich und will vorhandene Originalfunktionen nicht wiederholt einfordern müssen. Namen, Menüpfade, Zeitadressen/Tage und Cachebedienung sind Teil des Nachbaus; moderne Darstellung ersetzt diese Zuordnung nicht.
+- Zeitprogramme über Originalmenü benennen und nur konfigurierte erreichbare Geräte anzeigen. Rohgruppen bleiben in der API vollständig. Geräte-Zeiten aus dem Menü führen zur entsprechenden Woche.
+- Gemeinsamer Cache mit automatischem Erstlesen, bewusstem Aktualisieren und Lesezeitpunkt; im lesenden Testbetrieb private persistente Datei statt Änderungen der Original-DB. Fehler behalten den letzten vollständigen Stand. Kein zusätzlicher manueller Erstleseschritt.
+- Tatsächliches 15-Minuten-Lesefenster mit 195 Testmesspunkten und automatischer bestätigter Rückkehr erfolgreich. Hardware-Schreiben weiterhin getrennt und nicht freigegeben.

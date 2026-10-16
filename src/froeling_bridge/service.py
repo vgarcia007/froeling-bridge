@@ -123,7 +123,7 @@ class HeatingWorker:
 
 class BridgeService:
     def __init__(self, repository=None, mode="demo", interval=60, client=None,
-                 queue_capacity=64, job_limit=1000, autostart=True, max_cycle_seconds=120):
+                 queue_capacity=64, job_limit=1000, autostart=True, max_cycle_seconds=120, time_cache_file=None):
         if isinstance(interval, bool) or not isinstance(interval, (int, float)) or not math.isfinite(interval) or interval <= 0:
             raise ValidationError("interval must be a finite positive number of seconds")
         if mode not in ("demo", "demo-db", "database", "hardware-read"):
@@ -148,6 +148,18 @@ class BridgeService:
         self.cycle_lock = Lock()
         self.jobs = {}
         self.values = {}
+        self.time_cache_file = time_cache_file
+        self.time_items = []
+        self.time_groups = ()
+        self.time_observed_at = None
+        self.time_refresh_job_id = None
+        from .time_cache import load
+        cached = load(time_cache_file)
+        if cached:
+            items, stamp = cached
+            self.time_items = public(items)
+            self.time_groups = items
+            self.time_observed_at = stamp.isoformat()
         self.stop = Event()
         self.collector = None
         self.collector_state = dict(enabled=mode != "database", interval_seconds=interval,
@@ -297,6 +309,26 @@ class BridgeService:
                     self.collector_state["successful_cycles"] += 1
             self.cycle_lock.release()
 
+    def _store_time_cache(self, items, stamp):
+        from .time_cache import save
+        try:
+            save(self.time_cache_file, items, stamp)
+        except OSError:
+            logging.getLogger(__name__).error("Time-program cache could not be persisted")
+        with self.lock:
+            self.time_groups = tuple(items)
+            self.time_items = public(items)
+            self.time_observed_at = stamp
+
+    def time_program_cache(self):
+        with self.lock:
+            stamp = self.time_observed_at
+            return dict(available=stamp is not None, items=deepcopy(self.time_items),
+                        observed_at=stamp, source=self.source,
+                        age_seconds=max(0,(datetime.now(ZONE)-datetime.fromisoformat(stamp)).total_seconds()) if stamp else None,
+                        refreshing=self.time_refresh_job_id is not None,
+                        refresh_job_id=self.time_refresh_job_id)
+
     def _job_action(self, data):
         if not self.worker:
             raise ValidationError("controller operations unavailable in database mode")
@@ -312,6 +344,35 @@ class BridgeService:
             if set(data) != {"operation"}:
                 raise ValidationError("unexpected job fields")
             return simple[operation]
+        if operation == "read_menu_value":
+            from .menu import readable_menu
+            if set(data) != {"operation", "menu_id"} or type(data["menu_id"]) is not int:
+                raise ValidationError("menu-value read requires a menu_id")
+            item = self.repository.menu_item(data["menu_id"])
+            if not item or not readable_menu(item):
+                raise ValidationError("menu item has no readable controller value")
+            kind, address = item["type"], item["address"]
+            if kind == 22:
+                return lambda: dict(value=self.client.get_firmware().version_text, unit="")
+            if kind in (3,70):
+                sensor = next((s for s in self.repository.sensors() if s["type"] == "VA" and s["address"] == address), None)
+                if not sensor:
+                    raise ValidationError("measurement metadata unavailable")
+                return lambda: dict(self.read_sensor(sensor), unit=sensor["unit"])
+            if kind in (17,18,19):
+                command = {17:Command.DIGITAL_OUT,18:Command.ANALOG_OUT,19:Command.DIGITAL_IN}[kind]
+                def read_io():
+                    value = self.client.get_io(address,command)
+                    if kind == 18:
+                        display = f"{value.state} ({'A' if value.mode == 255 else value.mode})"
+                    else:
+                        display = f"{'on' if value.state else 'off'} ({chr(value.mode)})"
+                    return dict(value=value.state,mode=value.mode,display=display,unit="")
+                return read_io
+            def read_other_parameter():
+                parameter = self.client.get_parameter(address)
+                return dict(value=parameter.value,unit=parameter.unit)
+            return read_other_parameter
         if operation in ("read_parameter", "write_parameter"):
             expected = {"operation", "menu_id"} | ({"value"} if operation == "write_parameter" else set())
             if set(data) != expected or type(data["menu_id"]) is not int or data["menu_id"] < 1:
@@ -365,6 +426,8 @@ class BridgeService:
         action = self._job_action(data)
         identifier = uuid.uuid4().hex
         with self.lock:
+            if data["operation"] == "time_ranges" and self.time_refresh_job_id:
+                return self.time_refresh_job_id
             if len(self.jobs) >= self.job_limit:
                 oldest = next((k for k, v in self.jobs.items() if v["state"] in ("completed", "failed")), None)
                 if oldest is None:
@@ -372,6 +435,8 @@ class BridgeService:
                 del self.jobs[oldest]
             self.jobs[identifier] = dict(id=identifier, state="queued", operation=data["operation"],
                                          source=self.source, created_at=datetime.now(ZONE).isoformat())
+            if data["operation"] == "time_ranges":
+                self.time_refresh_job_id = identifier
         def execute():
             with self.lock:
                 self.jobs[identifier]["state"] = "running"
@@ -381,11 +446,23 @@ class BridgeService:
         except Exception:
             with self.lock:
                 del self.jobs[identifier]
+                if self.time_refresh_job_id == identifier:
+                    self.time_refresh_job_id = None
             raise
         def complete(future):
             try:
-                result = public(future.result())
+                raw_result = future.result()
+                result = public(raw_result)
                 update = dict(state="completed", result=result)
+                if data["operation"] == "time_ranges":
+                    self._store_time_cache(raw_result, datetime.now(ZONE).isoformat())
+                elif data["operation"] == "write_time_range":
+                    with self.lock:
+                        groups, stamp = self.time_groups, self.time_observed_at
+                    if any(item.address == raw_result.current.address for item in groups):
+                        updated = tuple(raw_result.current if item.address == raw_result.current.address else item for item in groups)
+                        # Only one day was freshly verified; keep the full-list observation time.
+                        self._store_time_cache(updated, stamp)
             except Exception as exc:
                 update = dict(state="failed", error=failure(exc))
                 if self.mode == "hardware-read" and isinstance(exc, (ProtocolError, DatabaseUnavailable)):
@@ -394,6 +471,8 @@ class BridgeService:
                     self.abort(type(exc).__name__)
             with self.lock:
                 self.jobs[identifier].update(update, finished_at=datetime.now(ZONE).isoformat())
+                if self.time_refresh_job_id == identifier:
+                    self.time_refresh_job_id = None
         future.add_done_callback(complete)
         return identifier
 

@@ -121,3 +121,16 @@ Beim Speichern lädt `performTimeParStore` alle vier Intervalle aus `timeranges`
 - Polling, Listenabfragen und mehrteilige Schreibabläufe müssen über denselben seriellen Besitzer laufen.
 - API-Antworten müssen unverändert, abgewiesen, bestätigt und nach Timeout unklar unterscheidbar machen; konkrete HTTP-Statuscodes bleiben dem API-Plan vorbehalten.
 - Das moderne Menü soll Hierarchie und editierbare Werte aus derselben fachlichen API beziehen. Charts, Dashboards und sonstige Integrationen sind für diesen ersten Umfang nicht erforderlich.
+
+
+## Verbindlicher Abgleich des Python-Webmenüs
+
+| Originalpfad | Übernahme im Python-Dienst | Prüfung |
+| --- | --- | --- |
+| `performMenu`: Titel trimmen, leere Titel/Bus/Reset/Sonderadressen auslassen | `menu.visible_menu`, reine Namen und echte Menüpfade | Unit- und Browserprüfung |
+| `updateParameter`: Firmware, VA-Messwerte, DO/AO/DI, sonst Parameter | `read_menu_value`/`read_parameter` mit den passenden Lesebefehlen; sichtbare Werte automatisch nachlesen | Bytefolgen im Simulator geprüft; physische VA/Status/Firmware/Parameter im Lesetest |
+| Vier „Zeiten“-Gruppen mit Instanzoffset und Montag bis Sonntag | `time_program_catalog` aus erreichbarem DB-Menübaum; keine erfundenen Gerätenamen | Alle vier Formeln einschließlich Zirkulation-Sonntag an `DF`, vorhandene DB und Browser geprüft |
+| `timeranges` als gemeinsam sichtbarer Cache, Aktualisierung ausdrücklich | Gemeinsamer Zeitcache, automatisches Erstlesen, bewusste Aktualisierung, Erhalt des letzten erfolgreichen Standes | Zweiter Browser, Navigation, Neustart, Fehlerfall und konkurrierende Aktualisierung geprüft |
+| Originalmenü zeigt nur konfigurierte erreichbare Geräte | Zeitkatalog und Suche folgen dem vorhandenen Menübaum; Suchpfade verwenden die echten Titel | Originalmetadaten und verwaiste Fixture-Zweige geprüft |
+
+Im ausdrücklich lesenden Hardwaretest liegt der persistente Zeitcache in einer privaten Datei, weil die Originaldatenbank unverändert bleiben muss. Das ist eine bewusste Speicherabweichung des Testbetriebs, keine Änderung der p4d-Adress-/Tageszuordnung. Die Original-`timeranges`-Tabelle wird dabei weder initialisiert noch beschrieben. Reale Schreibabläufe bleiben ein gesonderter nächster Schritt; aktuelle Änderungen aktivieren keine Heizungs-Schreibrechte.

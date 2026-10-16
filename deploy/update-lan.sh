@@ -1,5 +1,5 @@
 #!/bin/bash
-# Apply the reviewed LAN-access hotfix to the existing 0.3.0 test installation.
+# Apply the reviewed application/web update to the existing 0.3.0 test installation.
 # Does not stop p4d or start the hardware test.
 set -euo pipefail
 umask 077

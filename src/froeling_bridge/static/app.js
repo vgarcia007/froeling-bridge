@@ -12,6 +12,8 @@ const state = {
   busy: false,
   pending: null,
   times: [],
+  timeCatalog: [],
+  timeGroupFilter: null,
 };
 const editableTypes = new Set([7, 8, 10, 50, 57, 64]);
 const views = {
@@ -172,18 +174,18 @@ async function readMenuValues(items, generation) {
   if (!state.health?.capabilities.controller_read) return;
   for (const item of items) {
     if (generation !== state.generation) return;
-    if (item.child || !editableTypes.has(item.type)) continue;
+    if (item.child || !item.readable) continue;
     const node = document.querySelector(`[data-value-id="${item.id}"]`);
     if (!node) continue;
     try {
       const result = await job(
-        { operation: "read_parameter", menu_id: item.id },
+        { operation: editableTypes.has(item.type) ? "read_parameter" : "read_menu_value", menu_id: item.id },
         () => {},
         () => generation === state.generation
       );
       if (!result || generation !== state.generation) return;
       node.replaceChildren(
-        element("strong", parameterValue(item, result)),
+        element("strong", editableTypes.has(item.type) ? parameterValue(item, result) : result.display || format(result.value, result.unit)),
         element("small", "Frisch gelesen")
       );
     } catch (error) {
@@ -221,14 +223,9 @@ function renderRows(items, search = false) {
       element("p", item.title || "Unbenannter Eintrag", "row-title"),
       element(
         "span",
-        group
-          ? "Untermenü"
-          : `Adresse 0x${Number(item.address)
-              .toString(16)
-              .toUpperCase()
-              .padStart(4, "0")} · Typ 0x${Number(item.type)
-              .toString(16)
-              .toUpperCase()}`,
+        search && item.breadcrumbs?.length
+          ? item.breadcrumbs.map((crumb) => crumb.title).join(" › ")
+          : group ? "Untermenü" : item.unit || "",
         "row-subtitle"
       )
     );
@@ -260,14 +257,13 @@ function renderRows(items, search = false) {
     );
     button.type = "button";
     button.addEventListener("click", async () => {
+      if (item.time_program) {
+        switchView("times", item.id);
+        return;
+      }
       if (group) {
         if (search) {
-          state.crumbs = [{ parent: 1, title: "Heizung" }];
-          if (item.parent !== 1)
-            state.crumbs.push({
-              parent: item.parent,
-              title: "Ebene " + item.parent,
-            });
+          state.crumbs = [{ parent: 1, title: "Heizung" }, ...(item.breadcrumbs || [])];
         }
         state.crumbs.push({
           parent: item.child,
@@ -334,9 +330,15 @@ async function openParameter(item, rowValueNode) {
   $("editor").showModal();
   try {
     if (!editableTypes.has(item.type)) {
-      $("editor-description").textContent =
-        "Dieser Menütyp ist nicht als veränderbarer Parameter bekannt. Gespeicherter Wert: " +
-        rowValue(item);
+      if (item.readable && state.health.capabilities.controller_read) {
+        const result = await job({ operation: "read_menu_value", menu_id: item.id });
+        if (generation !== state.editorGeneration) return;
+        const display = result.display || format(result.value, result.unit);
+        $("editor-description").textContent = "Aktuell gelesen: " + display;
+        rowValueNode.replaceChildren(element("strong",display),element("small","Frisch gelesen"));
+      } else {
+        $("editor-description").textContent = readOnlyLabel() + " Gespeicherter Wert: " + rowValue(item);
+      }
       return;
     }
     if (!state.health.capabilities.controller_read) {
@@ -570,6 +572,26 @@ async function loadCollector() {
     if (state.view === "collector") notice(error.message, true);
   }
 }
+async function loadCachedTimes(autoRead = true) {
+  const generation = state.generation;
+  try {
+    const data = await api("/time-programs");
+    if (state.view !== "times" || generation !== state.generation) return;
+    state.timeCatalog = data.programs;
+    if (data.cache.available) {
+      state.times = data.cache.items;
+      renderTimes();
+      $("time-cache-status").textContent = "Zuletzt gelesen: " + stamp(data.cache.observed_at);
+    } else if (autoRead && state.health?.capabilities.controller_read) {
+      $("time-cache-status").textContent = "Zeitprogramme werden erstmals gelesen …";
+      await loadTimes();
+    } else {
+      renderTimes();
+    }
+  } catch (error) {
+    if (state.view === "times") notice(error.message, true);
+  }
+}
 async function loadTimes() {
   if (!state.health?.capabilities.controller_read) {
     notice(readOnlyLabel());
@@ -579,6 +601,10 @@ async function loadTimes() {
   button.disabled = true;
   const generation = state.generation;
   try {
+    if (!state.timeCatalog.length) {
+      const data = await api("/time-programs");
+      state.timeCatalog = data.programs;
+    }
     const times = await job(
       { operation: "time_ranges" },
       (text) => notice(text),
@@ -588,6 +614,7 @@ async function loadTimes() {
     state.times = times;
     renderTimes();
     notice("Zeitprogramme frisch gelesen.");
+    await loadCachedTimes(false);
   } catch (error) {
     notice(error.message, true);
   } finally {
@@ -597,16 +624,21 @@ async function loadTimes() {
 function renderTimes() {
   const container = $("time-programs");
   container.replaceChildren();
-  for (const program of state.times) {
-    if (program.address === 223) continue;
+  const byAddress = new Map(state.times.map((program) => [program.address, program]));
+  const devices = new Map();
+  for (const label of state.timeCatalog) {
+    if (state.timeGroupFilter !== null && label.menu_id !== state.timeGroupFilter) continue;
+    const program = byAddress.get(label.address);
+    if (!program) continue;
+    let device = devices.get(label.menu_id);
+    if (!device) {
+      device = element("section", "", "time-device");
+      device.append(element("h2", label.device), element("p", label.path.join(" › "), "row-subtitle"));
+      devices.set(label.menu_id, device);
+      container.append(device);
+    }
     const section = element("section", "", "time-program");
-    section.append(
-      element(
-        "h2",
-        "Adresse 0x" +
-          program.address.toString(16).toUpperCase().padStart(2, "0")
-      )
-    );
+    section.append(element("h3", label.weekday));
     program.ranges.forEach((interval, index) => {
       const form = element("form", "", "interval-row");
       const prefix = `time-${program.address}-${index}`;
@@ -679,13 +711,14 @@ function renderTimes() {
       });
       section.append(form);
     });
-    container.append(section);
+    device.append(section);
   }
   if (!container.children.length)
     container.append(element("p", "Keine Zeitprogramme gefunden.", "empty"));
 }
-function switchView(view) {
+function switchView(view, timeGroupFilter = null) {
   state.view = view;
+  if (view === "times") state.timeGroupFilter = timeGroupFilter;
   state.generation++;
   notice("");
   for (const [key, description] of Object.entries(views)) {
@@ -697,8 +730,10 @@ function switchView(view) {
   if (view === "menu") loadMenu();
   if (view === "values") loadValues();
   if (view === "collector") loadCollector();
-  if (view === "times")
+  if (view === "times") {
     $("load-times").disabled = !state.health?.capabilities.controller_read;
+    loadCachedTimes();
+  }
 }
 for (const button of document.querySelectorAll("[data-view]"))
   button.addEventListener("click", () => switchView(button.dataset.view));
@@ -706,7 +741,7 @@ $("search-form").addEventListener("submit", (event) => {
   event.preventDefault();
   loadMenu(state.parent, $("search").value.trim());
 });
-$("refresh").addEventListener("click", () => switchView(state.view));
+$("refresh").addEventListener("click", () => state.view === "times" ? loadTimes() : switchView(state.view));
 $("load-times").addEventListener("click", loadTimes);
 async function healthLoop() {
   let delay = 4000;

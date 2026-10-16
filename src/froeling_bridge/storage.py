@@ -105,11 +105,17 @@ class MemoryRepository:
     def sensors(self):
         return demo_sensors()
 
+    def time_programs(self):
+        from .menu import demo_time_program_catalog
+        return demo_time_program_catalog()
+
     def menu(self, parent):
         return [m for m in demo_menu() if m["parent"] == parent]
 
     def search_menu(self, query):
-        return [m for m in demo_menu() if query.casefold() in m["title"].casefold()][:100]
+        from .menu import menu_paths, named_search
+        rows = demo_menu()
+        return named_search([m for m in rows if query.casefold() in m["title"].casefold()][:100],menu_paths(rows))
 
     def menu_item(self, item_id):
         return next((m for m in demo_menu() if m["id"] == item_id), None)
@@ -202,6 +208,18 @@ class ReadOnlyDatabase:
                 raise ValidationError("sensor catalogue exceeds 4096 entries")
             return rows
 
+    def menu_catalog(self):
+        with self.transaction() as cursor:
+            cursor.execute("SELECT id,parent,child,type,address,title FROM menu ORDER BY id LIMIT 4097")
+            rows = cursor.fetchall()
+            if len(rows) > 4096:
+                raise ValidationError("menu catalogue exceeds 4096 entries")
+        return rows
+
+    def time_programs(self):
+        from .menu import time_program_catalog
+        return time_program_catalog(self.menu_catalog())
+
     def menu(self, parent):
         with self.transaction() as cursor:
             cursor.execute("SELECT id,parent,child,type,address,title,value,unit,digits,"
@@ -213,11 +231,15 @@ class ReadOnlyDatabase:
             return rows
 
     def search_menu(self, query):
+        from .menu import menu_paths,named_search
+        paths = menu_paths(self.menu_catalog())
         escaped = query.replace("!", "!!").replace("%", "!%").replace("_", "!_")
+        placeholders = ",".join(["%s"]*len(paths))
         with self.transaction() as cursor:
             cursor.execute("SELECT id,parent,child,type,address,title,value FROM menu "
-                           "WHERE title LIKE %s ESCAPE '!' ORDER BY id LIMIT 100", ("%" + escaped + "%",))
-            return cursor.fetchall()
+                           "WHERE title LIKE %s ESCAPE '!' AND parent IN ("+placeholders+") ORDER BY id LIMIT 100",
+                           ("%"+escaped+"%",*paths))
+            return named_search(cursor.fetchall(),paths)
 
     def menu_item(self, item_id):
         with self.transaction() as cursor:
@@ -287,6 +309,9 @@ class HardwareTestRepository:
 
     def sensors(self):
         return self.original.sensors()
+
+    def time_programs(self):
+        return self.original.time_programs()
 
     def menu(self, parent):
         return self.original.menu(parent)

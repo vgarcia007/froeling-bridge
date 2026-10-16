@@ -11,7 +11,7 @@ operator_home=$(getent passwd "$SUDO_USER" | cut -d: -f6)
 # Create a fresh root-owned file, then publish it atomically for the SSH account.
 archive=$(mktemp "$operator_home/.froeling-traces.XXXXXX")
 trap 'rm -f -- "$archive"' EXIT
-tar -C /var/lib/froeling-bridge-test -czf "$archive" .
+tar -C /var/lib/froeling-bridge-test --exclude='time-programs-cache.json' --exclude='.time-cache-*' -czf "$archive" .
 chmod 0600 "$archive"
 chown "$SUDO_USER" "$archive"
 mv -fT -- "$archive" "$operator_home/froeling-traces.private.tgz"

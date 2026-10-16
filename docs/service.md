@@ -132,3 +132,8 @@ docker stop froeling-bridge-test-db
 ```
 
 Reale Schreibmitschnitte sind zusätzliche spätere Validierung. Der Quellcode von p4d reicht als Grundlage für diese Implementierung; die kaputte alte Weboberfläche blockiert sie nicht. USB-Transport und Browsermenü sind nun implementiert; der tatsächliche Hardwaretest und die spätere Aggregation/Aufbewahrung bleiben offen.
+
+
+Zeitprogramme werden über `/api/v1/time-programs` mit den Gerätenamen und Wochentagen aus dem vorhandenen Menü angeboten. Die Adresszuordnung folgt p4d. Die Oberfläche lädt beim Öffnen den gemeinsamen Cache; nur ein leerer Cache löst automatisch eine vollständige Heizungsabfrage aus. „Aktualisieren“ liest bewusst neu. Erfolgreiche vollständige Listen ersetzen den Cache; fehlgeschlagene Aktualisierungen erhalten den letzten erfolgreichen Stand. Im Hardwaretest liegt er privat unter `/var/lib/froeling-bridge-test/time-programs-cache.json` und bleibt über Dienstneustarts erhalten. Die Originaldatenbank wird dafür nicht verändert. Die API liefert Lesezeitpunkt und Alter; parallele Aktualisierungen teilen einen Auftrag.
+
+Menüwerte werden wie im Original nach Typ gelesen: Messwerte über `30`, Ein-/Ausgänge über `44`/`45`/`46`, Firmware über `41`, Parameter über `55`. `read_menu_value` adressiert eine bekannte Menü-ID für reine Wertanzeigen; `read_parameter` bleibt für Parametermetadaten. Suchergebnisse nutzen erreichbare Menüpfade und deren Namen. Rohadressen bleiben in der API erhalten, werden im normalen Menü aber nicht als Ersatz für Namen angezeigt.

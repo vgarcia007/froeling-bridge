@@ -5,6 +5,7 @@ import json
 
 from .errors import ReadOnlyViolation, ValidationError
 from .messages import ParameterType
+from .menu import visible_menu, demo_time_program_catalog
 from .service import QueueBusy, ServiceStopped, public
 from .storage import DatabaseUnavailable, ZONE
 from . import __version__
@@ -97,7 +98,7 @@ def create_app(service):
         parent = integer("parent", 1)
         if not 0 <= parent <= 65535:
             raise ValidationError("invalid menu parent")
-        items = service.repository.menu(parent)
+        items = visible_menu(service.repository.menu(parent))
         for item in items:
             item["editable"] = service.can_write and item["type"] in set(ParameterType)
         return response(dict(source=service.repository.source, parent=parent, items=items,
@@ -109,10 +110,19 @@ def create_app(service):
         query = request.args.get("q", "").strip()
         if not 1 <= len(query) <= 100:
             raise ValidationError("search query must contain 1..100 characters")
-        items = service.repository.search_menu(query)
+        items = visible_menu(service.repository.search_menu(query))
         for item in items:
             item["editable"] = service.can_write and item["type"] in set(ParameterType)
         return response(dict(source=service.repository.source, items=items))
+
+    @app.get(prefix + "/time-programs")
+    def time_programs():
+        args_only()
+        programs = service.repository.time_programs()
+        if not programs and service.mode in ("demo", "demo-db"):
+            programs = demo_time_program_catalog()
+        return response(dict(source=service.repository.source, programs=programs,
+                             cache=service.time_program_cache()))
 
     @app.get(prefix + "/sensors")
     def sensors():

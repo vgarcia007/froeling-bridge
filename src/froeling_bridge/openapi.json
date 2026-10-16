@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Fr\u00f6ling Bridge local prototype API",
+    "title": "Fröling Bridge local prototype API",
     "version": "0.3.0",
     "description": "Local web menu, simulator, read-only p4d database and explicitly gated hardware-read test. Heating writes are only enabled in simulator modes; jobs are never replayed."
   },
@@ -494,6 +494,43 @@
           }
         }
       }
+    },
+    "/api/v1/time-programs": {
+      "get": {
+        "summary": "Named time programs and last successful cached controller read",
+        "responses": {
+          "200": {
+            "description": "Menu-derived device/weekday labels plus cache values, observation time and refresh state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "source",
+                    "programs",
+                    "cache"
+                  ],
+                  "properties": {
+                    "source": {
+                      "type": "string"
+                    },
+                    "programs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "cache": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "time_programs"
+      }
     }
   },
   "components": {
@@ -705,6 +742,26 @@
               "index",
               "start",
               "end"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "type": "string",
+                "enum": [
+                  "read_menu_value"
+                ]
+              },
+              "menu_id": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "operation",
+              "menu_id"
             ],
             "additionalProperties": false
           }

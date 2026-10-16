@@ -125,3 +125,9 @@ Die erste Helferfassung verwendete bei fuser die nicht unterstützte Option `--`
 ## Korrektur der Zeitprogrammabfrage
 
 Der echte Mitschnitt belegte `43 -> 42` als Antwortzuordnung für die Folgeabfrage. Das vorbereitete Update wird auf dem Zielhost über `sudo bash ~/fix-times.sh` angewendet. Es installiert Wheel, das explizite Profil unter `/etc/froeling-bridge-test/heating-reply-profile.json` und die passende Hardwaredienstdefinition. Der Lesepfad verwendet den ursprünglichen p4d-Check und ersetzt wiederholte Zeitgruppen nach Adresse. p4d bleibt während des Updates aktiv; ein neuer Hardwaretest wird separat über den Helfer gestartet. Die vollständige Zeitprogrammliste ist erst im folgenden Test zu bestätigen.
+
+## Bestätigter Teststand und Menüupdate
+
+Ein vollständiges 15-Minuten-Fenster wurde am Zielhost erfolgreich durchgeführt: 15 fehlerfreie Sammeldurchläufe/195 Testmesspunkte, 224 gelesene Zeitgruppen, funktionierende Parameter-/Status-/Firmwareabfragen und automatische Rückkehr mit neuer Originalaufzeichnung. Die Laufzeitbegrenzung kann den Testdienst anschließend als failed/timeout anzeigen; maßgeblich sind der erfolgreiche Rückkehrzustand und die Originalaufzeichnung.
+
+Das anschließend vorbereitete Menüupdate nutzt die vorhandenen Gerätenamen und Wochentage, zeigt den gemeinsamen persistenten Zeitcache automatisch und liest nur bei leerem Cache oder bewusster Aktualisierung neu. Kurzer Installationsaufruf: `sudo bash ~/update-bridge.sh`. Er startet keinen Hardwaretest. Erst nach Anwendung lässt sich die aktualisierte Echtansicht erneut über den bekannten Helfer starten. Port 8000 bleibt die Simulator-Vorschau; Port 8001 ist nur während des Lesefensters aktiv. Reale Schreibrechte werden damit nicht aktiviert.

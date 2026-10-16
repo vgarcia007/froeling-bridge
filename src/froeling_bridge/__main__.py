@@ -146,7 +146,9 @@ def run_service(args):
                 raise ValidationError("database mode requires --config")
             config = DatabaseConfig.load(args.config)
             repository = TestDatabase(config) if args.mode == "demo-db" else ReadOnlyDatabase(config)
-        service = BridgeService(repository, args.mode, args.interval, client=client)
+        from pathlib import Path
+        time_cache_file = Path(args.trace_file).parent / "time-programs-cache.json" if args.mode == "hardware-read" else None
+        service = BridgeService(repository, args.mode, args.interval, client=client, time_cache_file=time_cache_file)
         service.read_connection_verified = args.mode == "hardware-read"
         try:
             print(f"Fröling Bridge: {args.mode} on http://{args.host}:{args.port}", flush=True)
