@@ -144,7 +144,8 @@ class System:
     def device_free(self):
         if not os.path.exists(DEVICE):
             return True  # No new open can compete if the adapter was unplugged.
-        result = self.run(["/usr/bin/fuser", "--", DEVICE], accepted=(0, 1))
+        binary = "/usr/bin/fuser" if os.path.isfile("/usr/bin/fuser") else "/bin/fuser"
+        result = self.run([binary, DEVICE], accepted=(0, 1))
         if result.returncode == 1 and result.stderr.strip():
             raise TestControlError("could not determine device holders")
         return result.returncode == 1
@@ -160,6 +161,9 @@ class System:
             or not stat.S_ISCHR(os.stat(DEVICE).st_mode)
         ):
             raise TestControlError("hardware test already running or device missing")
+        # Validate the real process-inspection command while p4d still runs.
+        # The fixed absolute device path cannot be interpreted as an option.
+        self.device_free()
         with socket.socket() as sock:
             try:
                 sock.bind(("0.0.0.0", 8001))

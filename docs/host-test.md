@@ -117,3 +117,7 @@ sudo .venv/bin/python -I docs/tools/verify_host_rollback.py --run-local-spares
 Er startet ausschließlich eindeutig benannte `/bin/sleep`-Ersatzdienste, prüft Rückkehr durch Timer und nach SIGKILL und entfernt seine Einheiten wieder. Nicht mit dem echten Hardwaretest verwechseln.
 
 Bereits lokal geprüft: Browserabläufe in Chromium inklusive mobiler Darstellung, Protokoll-/Client-/HTTP-Schreibsperren, Pseudo-Terminal mit echten seriellen Bytes, unabhängige Rückkehr mit echten systemd-Ersatzdiensten sowie Sammlung in separater MariaDB bei unveränderter Metadaten-Quelldatenbank. Der tatsächliche Test am Zielhost steht bis zur administrativen Einrichtung noch aus.
+
+## Reparatur des ersten abgebrochenen Tests
+
+Die erste Helferfassung verwendete bei fuser die nicht unterstützte Option `--`. Das konnte sowohl den Teststart nach p4d-Stop als auch die Rückkehr blockieren. Die korrigierte Fassung prüft den tatsächlichen fuser-Aufruf bereits vor dem Stoppen. Für einen bereits betroffenen Host liegt im aktualisierten privaten Paket `repair-test.sh`: `sudo bash ~/froeling-bridge-test-0.3.0/repair-test.sh`. Sie prüft die Portbelegung, startet zuerst p4d, installiert das korrigierte Wheel und schließt den alten Fensterzustand über rollback. Sie startet keinen neuen Hardwaretest. Bis zur bestätigten Reparatur ist die Rückkehr auf dem betroffenen Host nicht gewährleistet.

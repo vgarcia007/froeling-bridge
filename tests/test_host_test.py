@@ -168,3 +168,18 @@ class DockerClientTests(unittest.TestCase):
                 "froeling-bridge-test-db",
             ]
         )
+
+
+@unittest.skipUnless(
+    any(Path(p).is_file() for p in ("/usr/bin/fuser", "/bin/fuser")),
+    "requires Linux fuser",
+)
+class RealDeviceHolderTests(unittest.TestCase):
+    def test_real_fuser_distinguishes_held_and_released_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "device"
+            path.touch()
+            with patch("froeling_bridge.host_test.DEVICE", str(path)):
+                with path.open("rb"):
+                    self.assertFalse(System().device_free())
+                self.assertTrue(System().device_free())

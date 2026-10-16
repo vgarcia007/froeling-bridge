@@ -85,3 +85,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 
 - Benutzer verlangt direkten Zugriff über die Server-IP. Webmenü/API standardmäßig 0.0.0.0, Vorschau 8000, Hardwaretest 8001; SSH-Tunnel ist optional. CLI --host erlaubt abweichende Bindung. Testdatenbank bleibt Loopback.
 - Administrative Arbeiten erfordern vorhandene Autorisierung und passende Rechte; die konkrete Zugriffslage bleibt privat. Notwendige Einrichtungsschritte als prüfbare Aktion vorbereiten.
+
+## 16.10.2026 — Prozessprüfung vor Abschalten
+
+- Reale Prozessinspektion muss bereits vor p4d-Stop funktionieren. Fuser-Aufruf ohne nicht unterstütztes „--“ bei festem absolutem Pfad.
+- Regression prüft echten fuser-Prozess mit gehaltenem/freiem temporärem Objekt. Simulierte Koordinator-/Ersatzdiensttests allein belegen nicht die Kompatibilität externer Kommandos auf dem Zielhost.
+- Nach fehlgeschlagener Rückkehr Originalbetrieb zuerst wiederherstellen und Aufzeichnung bestätigen; kein weiterer Hardwaretest vor Anwendung der Korrektur.
