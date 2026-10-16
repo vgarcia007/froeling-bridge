@@ -20,6 +20,15 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Aktuelle Freigabe: produktive Aufzeichnung und Dauerbetrieb
+
+Der Benutzer hat nach dem erfolgreichen Lesefenster ausdrücklich bestätigt: „ja wir schreiben nun auch un lassen es laufen“. Dies erweitert die bisherigen Grenzen ausschließlich wie folgt:
+
+- Dauerbetrieb mit exklusivem Heizungs-Lesezugriff und Messwertaufzeichnung in der bestehenden p4d-Datenbank ist autorisiert. Nur `samples` und `peaks` über den geprüften kompatiblen Recorder fortführen; Metadaten und Historie ansonsten lesend. Keine Schemaänderung, Initialisierung, Löschung oder neue Aggregation.
+- Umschaltung einschließlich p4d-Stop/Autostartwechsel, neuem Bridge-Autostart und Rückfall zu p4d ist autorisiert. Originalinstallation erhalten. Eigener Produktionsdienst ohne 15-Minuten-Limit; siehe docs/production.md.
+- Heizungsparameter schreiben bleibt ausdrücklich gesperrt. Testbetrieb/Bestandsansicht behalten ihre bisherigen Schreibgrenzen. Historische Nur-Lesen-Angaben weiter unten beschreiben die frühere Freigabe und werden durch diesen Abschnitt nur im genannten Umfang ersetzt.
+- Administrative Zugriffslage privat dokumentieren; erforderliche Rechte vor freigegebenen Aktionen prüfen. Keine zusätzlichen Heizungs-Schreibrechte daraus ableiten.
+
 ## Live-Datenbank: ausdrücklich nur lesen
 
 Der Benutzer hat am 16.10.2026 Zugang zur laufenden Original-p4d-Datenbank über die lokale Datei `live-db.con` gegeben, ausschließlich zum Umsehen.

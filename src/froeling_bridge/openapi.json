@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fröling Bridge local prototype API",
-    "version": "0.3.0",
-    "description": "Local web menu, simulator, read-only p4d database and explicitly gated hardware-read test. Heating writes are only enabled in simulator modes; jobs are never replayed."
+    "version": "0.4.0",
+    "description": "Local web menu, simulator, read-only p4d database and explicit hardware-read test and hardware-live recording. Heating writes are only enabled in simulator modes; jobs are never replayed."
   },
   "servers": [
     {
@@ -431,7 +431,7 @@
             }
           },
           "403": {
-            "description": "Heating writes are disabled in hardware-read mode",
+            "description": "Heating writes are disabled in hardware modes",
             "content": {
               "application/json": {
                 "schema": {
@@ -849,7 +849,8 @@
               "demo",
               "demo-db",
               "database",
-              "hardware-read"
+              "hardware-read",
+              "hardware-live"
             ]
           },
           "hardware_verified": {

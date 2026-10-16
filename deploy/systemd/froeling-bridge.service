@@ -1,0 +1,29 @@
+[Unit]
+Description=Froeling Bridge continuous p4d-compatible recording
+After=network-online.target p4d.service froeling-bridge-hardware-test.service
+Wants=network-online.target
+Conflicts=p4d.service froeling-bridge-hardware-test.service froeling-bridge-preview.service
+OnFailure=froeling-bridge-fallback.service
+
+[Service]
+Type=exec
+User=froeling-bridge-test
+Group=froeling-bridge-test
+SupplementaryGroups=dialout
+ExecStart=/opt/froeling-bridge/0.4.0/venv/bin/python -I -m froeling_bridge serve --mode hardware-live --config /etc/froeling-bridge-test/source-db.json --device /dev/ttyUSB0 --reply-profile /etc/froeling-bridge-test/heating-reply-profile.json --time-cache-file /var/lib/froeling-bridge/time-programs-cache.json --host 0.0.0.0 --port 8000
+WorkingDirectory=/opt/froeling-bridge/0.4.0
+StateDirectory=froeling-bridge
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+DevicePolicy=closed
+DeviceAllow=/dev/ttyUSB0 rw
+Restart=no
+TimeoutStopSec=25
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

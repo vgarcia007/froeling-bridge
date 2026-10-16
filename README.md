@@ -16,9 +16,11 @@ Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, 
 
 ## Projektstand
 
-Version 0.3.0 enthält ein modernes Webmenü, den Python-Protokollkern, einen Simulator, eine HTTP-API und einen kontinuierlichen Datensammler. Dieser liest regelmäßig simulierte Heizungswerte und speichert sie auf Wunsch im p4d-0.10.2-Schema einer separaten Test-MariaDB. Eine bestehende p4d-Datenbank kann ausschließlich lesend angezeigt werden. Parameter- und Zeitprogrammänderungen werden am Simulator durch Nachlesen bestätigt. Ein exklusiver Linux-TTY-Transport für einen ausdrücklich lesenden Hardwaretest und ein vorbereiteter systemd-Testablauf mit Rückkehr zu p4d sind ebenfalls vorhanden. Der reale Heizungsbetrieb ist noch nicht geprüft.
+Version 0.4.0 enthält das moderne Webmenü mit echten Menüpfaden, benannten Zeitprogrammen und gemeinsamem persistentem Cache, eine HTTP-API und kontinuierliche Messwertaufzeichnung. Der Modus `hardware-live` liest die reale Heizung und führt `samples` und `peaks` in der bestehenden p4d-Datenbank fort. Ein eigener systemd-Dienst übernimmt Dauerbetrieb und Autostart; bei Fehlern wird Original-p4d wiederhergestellt. Die [Dauerbetriebsanleitung](docs/production.md) beschreibt die Umschaltung auf einem bereits vorbereiteten Host.
 
-Die bisherigen Protokollprüfungen erfolgen offline anhand des Referenzcodes und synthetischer Fixtures. Ein ausschließlich lesender [Abgleich mit dem bestehenden Datenbankschema](docs/live-database.md) und dem [installierten p4d-Stand](docs/live-server.md) ist dokumentiert. Das Simulationsprofil der Antwortcodes und die Schreibsemantik sind noch nicht an der realen Heizung bestätigt.
+Ein vollständiger 15-Minuten-Lesetest an der realen Heizung war erfolgreich: 15 Sammeldurchläufe, 195 Testmesspunkte, komplette Zeitprogrammliste und automatische Rückkehr zu p4d. Die produktive Installation wird gesondert aktiviert und bestätigt; den tatsächlichen Betriebsstand dokumentiert [project-context.md](docs/project-context.md).
+
+Heizungsparameter schreiben bleibt im Hardwarebetrieb gesperrt. Parameter- und Zeitprogrammänderungen sind bislang nur am Simulator durch Nachlesen geprüft. Simulator und begrenzter Hardwaretest mit separater Test-MariaDB bleiben verfügbar; `database` bleibt eine reine Bestandsansicht. Grundlage sind der dokumentierte [Schemaabgleich](docs/live-database.md) und [installierte p4d-Stand](docs/live-server.md).
 
 ## Installieren und ausprobieren
 

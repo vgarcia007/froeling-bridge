@@ -1,0 +1,10 @@
+[Unit]
+Description=Restore original p4d after Froeling Bridge failure
+After=froeling-bridge.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/froeling-bridge-live rollback
+TimeoutStartSec=180
+Restart=on-failure
+RestartSec=5

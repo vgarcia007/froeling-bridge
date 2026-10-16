@@ -1,6 +1,6 @@
 """p4d 0.10.2 repositories. Connections are private to each operation.
 
-Only TestDatabase can write, and only to an explicitly named loopback test DB.
+TestDatabase writes only to loopback test DBs; P4dDatabase requires explicit live-write authorization.
 No repository creates or migrates tables on startup.
 """
 from contextlib import contextmanager
@@ -171,7 +171,7 @@ class ReadOnlyDatabase:
 
     @contextmanager
     def transaction(self, writable=False):
-        if writable and not isinstance(self, TestDatabase):
+        if writable and not isinstance(self, (TestDatabase, P4dDatabase)):
             raise ValidationError("repository is read-only")
         connection = None
         try:
@@ -260,12 +260,8 @@ class ReadOnlyDatabase:
             return rows
 
 
-class TestDatabase(ReadOnlyDatabase):
-    source = "simulator-test-database"
-
-    def __init__(self, config):
-        config.require_test()
-        super().__init__(config)
+class SampleWriter:
+    """Shared p4d-compatible samples/peaks transaction; no schema operations."""
 
     def store_cycle(self, samples, when, stamp):
         rows = prepare_samples(samples, when, stamp)
@@ -284,6 +280,47 @@ class TestDatabase(ReadOnlyDatabase):
                     "maxv=GREATEST(COALESCE(maxv,VALUES(maxv)),VALUES(maxv))",
                     (row["address"], row["type"], stamp, stamp, row["value"], row["value"]))
         return len(rows)
+
+
+class TestDatabase(SampleWriter, ReadOnlyDatabase):
+    source = "simulator-test-database"
+
+    def __init__(self, config):
+        config.require_test()
+        super().__init__(config)
+
+
+
+class P4dDatabase(SampleWriter, ReadOnlyDatabase):
+    """Explicit production recorder. Metadata remains read-only; no migration."""
+    source = "heating-p4d-database"
+
+    def __init__(self, config, *, allow_recording=False):
+        if allow_recording is not True:
+            raise ValidationError("live recording requires explicit authorization")
+        super().__init__(config)
+
+    def validate_schema(self):
+        required = {
+            "samples": {"address", "type", "aggregate", "time", "inssp", "updsp", "value", "text", "samples"},
+            "peaks": {"address", "type", "inssp", "updsp", "minv", "maxv"},
+        }
+        with self.transaction() as cursor:
+            for table, columns in required.items():
+                cursor.execute("SHOW COLUMNS FROM " + table)
+                if not columns <= {row["Field"] for row in cursor.fetchall()}:
+                    raise ValidationError("incompatible p4d recorder columns")
+                cursor.execute("SHOW INDEX FROM " + table)
+                primary = sorted((row["Seq_in_index"], row["Column_name"]) for row in cursor.fetchall() if row["Key_name"] == "PRIMARY")
+                expected = ["address", "type", "aggregate", "time"] if table == "samples" else ["address", "type"]
+                if [name for _, name in primary] != expected:
+                    raise ValidationError("incompatible p4d recorder primary key")
+            cursor.execute("SELECT TABLE_NAME,ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=%s AND TABLE_NAME IN ('samples','peaks')", (self.config.database,))
+            engines = {row["TABLE_NAME"]: row["ENGINE"] for row in cursor.fetchall()}
+            if set(engines) != set(required) or any(value != "InnoDB" for value in engines.values()):
+                raise ValidationError("recording requires transactional p4d tables")
+        self.sensors()
+        self.menu(1)
 
 
 class HardwareTestRepository:

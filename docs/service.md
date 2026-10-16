@@ -1,6 +1,6 @@
-# API und kontinuierlicher Datensammler (0.3.0)
+# API und kontinuierlicher Datensammler (0.4.0)
 
-Der Dienst sammelt regelmäßig Werte vom **Simulator** und bietet eine lokale HTTP-API. Mit einer separaten Test-MariaDB werden diese Werte im bekannten p4d-0.10.2-Schema gespeichert. Die Bestandsansicht kann eine bestehende Datenbank ausschließlich lesen. Das [Webmenü und der vorbereitete lesende Hardwaretest](host-test.md) sind inzwischen implementiert. Eine produktive Heizungsanbindung ist noch nicht geprüft.
+Der Dienst sammelt regelmäßig Werte vom Simulator oder der realen Heizung und bietet das Webmenü und die HTTP-API. `demo-db` zeichnet ausschließlich in separater Test-MariaDB auf, `database` zeigt den Bestand ausschließlich lesend. `hardware-read` nutzt den begrenzten Lesetest mit separater Aufzeichnung; `hardware-live` führt mit ausdrücklicher Freigabe die bestehende p4d-Datenbank fort. Siehe [Dauerbetrieb und Rückkehr](production.md). Heizungsparameter schreiben bleibt auf Simulator-Modi begrenzt.
 
 ## Installation und Start
 
@@ -20,6 +20,8 @@ Der Dienst ist über `http://SERVER-IP:8000` im LAN erreichbar und bindet standa
 | `demo` (Default) | fiktive Simulator-Metadaten | flüchtiger Speicher, höchstens 10.000 Messpunkte | Simulator |
 | `demo-db --config DATEI` | separate lokale Test-MariaDB | `samples` und `peaks` der Test-DB | Simulator |
 | `database --config DATEI` | bestehende p4d-MariaDB | keine; ausschließlich lesend | keine |
+| `hardware-read` | echte Heizung, Originalmetadaten | separate Test-MariaDB | ausschließlich lesen |
+| `hardware-live` | echte Heizung, Originalmetadaten | vorhandene p4d-DB: `samples`, `peaks` | ausschließlich lesen |
 
 Die Modi vermischen keine Bestandsmenüadressen mit simulierten Heizungswerten. Verbindungsdateien werden niemals automatisch entdeckt. Die vorhandenen `live-*.con` werden weder eingelesen noch konvertiert.
 
@@ -54,7 +56,7 @@ Nach dem Start eine **lokale**, ignorierte Datei `.local/test-database.json` mit
 
 `init-test-db` legt ausdrücklich eine neue Testdatenbank mit `valuefacts`, `menu`, `samples`, `peaks` und rein synthetischen Metadaten an. Es lehnt vorhandene Tabellen ab. DDL ist in MariaDB nicht transaktional: Scheitert eine Initialisierung, kann eine unvollständige Testdatenbank verbleiben; der Dienst repariert sie nicht automatisch.
 
-Schreiber und Initialisierung akzeptieren nur Loopback-Hosts und Namen `froeling_bridge_test_<name>` mit Kleinbuchstaben/Ziffern/Unterstrichen. Diese Begrenzung ist für den lokalen Prototyp bestimmt. Keine Produktivdaten unter einem solchen Testnamen bereitstellen. Es gibt keine automatische Migration, Discovery-Speicherung, Aggregation oder Löschung bestehender Historie.
+Testschreiber und Testinitialisierung akzeptieren nur Loopback-Hosts und Namen `froeling_bridge_test_<name>` mit Kleinbuchstaben/Ziffern/Unterstrichen. Diese Begrenzung ist für den lokalen Prototyp bestimmt. Keine Produktivdaten unter einem solchen Testnamen bereitstellen. Es gibt keine automatische Migration, Discovery-Speicherung, Aggregation oder Löschung bestehender Historie.
 
 Die Bestandsansicht verwendet dieselben JSON-Felder, darf aber einen anderen Host/DB-Namen lesen:
 

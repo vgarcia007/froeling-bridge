@@ -126,12 +126,12 @@ class BridgeService:
                  queue_capacity=64, job_limit=1000, autostart=True, max_cycle_seconds=120, time_cache_file=None):
         if isinstance(interval, bool) or not isinstance(interval, (int, float)) or not math.isfinite(interval) or interval <= 0:
             raise ValidationError("interval must be a finite positive number of seconds")
-        if mode not in ("demo", "demo-db", "database", "hardware-read"):
+        if mode not in ("demo", "demo-db", "database", "hardware-read", "hardware-live"):
             raise ValidationError("unknown service mode")
-        if mode == "hardware-read" and client is None:
+        if mode in ("hardware-read", "hardware-live") and client is None:
             raise ValidationError("hardware-read requires an explicit physical read-only client")
         self.mode = mode
-        self.source = "heating" if mode == "hardware-read" else ("p4d-database" if mode == "database" else "simulator")
+        self.source = "heating" if mode in ("hardware-read", "hardware-live") else ("p4d-database" if mode == "database" else "simulator")
         self.can_write = mode in ("demo", "demo-db")
         self.fatal = Event()
         self.fatal_reason = None
@@ -165,7 +165,7 @@ class BridgeService:
         self.collector_state = dict(enabled=mode != "database", interval_seconds=interval,
                                     running=False, last_cycle=None, last_successful_store=None,
                                     stored=0, errors=[], skipped=[], successful_cycles=0)
-        if mode == "hardware-read":
+        if mode in ("hardware-read", "hardware-live"):
             self.watchdog = Thread(target=self._watch_cycles, name="test-watchdog", daemon=True)
             self.watchdog.start()
         if autostart and self.worker:
@@ -286,7 +286,7 @@ class BridgeService:
                     break
                 except Exception as exc:
                     errors.append(dict(**identity, error=failure(exc)))
-                    if self.mode == "hardware-read":
+                    if self.mode in ("hardware-read", "hardware-live"):
                         if isinstance(exc, ProtocolError):
                             logging.getLogger(__name__).error("Heating read failed: %s", exc)
                         self.abort(type(exc).__name__)
@@ -299,7 +299,7 @@ class BridgeService:
                     self.collector_state["last_successful_store"] = datetime.now(ZONE).isoformat()
         except Exception as exc:
             errors.append(dict(error=failure(exc)))
-            if self.mode == "hardware-read":
+            if self.mode in ("hardware-read", "hardware-live"):
                 self.abort(type(exc).__name__)
         finally:
             with self.lock:
@@ -336,7 +336,7 @@ class BridgeService:
             raise ValidationError("job requires an operation")
         operation = data["operation"]
         if not self.can_write and operation in ("write_parameter", "write_time_range"):
-            raise ReadOnlyViolation("heating writes are disabled in hardware-read mode")
+            raise ReadOnlyViolation("heating writes are disabled in hardware modes")
         simple = {"status": self.client.get_status, "firmware": self.client.get_firmware,
                   "discover_menu": lambda: self.client.get_menu(timeout=10),
                   "time_ranges": lambda: self.client.get_time_ranges(timeout=10)}
@@ -465,7 +465,7 @@ class BridgeService:
                         self._store_time_cache(updated, stamp)
             except Exception as exc:
                 update = dict(state="failed", error=failure(exc))
-                if self.mode == "hardware-read" and isinstance(exc, (ProtocolError, DatabaseUnavailable)):
+                if self.mode in ("hardware-read", "hardware-live") and isinstance(exc, (ProtocolError, DatabaseUnavailable)):
                     if isinstance(exc, ProtocolError):
                         logging.getLogger(__name__).error("Heating read job failed: %s", exc)
                     self.abort(type(exc).__name__)

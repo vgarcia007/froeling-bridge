@@ -1,4 +1,4 @@
-"""Protocol tools and local web service; TTY access only in explicit hardware-read mode."""
+"""Protocol tools and local web service; TTY access only in explicit hardware modes."""
 import argparse
 from dataclasses import asdict
 from datetime import datetime, time
@@ -56,7 +56,7 @@ def demo():
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Fröling Bridge: protocol tools, simulator collector and local API (no hardware access)")
+    parser = argparse.ArgumentParser(description="Fröling Bridge: protocol tools, collector, web menu and API")
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("demo", help="read and change fictional in-memory controller data")
@@ -65,13 +65,14 @@ def main(argv=None):
     encoder.add_argument("payload_hex", nargs="?", default="", help="hex payload, for example '12 34'")
     decoder = commands.add_parser("decode", help="validate and decode exactly one hex frame")
     decoder.add_argument("wire_hex")
-    server = commands.add_parser("serve", help="run local API and simulated collector")
-    server.add_argument("--mode", choices=("demo", "demo-db", "database", "hardware-read"), default="demo")
+    server = commands.add_parser("serve", help="run web API and selected collector")
+    server.add_argument("--mode", choices=("demo", "demo-db", "database", "hardware-read", "hardware-live"), default="demo")
     server.add_argument("--config", help="local JSON database configuration")
     server.add_argument("--test-config", help="separate loopback test database (hardware-read only)")
     server.add_argument("--device", help="exclusive TTY device (hardware-read only)")
     server.add_argument("--trace-file", help="new private raw trace file (hardware-read only)")
     server.add_argument("--reply-profile", help="explicit JSON request-to-reply command mapping")
+    server.add_argument("--time-cache-file", help="persistent controller time cache")
     server.add_argument("--host", default="0.0.0.0", help="listen address (default: all IPv4 interfaces)")
     server.add_argument("--port", type=int, default=8000)
     server.add_argument("--interval", type=float, default=60)
@@ -100,7 +101,7 @@ def run_service(args):
     transport = None
     service = None
     try:
-        from .storage import DatabaseConfig, ReadOnlyDatabase, TestDatabase, HardwareTestRepository
+        from .storage import DatabaseConfig, ReadOnlyDatabase, TestDatabase, HardwareTestRepository, P4dDatabase
         if args.command == "init-test-db":
             from .testdb import initialize
             config = DatabaseConfig.load(args.config)
@@ -113,22 +114,30 @@ def run_service(args):
         from waitress import serve
         if not 1 <= args.port <= 65535:
             raise ValidationError("port must be 1..65535")
-        if args.mode != "hardware-read" and any((args.test_config, args.device, args.trace_file, args.reply_profile)):
-            raise ValidationError("hardware options require hardware-read mode")
+        if args.mode not in ("hardware-read", "hardware-live") and any((args.test_config, args.device, args.trace_file, args.reply_profile)):
+            raise ValidationError("hardware options require hardware-read or hardware-live mode")
         client = None
-        if args.mode == "hardware-read":
-            if not all((args.config, args.test_config, args.device, args.trace_file)):
-                raise ValidationError("hardware-read requires source/test configuration, device and private trace file")
-            original = ReadOnlyDatabase(DatabaseConfig.load(args.config))
-            target = TestDatabase(DatabaseConfig.load(args.test_config))
-            repository = HardwareTestRepository(original, target)
-            # Validate metadata and target schema before taking the device.
-            repository.sensors()
-            target.history(0, "VA", datetime(2000, 1, 1), datetime(2000, 1, 2), limit=1)
+        if args.mode in ("hardware-read", "hardware-live"):
+            if not args.config or not args.device:
+                raise ValidationError("hardware mode requires configuration and device")
+            if args.mode == "hardware-read":
+                if not args.test_config or not args.trace_file:
+                    raise ValidationError("hardware-read requires test configuration and trace file")
+                original = ReadOnlyDatabase(DatabaseConfig.load(args.config))
+                target = TestDatabase(DatabaseConfig.load(args.test_config))
+                repository = HardwareTestRepository(original, target)
+                repository.sensors()
+                target.history(0, "VA", datetime(2000, 1, 1), datetime(2000, 1, 2), limit=1)
+            else:
+                if args.test_config:
+                    raise ValidationError("hardware-live records in the configured original database")
+                repository = P4dDatabase(DatabaseConfig.load(args.config), allow_recording=True)
+                repository.validate_schema()
             from .serial_transport import SerialTransport, TraceTransport, ReadOnlyTransport
             from .client import ReadOnlyHeatingClient
             transport = SerialTransport(args.device)
-            transport = TraceTransport(transport, args.trace_file)
+            if args.trace_file:
+                transport = TraceTransport(transport, args.trace_file)
             transport = ReadOnlyTransport(transport)
             profile = {}
             if args.reply_profile:
@@ -147,9 +156,9 @@ def run_service(args):
             config = DatabaseConfig.load(args.config)
             repository = TestDatabase(config) if args.mode == "demo-db" else ReadOnlyDatabase(config)
         from pathlib import Path
-        time_cache_file = Path(args.trace_file).parent / "time-programs-cache.json" if args.mode == "hardware-read" else None
+        time_cache_file = Path(args.time_cache_file) if args.time_cache_file else (Path(args.trace_file).parent / "time-programs-cache.json" if args.trace_file else None)
         service = BridgeService(repository, args.mode, args.interval, client=client, time_cache_file=time_cache_file)
-        service.read_connection_verified = args.mode == "hardware-read"
+        service.read_connection_verified = args.mode in ("hardware-read", "hardware-live")
         try:
             print(f"Fröling Bridge: {args.mode} on http://{args.host}:{args.port}", flush=True)
             import signal
@@ -158,7 +167,7 @@ def run_service(args):
                 raise KeyboardInterrupt()
             signal.signal(signal.SIGTERM, terminate)
             try:
-                if args.mode == "hardware-read":
+                if args.mode in ("hardware-read", "hardware-live"):
                     import os
                     from threading import Thread
                     def abort_test():
@@ -185,7 +194,7 @@ def run_service(args):
             service.close()
         if transport is not None:
             transport.close()
-        if service is not None and args.mode == "hardware-read":
+        if service is not None and args.trace_file and args.mode in ("hardware-read", "hardware-live"):
             # Keep a private summary even when OnFailure runs after HTTP exits.
             import os
             summary = dict(fatal_reason=service.fatal_reason, collector=service.collector_status())

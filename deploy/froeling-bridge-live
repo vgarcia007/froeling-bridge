@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /opt/froeling-bridge/0.4.0/venv/bin/python -I -m froeling_bridge.production "$@"

@@ -104,3 +104,12 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Zeitprogramme über Originalmenü benennen und nur konfigurierte erreichbare Geräte anzeigen. Rohgruppen bleiben in der API vollständig. Geräte-Zeiten aus dem Menü führen zur entsprechenden Woche.
 - Gemeinsamer Cache mit automatischem Erstlesen, bewusstem Aktualisieren und Lesezeitpunkt; im lesenden Testbetrieb private persistente Datei statt Änderungen der Original-DB. Fehler behalten den letzten vollständigen Stand. Kein zusätzlicher manueller Erstleseschritt.
 - Tatsächliches 15-Minuten-Lesefenster mit 195 Testmesspunkten und automatischer bestätigter Rückkehr erfolgreich. Hardware-Schreiben weiterhin getrennt und nicht freigegeben.
+
+
+## 16.10.2026 — Produktive Aufzeichnung freigegeben
+
+- Benutzer bestätigt ausdrücklich die Messwertaufzeichnung in der bestehenden p4d-Datenbank und dauerhaften Betrieb. Dies ersetzt die frühere Nur-Lesen-/Testfenstergrenze für genau diesen Aufzeichnungspfad.
+- Eigener Modus hardware-live und eigenes Release 0.4.0. Gemeinsamer getesteter samples/peaks-Writer, explizite Aktivierung, Schema-/Schlüssel-/InnoDB-Prüfung ohne Migration. Metadaten lesen unverändert read-only. Keine Lösch-/Aggregationsroutine hinzufügen.
+- Dauerbetrieb auf LAN-Port 8000 ersetzt dort die Simulator-Vorschau. Eigener Autostart statt p4d, keine RuntimeMaxSec. Originalinstallation und bisheriges Release erhalten.
+- Aktivierung mit unabhängigem Fünf-Minuten-Rückkehrtimer; nach zwei Sammelzyklen und nachgewiesenem neuen Originalmesspunkt abschalten. Laufzeitfehler lösen echte Rückkehr zu p4d samt Autostart aus. Keine konkurrierenden seriellen Dienste.
+- Die damalige Freigabe bezog sich ausschließlich auf Datenbank-Messwerte, nicht auf Heizungsparameter. Administrative Einrichtung getrennt vorbereiten; persönliche Berechtigungsdetails bleiben privat.

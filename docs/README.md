@@ -57,3 +57,5 @@ python3 docs/tools/verify_protocol_examples.py
 Benötigt werden Python 3, Git und ein C++17-Compiler (`c++`). Das Prüfwerkzeug extrahiert die Originalfunktionen `prepareRequest`, `readByte`, beide `readWord`-Varianten, `readHeader` sowie `crc` in einen temporären C++-Prüfstand. Nur Transport und umgebende Typen werden durch Speicher-Stubs ersetzt. Es öffnet weder TTY noch Datenbank und baut/installiert nicht den Daemon.
 
 Ergebnis: acht [synthetische Telegrammvektoren](protocol-vectors.json) stimmen mit Encoder und Decoder überein; alle 65.536 16-Bit-Muster werden vorzeichenbehaftet und vorzeichenlos geprüft. Ungültige und abgeschnittene Escape-Folgen werden abgelehnt. Die Beispiele belegen die Bytecodierung, **nicht** die Antwortsemantik einer realen Heizung oder den kompletten Schreibablauf. Die extrahierten Originalfunktionen unterliegen der Lizenz des Referenzprojekts.
+
+- [Produktiver Dauerbetrieb und Rückkehr](production.md)

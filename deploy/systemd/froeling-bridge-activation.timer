@@ -1,0 +1,7 @@
+[Unit]
+Description=Restore p4d if Froeling Bridge activation is interrupted
+
+[Timer]
+OnActiveSec=5min
+AccuracySec=1s
+Unit=froeling-bridge-fallback.service

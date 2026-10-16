@@ -59,7 +59,7 @@ def create_app(service):
 
     @app.errorhandler(DatabaseUnavailable)
     def unavailable(exc):
-        if service.mode == "hardware-read":
+        if service.mode in ("hardware-read", "hardware-live"):
             service.abort("database_unavailable")
         return response(dict(error=dict(code="database_unavailable", message="database operation failed")), 503)
 

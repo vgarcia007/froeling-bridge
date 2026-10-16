@@ -191,7 +191,7 @@ async function readMenuValues(items, generation) {
     } catch (error) {
       if (generation !== state.generation) return;
       node.append(element("small", "Nicht frisch gelesen", "stale"));
-      if (state.health.mode === "hardware-read") return;
+      if (["hardware-read", "hardware-live"].includes(state.health.mode)) return;
     }
   }
 }
@@ -310,8 +310,8 @@ async function loadMenu(parent = state.parent, search = "") {
   }
 }
 function readOnlyLabel() {
-  return state.health?.mode === "hardware-read"
-    ? "Lesender Hardwaretest: Änderungen gesperrt."
+  return ["hardware-read", "hardware-live"].includes(state.health?.mode)
+    ? "Heizungsparameter: Änderungen gesperrt."
     : "Bestandsansicht: gespeicherte Daten, keine direkte Heizungsabfrage.";
 }
 async function openParameter(item, rowValueNode) {
@@ -751,11 +751,11 @@ async function healthLoop() {
     state.health = health;
     $("version").textContent = health.version || "";
     $("connection").textContent = health.fatal_reason
-      ? "Test wird beendet"
+      ? "Dienst wird beendet"
       : "API verbunden";
     $("connection-dot").className =
       "dot " + (health.fatal_reason ? "offline" : "online");
-    const hardware = health.mode === "hardware-read";
+    const hardware = ["hardware-read", "hardware-live"].includes(health.mode);
     $("mode").textContent = hardware
       ? "HEIZUNG · NUR LESEN"
       : health.mode === "database"
@@ -764,7 +764,7 @@ async function healthLoop() {
     $("mode").classList.toggle("hardware", hardware);
     $("mode-note").classList.toggle("hardware", hardware);
     $("mode-note").textContent = hardware
-      ? "Lesender Hardwaretest. Neue Messpunkte werden nur in der separaten Testdatenbank gespeichert."
+      ? (health.mode === "hardware-live" ? "Dauerbetrieb. Neue Messpunkte werden in der bestehenden p4d-Datenbank gespeichert. Heizungsparameter sind schreibgeschützt." : "Lesender Hardwaretest. Neue Messpunkte werden nur in der separaten Testdatenbank gespeichert.")
       : health.mode === "database"
       ? "Gespeicherte p4d-Daten. Keine direkte Heizungsabfrage und keine Änderungen."
       : "Du arbeitest mit fiktiven Heizungsdaten. Änderungen betreffen ausschließlich den Simulator.";
