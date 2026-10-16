@@ -1,0 +1,17 @@
+[Unit]
+Description=Froeling Bridge simulator web preview
+After=network.target
+
+[Service]
+Type=exec
+User=froeling-bridge-test
+Group=froeling-bridge-test
+ExecStart=/opt/froeling-bridge/0.3.0/venv/bin/python -I -m froeling_bridge serve --mode demo --port 8000
+WorkingDirectory=/opt/froeling-bridge/0.3.0
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+Restart=no
+TimeoutStopSec=25

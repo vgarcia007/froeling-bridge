@@ -79,3 +79,7 @@ class WriteVerificationError(ProtocolError):
         self.address = address
         self.actual = actual
         super().__init__(f"{operation} at 0x{address:04X}: readback differs from target")
+
+
+class ReadOnlyViolation(ValidationError):
+    """The hardware test cannot change controller settings."""

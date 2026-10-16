@@ -1,6 +1,6 @@
 # p4d: Bestandsaufnahme für einen Python-Nachbau
 
-Stand der Untersuchung: 16.10.2026. Ziel ist ein einfacher installierbarer Heizungsdienst mit API und modernem Servicemenü, der die vorhandene p4d-Datenbank weiterführen kann. Die Bestandsaufnahme ist inzwischen durch einen [Offline-Python-Kern mit Simulator](python-core.md) ergänzt. Inzwischen sind auch [API, Datenbankadapter und kontinuierliche Simulator-Aufzeichnung](service.md) implementiert. Ein Live-Heizungsdienst ist noch nicht vorhanden.
+Stand der Untersuchung: 16.10.2026. Ziel ist ein einfacher installierbarer Heizungsdienst mit API und modernem Servicemenü, der die vorhandene p4d-Datenbank weiterführen kann. Die Bestandsaufnahme ist inzwischen durch einen [Offline-Python-Kern mit Simulator](python-core.md) ergänzt. Inzwischen sind auch [API, Datenbankadapter und kontinuierliche Simulator-Aufzeichnung](service.md) implementiert. In Version 0.3.0 sind auch [Webmenü und lesender Hardwaretest mit Rückkehr](host-test.md) vorbereitet; der tatsächliche Hardwaretest steht noch aus.
 
 ## Referenz und Aussagekraft
 

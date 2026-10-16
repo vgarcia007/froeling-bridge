@@ -3,14 +3,15 @@ from datetime import datetime
 from importlib.resources import files
 import json
 
-from .errors import ValidationError
+from .errors import ReadOnlyViolation, ValidationError
 from .messages import ParameterType
 from .service import QueueBusy, ServiceStopped, public
 from .storage import DatabaseUnavailable, ZONE
+from . import __version__
 
 
 def create_app(service):
-    from flask import Flask, jsonify, request
+    from flask import Flask, jsonify, request, render_template
     from werkzeug.exceptions import HTTPException
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 16384
@@ -35,12 +36,30 @@ def create_app(service):
         if set(request.args) - set(names) or any(len(request.args.getlist(k)) != 1 for k in request.args):
             raise ValidationError("unknown or repeated query parameter")
 
+    @app.after_request
+    def headers(result):
+        result.headers["X-Content-Type-Options"] = "nosniff"
+        result.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        if request.path.startswith(prefix):
+            result.headers["Cache-Control"] = "no-store"
+        return result
+
+    @app.get("/")
+    def index():
+        return render_template("index.html")
+
+    @app.errorhandler(ReadOnlyViolation)
+    def readonly(exc):
+        return response(dict(error=dict(code="read_only", message=str(exc))), 403)
+
     @app.errorhandler(ValidationError)
     def invalid(exc):
         return response(dict(error=dict(code="validation_error", message=str(exc))), 400)
 
     @app.errorhandler(DatabaseUnavailable)
     def unavailable(exc):
+        if service.mode == "hardware-read":
+            service.abort("database_unavailable")
         return response(dict(error=dict(code="database_unavailable", message="database operation failed")), 503)
 
     @app.errorhandler(QueueBusy)
@@ -59,7 +78,10 @@ def create_app(service):
 
     @app.get(prefix + "/health")
     def health():
-        return response(dict(mode=service.mode, hardware_verified=False,
+        return response(dict(mode=service.mode, version=__version__, hardware_verified=False,
+                             read_connection_verified=service.read_connection_verified,
+                             fatal_reason=service.fatal_reason,
+                             capabilities=dict(controller_read=service.worker is not None, heating_write=service.can_write),
                              worker="unavailable" if not service.worker else (
                                  "running" if service.worker.thread.is_alive() else "stopped"),
                              database_available=service.repository.available,
@@ -77,9 +99,20 @@ def create_app(service):
             raise ValidationError("invalid menu parent")
         items = service.repository.menu(parent)
         for item in items:
-            item["editable"] = service.worker is not None and item["type"] in set(ParameterType)
+            item["editable"] = service.can_write and item["type"] in set(ParameterType)
         return response(dict(source=service.repository.source, parent=parent, items=items,
                              cached=True, timezone="Europe/Berlin"))
+
+    @app.get(prefix + "/menu/search")
+    def search_menu():
+        args_only("q")
+        query = request.args.get("q", "").strip()
+        if not 1 <= len(query) <= 100:
+            raise ValidationError("search query must contain 1..100 characters")
+        items = service.repository.search_menu(query)
+        for item in items:
+            item["editable"] = service.can_write and item["type"] in set(ParameterType)
+        return response(dict(source=service.repository.source, items=items))
 
     @app.get(prefix + "/sensors")
     def sensors():
@@ -98,7 +131,7 @@ def create_app(service):
         for row in rows:
             row["age_seconds"] = max(0, (now - datetime.fromisoformat(row["observed_at"])).total_seconds())
             row["stale"] = row["age_seconds"] > service.interval * 2 or (row["address"], row["type"]) in failures
-        return response(dict(source="simulator", items=rows))
+        return response(dict(source=service.source, items=rows))
 
     @app.get(prefix + "/history")
     def history():

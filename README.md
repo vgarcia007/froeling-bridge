@@ -16,7 +16,7 @@ Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, 
 
 ## Projektstand
 
-Version 0.2.0 enthält den Python-Protokollkern, einen Simulator, eine HTTP-API und einen kontinuierlichen Datensammler. Dieser liest regelmäßig simulierte Heizungswerte und speichert sie auf Wunsch im p4d-0.10.2-Schema einer separaten Test-MariaDB. Eine bestehende p4d-Datenbank kann ausschließlich lesend angezeigt werden. Parameter- und Zeitprogrammänderungen werden am Simulator durch Nachlesen bestätigt. USB-/TTY-Transport und modernes Browsermenü folgen noch.
+Version 0.3.0 enthält ein modernes Webmenü, den Python-Protokollkern, einen Simulator, eine HTTP-API und einen kontinuierlichen Datensammler. Dieser liest regelmäßig simulierte Heizungswerte und speichert sie auf Wunsch im p4d-0.10.2-Schema einer separaten Test-MariaDB. Eine bestehende p4d-Datenbank kann ausschließlich lesend angezeigt werden. Parameter- und Zeitprogrammänderungen werden am Simulator durch Nachlesen bestätigt. Ein exklusiver Linux-TTY-Transport für einen ausdrücklich lesenden Hardwaretest und ein vorbereiteter systemd-Testablauf mit Rückkehr zu p4d sind ebenfalls vorhanden. Der reale Heizungsbetrieb ist noch nicht geprüft.
 
 Die bisherigen Protokollprüfungen erfolgen offline anhand des Referenzcodes und synthetischer Fixtures. Ein ausschließlich lesender [Abgleich mit dem bestehenden Datenbankschema](docs/live-database.md) und dem [installierten p4d-Stand](docs/live-server.md) ist dokumentiert. Das Simulationsprofil der Antwortcodes und die Schreibsemantik sind noch nicht an der realen Heizung bestätigt.
 
@@ -40,7 +40,7 @@ Für API und dauerhafte Datensammlung:
 .venv/bin/froeling-bridge serve
 ```
 
-Die API läuft unter `http://127.0.0.1:8000/api/v1/health`. Der Sammler startet sofort und liest danach alle 60 Sekunden. Ohne Konfiguration bleiben alle Daten fiktiv und im Speicher. Die [Dienstanleitung](docs/service.md) beschreibt Testdatenbank, Bestandsansicht, API-Beispiele und Integrationstests. Ein alter Webinterface-Schreibmitschnitt ist keine Voraussetzung für die Weiterentwicklung.
+Das Webmenü läuft unter `http://127.0.0.1:8000/`, die API unter `http://127.0.0.1:8000/api/v1/health`. Der Sammler startet sofort und liest danach alle 60 Sekunden. Ohne Konfiguration bleiben alle Daten fiktiv und im Speicher. Die [Dienstanleitung](docs/service.md) beschreibt Testdatenbank, Bestandsansicht, API-Beispiele und Integrationstests. Die [Host-Testanleitung](docs/host-test.md) beschreibt die einmalige Einrichtung, SSH-Zugriff und den begrenzten Test mit automatischer Rückkehr. Ein alter Webinterface-Schreibmitschnitt ist keine Voraussetzung für die Weiterentwicklung.
 
 ## Dokumentation
 

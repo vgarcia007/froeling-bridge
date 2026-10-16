@@ -108,6 +108,9 @@ class MemoryRepository:
     def menu(self, parent):
         return [m for m in demo_menu() if m["parent"] == parent]
 
+    def search_menu(self, query):
+        return [m for m in demo_menu() if query.casefold() in m["title"].casefold()][:100]
+
     def menu_item(self, item_id):
         return next((m for m in demo_menu() if m["id"] == item_id), None)
 
@@ -209,6 +212,13 @@ class ReadOnlyDatabase:
                 raise ValidationError("menu level exceeds 4096 entries")
             return rows
 
+    def search_menu(self, query):
+        escaped = query.replace("!", "!!").replace("%", "!%").replace("_", "!_")
+        with self.transaction() as cursor:
+            cursor.execute("SELECT id,parent,child,type,address,title,value FROM menu "
+                           "WHERE title LIKE %s ESCAPE '!' ORDER BY id LIMIT 100", ("%" + escaped + "%",))
+            return cursor.fetchall()
+
     def menu_item(self, item_id):
         with self.transaction() as cursor:
             cursor.execute("SELECT id,parent,child,type,address,title FROM menu WHERE id=%s", (item_id,))
@@ -252,3 +262,43 @@ class TestDatabase(ReadOnlyDatabase):
                     "maxv=GREATEST(COALESCE(maxv,VALUES(maxv)),VALUES(maxv))",
                     (row["address"], row["type"], stamp, stamp, row["value"], row["value"]))
         return len(rows)
+
+
+class HardwareTestRepository:
+    """Original metadata read-only; all measurement writes go to a test DB.
+
+    Existing history is intentionally separate from this window's test history.
+    No simulator fixtures or metadata are imported into the original database.
+    """
+    source = "heating-test-database"
+
+    def __init__(self, original, target):
+        if type(original) is not ReadOnlyDatabase or type(target) is not TestDatabase:
+            raise ValidationError("hardware test requires read-only metadata and a separate test writer")
+        if original.config.database == target.config.database and original.config.host == target.config.host and original.config.port == target.config.port:
+            raise ValidationError("original and test databases must differ")
+        self.original, self.target = original, target
+
+    @property
+    def available(self):
+        if self.original.available is False or self.target.available is False:
+            return False
+        return True if self.original.available is True and self.target.available is True else None
+
+    def sensors(self):
+        return self.original.sensors()
+
+    def menu(self, parent):
+        return self.original.menu(parent)
+
+    def menu_item(self, item_id):
+        return self.original.menu_item(item_id)
+
+    def search_menu(self, query):
+        return self.original.search_menu(query)
+
+    def history(self, *args, **kwargs):
+        return self.target.history(*args, **kwargs)
+
+    def store_cycle(self, *args, **kwargs):
+        return self.target.store_cycle(*args, **kwargs)

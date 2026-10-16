@@ -7,7 +7,7 @@ from .errors import ValidationError
 from .storage import demo_menu, demo_sensors
 
 
-def initialize(config):
+def initialize(config, seed=True):
     config.require_test()
     # Identifiers are validated by require_test; all DDL types come from our
     # packaged, sanitized schema snapshot, never from a request or DB response.
@@ -28,11 +28,11 @@ def initialize(config):
                 if table == "samples":
                     definitions.append("INDEX addr_type_time (address,type,time)")
                 cursor.execute(f"CREATE TABLE `{table}` (" + ",".join(definitions) + ") ENGINE=InnoDB")
-            for sensor in demo_sensors():
+            for sensor in (demo_sensors() if seed else ()):
                 keys = list(sensor)
                 cursor.execute("INSERT INTO valuefacts (" + ",".join(f"`{k}`" for k in keys)
                                + ") VALUES (" + ",".join(["%s"] * len(keys)) + ")", tuple(sensor.values()))
-            for item in demo_menu():
+            for item in (demo_menu() if seed else ()):
                 keys = list(item)
                 cursor.execute("INSERT INTO menu (" + ",".join(f"`{k}`" for k in keys)
                                + ") VALUES (" + ",".join(["%s"] * len(keys)) + ")", tuple(item.values()))

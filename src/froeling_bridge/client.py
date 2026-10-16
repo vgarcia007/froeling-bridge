@@ -216,3 +216,14 @@ class HeatingClient:
             if attempted:
                 raise WriteOutcomeUnknown("time-program write", address, stage) from exc
             raise
+
+
+class ReadOnlyHeatingClient(HeatingClient):
+    """Defence in depth: reject writes even when bypassing the HTTP API."""
+    def set_parameter(self, *args, **kwargs):
+        from .errors import ReadOnlyViolation
+        raise ReadOnlyViolation("heating writes are disabled in hardware-read mode")
+
+    def set_time_range(self, *args, **kwargs):
+        from .errors import ReadOnlyViolation
+        raise ReadOnlyViolation("heating writes are disabled in hardware-read mode")

@@ -16,7 +16,7 @@ import time
 import uuid
 
 from .client import HeatingClient
-from .errors import ValidationError, WriteOutcomeUnknown, WriteVerificationError, ProtocolError
+from .errors import ReadOnlyViolation, ValidationError, WriteOutcomeUnknown, WriteVerificationError, ProtocolError
 from .messages import Command, ParameterType, TimeRange, parse_time
 from .session import ProtocolSession
 from .simulator import MemoryTransport
@@ -122,12 +122,22 @@ class HeatingWorker:
 
 class BridgeService:
     def __init__(self, repository=None, mode="demo", interval=60, client=None,
-                 queue_capacity=64, job_limit=1000, autostart=True):
+                 queue_capacity=64, job_limit=1000, autostart=True, max_cycle_seconds=120):
         if isinstance(interval, bool) or not isinstance(interval, (int, float)) or not math.isfinite(interval) or interval <= 0:
             raise ValidationError("interval must be a finite positive number of seconds")
-        if mode not in ("demo", "demo-db", "database"):
+        if mode not in ("demo", "demo-db", "database", "hardware-read"):
             raise ValidationError("unknown service mode")
+        if mode == "hardware-read" and client is None:
+            raise ValidationError("hardware-read requires an explicit physical read-only client")
         self.mode = mode
+        self.source = "heating" if mode == "hardware-read" else ("p4d-database" if mode == "database" else "simulator")
+        self.can_write = mode in ("demo", "demo-db")
+        self.fatal = Event()
+        self.fatal_reason = None
+        self.read_connection_verified = False
+        self.max_cycle_seconds = max_cycle_seconds
+        self.cycle_started = None
+        self.watchdog = None
         self.repository = repository or MemoryRepository()
         self.client = None if mode == "database" else (client or HeatingClient(ProtocolSession(MemoryTransport())))
         self.worker = None if mode == "database" else HeatingWorker(queue_capacity)
@@ -141,13 +151,32 @@ class BridgeService:
         self.collector = None
         self.collector_state = dict(enabled=mode != "database", interval_seconds=interval,
                                     running=False, last_cycle=None, last_successful_store=None,
-                                    stored=0, errors=[], skipped=[])
+                                    stored=0, errors=[], skipped=[], successful_cycles=0)
+        if mode == "hardware-read":
+            self.watchdog = Thread(target=self._watch_cycles, name="test-watchdog", daemon=True)
+            self.watchdog.start()
         if autostart and self.worker:
             self.collector = Thread(target=self._collect_loop, name="collector", daemon=True)
             self.collector.start()
 
+    def abort(self, reason):
+        with self.lock:
+            if not self.fatal.is_set():
+                self.fatal_reason = reason
+                self.fatal.set()
+        self.stop.set()
+
+    def _watch_cycles(self):
+        while not self.stop.wait(0.1):
+            with self.lock:
+                started = self.cycle_started
+            if started is not None and time.monotonic() - started > self.max_cycle_seconds:
+                self.abort("collector_deadline")
+
     def close(self):
         self.stop.set()
+        if self.watchdog:
+            self.watchdog.join(timeout=1)
         if self.collector:
             self.collector.join(timeout=6)
         if self.worker:
@@ -213,6 +242,7 @@ class BridgeService:
         when = datetime.fromtimestamp(stamp, ZONE).replace(tzinfo=None)
         with self.lock:
             self.collector_state.update(running=True, last_cycle=when.isoformat())
+            self.cycle_started = time.monotonic()
         stored = 0
         try:
             sensors = self.repository.sensors()
@@ -236,13 +266,16 @@ class BridgeService:
                     observed_at = datetime.now(ZONE).isoformat()
                     with self.lock:
                         self.values[(sensor["address"], sensor["type"])] = public(dict(
-                            **sample, observed_at=observed_at, source="simulator", unit=sensor["unit"]))
+                            **sample, observed_at=observed_at, source=self.source, unit=sensor["unit"], title=sensor.get("usrtitle") or sensor.get("title")))
                     if sensor["record"] == "A":
                         samples.append(sample)
                 except ServiceStopped:
                     break
                 except Exception as exc:
                     errors.append(dict(**identity, error=failure(exc)))
+                    if self.mode == "hardware-read":
+                        self.abort(type(exc).__name__)
+                        break
             if samples and not self.stop.is_set():
                 stamp = int(time.time())
                 when = datetime.fromtimestamp(stamp, ZONE).replace(tzinfo=None)
@@ -251,9 +284,14 @@ class BridgeService:
                     self.collector_state["last_successful_store"] = datetime.now(ZONE).isoformat()
         except Exception as exc:
             errors.append(dict(error=failure(exc)))
+            if self.mode == "hardware-read":
+                self.abort(type(exc).__name__)
         finally:
             with self.lock:
                 self.collector_state.update(running=False, stored=stored, errors=errors, skipped=skipped)
+                self.cycle_started = None
+                if stored and not errors:
+                    self.collector_state["successful_cycles"] += 1
             self.cycle_lock.release()
 
     def _job_action(self, data):
@@ -262,6 +300,8 @@ class BridgeService:
         if not isinstance(data, dict) or not isinstance(data.get("operation"), str):
             raise ValidationError("job requires an operation")
         operation = data["operation"]
+        if not self.can_write and operation in ("write_parameter", "write_time_range"):
+            raise ReadOnlyViolation("heating writes are disabled in hardware-read mode")
         simple = {"status": self.client.get_status, "firmware": self.client.get_firmware,
                   "discover_menu": lambda: self.client.get_menu(timeout=10),
                   "time_ranges": lambda: self.client.get_time_ranges(timeout=10)}
@@ -317,6 +357,8 @@ class BridgeService:
         raise ValidationError("unknown operation")
 
     def submit_job(self, data):
+        if self.fatal.is_set() or self.stop.is_set():
+            raise ServiceStopped()
         action = self._job_action(data)
         identifier = uuid.uuid4().hex
         with self.lock:
@@ -326,7 +368,7 @@ class BridgeService:
                     raise QueueBusy()
                 del self.jobs[oldest]
             self.jobs[identifier] = dict(id=identifier, state="queued", operation=data["operation"],
-                                         source="simulator", created_at=datetime.now(ZONE).isoformat())
+                                         source=self.source, created_at=datetime.now(ZONE).isoformat())
         def execute():
             with self.lock:
                 self.jobs[identifier]["state"] = "running"
@@ -343,6 +385,8 @@ class BridgeService:
                 update = dict(state="completed", result=result)
             except Exception as exc:
                 update = dict(state="failed", error=failure(exc))
+                if self.mode == "hardware-read" and isinstance(exc, (ProtocolError, DatabaseUnavailable)):
+                    self.abort(type(exc).__name__)
             with self.lock:
                 self.jobs[identifier].update(update, finished_at=datetime.now(ZONE).isoformat())
         future.add_done_callback(complete)

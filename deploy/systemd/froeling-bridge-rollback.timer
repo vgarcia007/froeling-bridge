@@ -1,0 +1,7 @@
+[Unit]
+Description=Independent 15-minute p4d restoration deadline
+
+[Timer]
+OnActiveSec=15min
+AccuracySec=1s
+Unit=froeling-bridge-rollback.service

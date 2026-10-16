@@ -46,7 +46,7 @@ Hier stehen dauerhafte Vereinbarungen, keine ungeprüften Annahmen. Neuere Entsc
 
 ## Noch nicht entschieden
 
-Frontendtechnik, Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Projektteile. Framework, DB-Treiber und API-Vertrag für den lokalen Prototyp wurden inzwischen wie unten beschrieben entschieden.
+Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Projektteile. Framework, DB-Treiber und API-Vertrag für den lokalen Prototyp wurden inzwischen wie unten beschrieben entschieden.
 
 
 ## 16.10.2026 — Kontinuierliche Datensammlung und lokale API
@@ -61,3 +61,16 @@ Frontendtechnik, Produktionsauthentifizierung, endgültiger Deploymentweg und Li
 - Unterstützte Sammlung: VA, DO/DI/AO, UD 1–3; weitere Typen sichtbar überspringen. Aggregation/Bereinigung vor vollständiger Ablösung gesondert implementieren. Bestehende Historie/Metadaten und Fremdintegrationen nicht verändern.
 - /api/v1 mit dokumentiertem OpenAPI-Vertrag. Jobs queued/running/completed/failed, Schreibbestätigung weiterhin ausschließlich durch Nachlesen. FIFO 64, maximal 1.000 flüchtige Jobresultate; keine Wiederholung nach Neustarts.
 - Kein Zugriff auf Live-DB/-Server und kein Portzugriff im Implementierungspaket. Keine neue Freigabe für produktive Schreibtests oder Dienstaktionen abgeleitet.
+
+
+## 16.10.2026 — Webmenü und begrenzter Hardwaretest
+
+- Benutzer bestätigt Umsetzung des Plans und wählt ersten Hardwarewechsel ausschließlich lesend mit separater Test-Aufzeichnung. Einmalige administrative Einrichtung durch ihn, danach feste root-Helferaktionen statt weiterer allgemeiner sudo-Freigabe.
+- Webmenü direkt aus Flask mit HTML/CSS/JavaScript; keine externe UI-Plattform, kein Node-Build. Explizite Quellen/Fähigkeiten und frische Werte, bestätigte Simulator-Schreibabläufe, keine Wiederholung nach Verbindungsabbruch.
+- Linux-TTY-Adapter aus Standardbibliothek: 57600 Baud/8N1, keine Flusskontrolle, flock/TIOCEXCL, Deadline/Teilübertragungen, kein stilles Flush. Original-p4d muss vorher vollständig beendet und Portfreigabe festgestellt sein.
+- hardware-read verbietet Schreibjobs und Client-Schreibmethoden; ein zusätzlicher Transportfilter prüft vollständige Frames und Read-Payload-Längen vor dem ersten physischen Byte. Echtes Schreiben bleibt gesondertes späteres Arbeitspaket.
+- Original-DB nur Metadaten lesend, Messpunkte in jeweils neue Test-DB auf separatem lokalen MariaDB-Container. Keine produktive Historienfortschreibung in diesem Test, keine Zusammenführung danach.
+- Installation als versioniertes Release unter /opt, geschützte Konfiguration, neuer Dienstbenutzer. Standardports 8000 (Simulator) und 8001 (Hardwaretest), ausschließlich Loopback und SSH-Tunnel.
+- Testfenster 15 Minuten. Rückkehrtimer vor p4d-Stop scharfstellen; OnFailure und RuntimeMaxSec ergänzen ihn. Protokoll-/DB-Fehler und Sammlerdeadline 120 Sekunden brechen früher ab. Original-Autostart bleibt enabled, Hardwaretest ohne Boot-Aktivierung.
+- Rückkehr: Testdienst vollständig stoppen, exklusiven Port freigeben, Originaldienst starten, neue Messpunkte ausschließlich lesend nachweisen. Keine pauschale Garantie bei Host-/Hardwareausfall oder fremdem Portbesitzer; Fehler sichtbar melden.
+- Benutzerautorisiert sind jetzt auch das Bereitstellen des privaten Pakets auf dem Host und später der konkrete Helferablauf nach erfolgreicher Einrichtung. Der fehlende administrative Zugriff wird nicht umgangen. Tatsächlicher Heizungs-/Original-DB-Schreibzugriff bleibt ausgeschlossen.

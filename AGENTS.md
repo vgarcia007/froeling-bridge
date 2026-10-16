@@ -14,7 +14,7 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Bestehende MariaDB und historische Messreihen weiterführen; p4d als Rückfalloption erhalten.
 - Kein dauerhafter Parallelbetrieb zweier unabhängiger serieller Heizungsdienste als Default.
 - Charts, Dashboards, Pelletverwaltung und weitere Integrationen zunächst außerhalb des Kernumfangs.
-- Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Produktionsauthentifizierung, UI-Technik, endgültige Installation und neue Projektlizenz sind noch offen.
+- Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
 ## Live-Datenbank: ausdrücklich nur lesen
@@ -29,13 +29,13 @@ Der Benutzer hat am 16.10.2026 Zugang zur laufenden Original-p4d-Datenbank über
 - Repository-Dokumentation darf bereinigte Schema-/Kompatibilitätsbefunde enthalten. Raw-Ergebnisse und Mitschnitte bleiben lokal und ignoriert.
 - Schreibversuche gehören später ausschließlich auf eine separate DB-Kopie; direkte Heizungs-Schreibtests müssen gesondert mit dem Benutzer vereinbart werden.
 
-## Live-Server per SSH: ausschließlich Bestandsaufnahme
+## Live-Server per SSH: Bestandsaufnahme und freigegebener Lesetest
 
-Der Benutzer stellt `live-server-ssh.con` für den zuvor angebotenen lesenden SSH-Zugriff bereit. Auch diese Datei bleibt ignoriert und wird nicht ausgegeben. Private SSH-Ergebnisse und Hostschlüssel liegen unter `.local/`, nicht im Repository.
+Der Benutzer stellt `live-server-ssh.con` für den zuvor angebotenen lesenden SSH-Zugriff bereit. Auch diese Datei bleibt ignoriert und wird nicht ausgegeben. Private SSH-Ergebnisse und Hostschlüssel liegen unter `.local/`, nicht im Repository. Der Benutzer hat inzwischen den erweiterten Plan einschließlich Webmenü, vorbereiteter einmaliger Einrichtung und 15-minütigem lesendem Hardwaretest ausdrücklich zur Umsetzung beauftragt; das aktualisiert die frühere reine SSH-Bestandsaufnahme-Freigabe wie folgt.
 
-- Zulässig sind lesende Prüfungen von Quellcheckout, Binärdatei, Dienstmetadaten, Locale/Zeitzone und vorhandenen Logs. Keine Installationen, Dateiänderungen oder Dienstaktionen auf dem Live-Server.
+- Zulässig sind lesende Prüfungen sowie die Übertragung des geprüften privaten Einrichtungspakets in einen neuen SSH-Benutzerordner. Einmalige administrative Einrichtung durch den Benutzer mit deploy/install.sh; danach ausschließlich feste Helferaktionen status/start-test/rollback für den vereinbarten Test. Keine Änderung der Originalinstallation, Dienstdefinition oder Autostart-Einstellung.
 - Keinen weiteren p4d-Prozess starten; auch keine vermeintlichen Versions-/Hilfeflags ausführen, solange deren Nebenwirkungsfreiheit nicht belegt ist.
-- Der RS232-USB-Adapter liegt laut Benutzer auf dem Live-Server unter `/dev/ttyUSB0`. Den Port nicht öffnen, konfigurieren oder parallel zum laufenden p4d benutzen. Ein `stat` auf den Gerätepfad ist eine reine Metadatenprüfung.
+- Der Adapter liegt unter `/dev/ttyUSB0`. Nur innerhalb des vorbereiteten hardware-read-Testfensters nach aktiviertem Rückkehrtimer, beendetem p4d und geprüfter Portfreigabe öffnen. Kein Parallelzugriff. Keine Heizungs-Schreibbefehle; Originaldatenbank bleibt strikt lesend, Aufzeichnung nur in separater Test-MariaDB. Außerhalb dieses Ablaufs Port nicht öffnen oder konfigurieren.
 - Vorhandener Quellcommit, lokale Änderungen und tatsächlich laufende Binärdatei sind getrennte Belege. Eine Gleichheit nicht allein aus einem vorhandenen Checkout folgern.
 - Bestehende Logs dürfen begrenzt gelesen werden; keine Logstufe ändern oder neuen Heizungsverkehr für Mitschnitte auslösen.
 - Nur bereinigte fachliche Befunde dokumentieren; keine privaten Hostnamen, IPs, Benutzerpfade, Zugangsdaten oder ungefilterten Logs committen.

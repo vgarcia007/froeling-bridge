@@ -1,0 +1,27 @@
+[Unit]
+Description=Froeling Bridge temporary read-only heating test
+After=network.target p4d.service
+Conflicts=p4d.service
+OnFailure=froeling-bridge-rollback.service
+
+[Service]
+Type=exec
+User=froeling-bridge-test
+Group=froeling-bridge-test
+SupplementaryGroups=dialout
+EnvironmentFile=/etc/froeling-bridge-test/window.env
+ExecStart=/opt/froeling-bridge/0.3.0/venv/bin/python -I -m froeling_bridge serve --mode hardware-read --config /etc/froeling-bridge-test/source-db.json --test-config /etc/froeling-bridge-test/test-db.json --device /dev/ttyUSB0 --trace-file ${BRIDGE_TRACE} --port 8001
+WorkingDirectory=/opt/froeling-bridge/0.3.0
+StateDirectory=froeling-bridge-test
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+DevicePolicy=closed
+DeviceAllow=/dev/ttyUSB0 rw
+Restart=no
+RuntimeMaxSec=15min
+TimeoutStopSec=25
+KillMode=control-group

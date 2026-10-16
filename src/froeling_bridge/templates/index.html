@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fröling Bridge · Heizungsmenü</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}" />
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Fröling Bridge Startseite"
+        ><span class="brand-mark">F<span>↗</span></span
+        ><span>Fröling<span class="brand-sub">BRIDGE</span></span></a
+      >
+      <p class="section-label">HEIZUNGSSTEUERUNG</p>
+      <nav class="main-nav" aria-label="Hauptnavigation">
+        <button id="nav-menu" class="active" data-view="menu">
+          <span>☷</span> Servicemenü
+        </button>
+        <button id="nav-values" data-view="values">
+          <span>◴</span> Messwerte
+        </button>
+        <button id="nav-times" data-view="times">
+          <span>◷</span> Zeitprogramme
+        </button>
+        <button id="nav-collector" data-view="collector">
+          <span>▤</span> Aufzeichnung
+        </button>
+      </nav>
+      <div class="sidebar-foot">
+        <span id="connection-dot" class="dot"></span
+        ><span id="connection">Verbindung wird geprüft</span
+        ><small
+          >Basierend auf linux-p4d<br />von Jörg Wendel & Mitwirkenden</small
+        >
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <span>DEINE HEIZUNG. KLAR IM BLICK.</span
+        ><span id="mode" class="badge">Verbinden …</span>
+      </header>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">FRÖLING BRIDGE</p>
+          <h1 id="view-title">Servicemenü</h1>
+          <p id="view-description">
+            Parameter finden, Werte prüfen und Änderungen nachvollziehen.
+          </p>
+        </div>
+        <button id="refresh" class="button secondary">↻ Aktualisieren</button>
+      </section>
+      <div id="mode-note" class="mode-note" role="status"></div>
+      <div id="notice" role="status" aria-live="polite" hidden></div>
+      <section id="menu-view" class="view">
+        <div class="toolbar">
+          <nav id="breadcrumbs" aria-label="Menüpfad"></nav>
+          <form id="search-form" role="search">
+            <label class="sr-only" for="search">Menü durchsuchen</label
+            ><input
+              id="search"
+              type="search"
+              placeholder="Parameter suchen …"
+              maxlength="100"
+            /><button class="button secondary" type="submit">Suchen</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 id="level-title">Heizungsmenü</h2>
+              <p id="level-subtitle">Menüeinträge werden geladen.</p>
+            </div>
+            <span class="tiny-label">MENÜ & PARAMETER</span>
+          </div>
+          <div id="menu-items" class="menu-items" aria-live="polite"></div>
+        </div>
+      </section>
+      <section id="values-view" class="view" hidden>
+        <div id="values-grid" class="values-grid"></div>
+      </section>
+      <section id="times-view" class="view" hidden>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Zeitprogramme</h2>
+              <p>Vier Intervalle pro Adresse · Auflösung: zehn Minuten</p>
+            </div>
+            <button id="load-times" class="button secondary">
+              Aus Steuerung lesen
+            </button>
+          </div>
+          <div id="time-programs" class="panel-body">
+            <p class="empty">
+              Zeitprogramme über „Aus Steuerung lesen“ abrufen.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section id="collector-view" class="view" hidden>
+        <div id="collector-content" class="panel panel-body"></div>
+      </section>
+      <footer>
+        Fröling Bridge <span id="version"></span
+        ><span
+          >Unabhängiges Projekt · API unter
+          <a href="/api/v1/openapi.json">/api/v1</a></span
+        >
+      </footer>
+    </main>
+    <dialog id="editor" aria-labelledby="editor-title">
+      <form id="edit-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">HEIZUNGSPARAMETER</p>
+            <h2 id="editor-title">Parameter</h2>
+          </div>
+          <button
+            id="close-editor"
+            class="icon-button"
+            type="button"
+            aria-label="Schließen"
+          >
+            ×
+          </button>
+        </div>
+        <p id="editor-description"></p>
+        <div id="parameter-meta" class="parameter-meta"></div>
+        <label id="input-label" for="parameter-input">Neuer Wert</label>
+        <div id="input-wrap"></div>
+        <p id="edit-result" role="status" aria-live="polite"></p>
+        <div class="dialog-actions">
+          <button id="cancel-editor" class="button secondary" type="button">
+            Schließen</button
+          ><button id="save-parameter" class="button primary" type="submit">
+            Änderung prüfen
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="confirmation" aria-labelledby="confirm-title">
+      <form id="confirm-form">
+        <p class="eyebrow">ÄNDERUNG BESTÄTIGEN</p>
+        <h2 id="confirm-title">Diesen Wert übernehmen?</h2>
+        <p id="confirm-description"></p>
+        <p class="hint">
+          Der Wert wird nach dem Schreiben erneut ausgelesen. Bei einem unklaren
+          Ergebnis wird nicht automatisch wiederholt.
+        </p>
+        <div class="dialog-actions">
+          <button id="cancel-confirm" class="button secondary" type="button">
+            Abbrechen</button
+          ><button id="confirm-save" class="button primary" type="submit">
+            Jetzt speichern
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

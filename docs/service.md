@@ -1,6 +1,6 @@
-# API und kontinuierlicher Datensammler (0.2.0)
+# API und kontinuierlicher Datensammler (0.3.0)
 
-Der Dienst sammelt regelmäßig Werte vom **Simulator** und bietet eine lokale HTTP-API. Mit einer separaten Test-MariaDB werden diese Werte im bekannten p4d-0.10.2-Schema gespeichert. Die Bestandsansicht kann eine bestehende Datenbank ausschließlich lesen. Es gibt noch keinen USB-/TTY-Transport, keine produktive Heizungsanbindung und kein Browsermenü.
+Der Dienst sammelt regelmäßig Werte vom **Simulator** und bietet eine lokale HTTP-API. Mit einer separaten Test-MariaDB werden diese Werte im bekannten p4d-0.10.2-Schema gespeichert. Die Bestandsansicht kann eine bestehende Datenbank ausschließlich lesen. Das [Webmenü und der vorbereitete lesende Hardwaretest](host-test.md) sind inzwischen implementiert. Eine produktive Heizungsanbindung ist noch nicht geprüft.
 
 ## Installation und Start
 
@@ -13,7 +13,7 @@ python3 -m venv .venv
 .venv/bin/froeling-bridge serve
 ```
 
-Der Dienst läuft unter `http://127.0.0.1:8000`, ohne Debugger/Reload. Das Aufzeichnungsintervall beträgt 60 Sekunden; `--interval 5` und `--port 8001` ändern die lokalen Demo-Einstellungen. SIGINT/SIGTERM beenden den Dienst. Es gibt absichtlich keine Bindung an öffentliche Interfaces, kein Produktions-Authentifizierungsverfahren und keinen Zugriff auf `/dev/ttyUSB0`.
+Der Dienst läuft unter `http://127.0.0.1:8000`, ohne Debugger/Reload. Das Aufzeichnungsintervall beträgt 60 Sekunden; `--interval 5` und `--port 8001` ändern die lokalen Demo-Einstellungen. SIGINT/SIGTERM beenden den Dienst. Es gibt absichtlich keine Bindung an öffentliche Interfaces, kein Produktions-Authentifizierungsverfahren und im Defaultmodus keinen Zugriff auf `/dev/ttyUSB0`.
 
 | Modus | Datenquelle | Aufzeichnung | Heizungsjobs |
 | --- | --- | --- | --- |
@@ -131,4 +131,4 @@ Ohne Service-Extra werden die HTTP-Tests übersprungen. Ohne ausdrücklich geset
 docker stop froeling-bridge-test-db
 ```
 
-Reale Schreibmitschnitte sind zusätzliche spätere Validierung. Der Quellcode von p4d reicht als Grundlage für diese Implementierung; die kaputte alte Weboberfläche blockiert sie nicht. USB-Transport, kontrollierter Livewechsel, Aggregation/Aufbewahrung und das moderne Browsermenü bleiben die nächsten Arbeitspakete.
+Reale Schreibmitschnitte sind zusätzliche spätere Validierung. Der Quellcode von p4d reicht als Grundlage für diese Implementierung; die kaputte alte Weboberfläche blockiert sie nicht. USB-Transport und Browsermenü sind nun implementiert; der tatsächliche Hardwaretest und die spätere Aggregation/Aufbewahrung bleiben offen.

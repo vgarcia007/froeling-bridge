@@ -102,12 +102,12 @@ Der [Python-Protokollkern mit Simulator](python-core.md) ist inzwischen implemen
 
 ## Aktueller Fortschritt und nächste Arbeitsphasen
 
-API, Datenbankadapter und kontinuierliche Simulator-Aufzeichnung sind in Version 0.2.0 implementiert: [Dienstanleitung](service.md). Flask/Waitress und PyMySQL sind für diesen lokalen Prototyp gewählt. Die Tests umfassen auch eine separate lokale MariaDB mit bekanntem Schema. Live-DB/-Server und USB-Port bleiben in diesem Arbeitspaket unberührt.
+API, Datenbankadapter und kontinuierliche Simulator-Aufzeichnung sind seit Version 0.2.0 implementiert: [Dienstanleitung](service.md). Flask/Waitress und PyMySQL sind für diesen lokalen Prototyp gewählt. Die Tests umfassen auch eine separate lokale MariaDB mit bekanntem Schema. Live-DB/-Server und USB-Port bleiben in diesem Arbeitspaket unberührt.
 
-1. **Hardwaretransport:** exklusiven USB-/TTY-Transport implementieren und offline prüfen; danach gesonderten kontrollierten Wechsel von p4d zum ersten realen Lesetest vorbereiten. Antwortprofil, Firmware und Wiederanlauf dabei validieren. Ein Schreibmitschnitt über die alte Weboberfläche ist keine Voraussetzung.
-2. **Modernes Menü:** Browser als Client der vorhandenen API; Hierarchie, Parametereditor, eindeutige Auftragszustände und Zeitprogramme. Charts und Fremdintegrationen bleiben nachrangig.
-3. **Produktiver Betrieb:** Authentifizierung, persistentes Auftragsjournal, Serviceinstallation und kontrollierter Produktivwriter; Hardware-Schreibtest gesondert vereinbaren. Aggregation/Aufbewahrung und bisher nicht unterstützte benötigte Sensortypen vor vollständiger Ablösung berücksichtigen.
-4. **Umstieg und Rückkehr:** Bestandsbackup/Schemavergleich, exklusiver Portzugriff, Messreihenvergleich und getestete Rückkehr auf p4d. Keine zwei gleichzeitigen Logger oder Aggregationswriter.
+1. **Erster realer Lesetest:** Webmenü, Linux-TTY-Transport und Rückkehrablauf sind in 0.3.0 implementiert und lokal geprüft; siehe [Host-Testanleitung](host-test.md). Nach einmaliger administrativer Einrichtung auf dem Zielhost den vereinbarten 15-Minuten-Test durchführen und anschließend p4d samt neuer Originalmesspunkte prüfen.
+2. **Befunde übernehmen:** Tatsächliche Antwortcodes, Firmware, benötigte Sensortypen und Menübesonderheiten aus dem Lesetest bereinigt dokumentieren. Unbekannte Protokollfelder nicht erfinden; keine Reparatur des alten Webinterfaces erforderlich.
+3. **Produktiver Betrieb:** Authentifizierung, dauerhaftes Auftragsjournal, endgültige Installation und Produktivwriter; gesonderter Hardware-Schreibtest. Aggregation/Aufbewahrung vor vollständiger Ablösung berücksichtigen.
+4. **Dauerhafter Umstieg:** Bestandsbackup/Schemavergleich und getestete Rückkehr, keine parallelen Logger oder Aggregationswriter.
 
 ## Prüfstand und Grenzen dieser Lieferung
 

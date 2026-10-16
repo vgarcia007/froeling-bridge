@@ -1,6 +1,6 @@
 # Python-Protokollkern und Offline-Simulator
 
-Stand: Version 0.2.0. Der Benutzer hat nach der Bestandsaufnahme die autonome Umsetzung des Offline-Kerns beauftragt. Dieses Paket implementiert die aus p4d 0.10.2 abgeleitete Bytecodierung und simulierte Transaktionsabläufe. Es gibt keinen seriellen Adapter und keine Live-Heizungsverbindung. Die getrennte [Dienstschicht](service.md) ergänzt API und Simulator-Datenaufzeichnung.
+Stand: Version 0.3.0. Der Benutzer hat nach der Bestandsaufnahme die autonome Umsetzung des Offline-Kerns beauftragt. Dieses Paket implementiert die aus p4d 0.10.2 abgeleitete Bytecodierung und simulierte Transaktionsabläufe. Ein separat implementierter Linux-TTY-Adapter ist für den ausdrücklich lesenden [Hardwaretest](host-test.md) vorhanden; eine reale Heizungsverbindung wurde noch nicht geprüft. Die getrennte [Dienstschicht](service.md) ergänzt API und Simulator-Datenaufzeichnung.
 
 ## Installation und Demo
 
@@ -95,7 +95,7 @@ Diese Frische gilt nur innerhalb unseres exklusiven Kommunikationsbesitzes. Ein 
 
 Der Simulator verwendet standardmäßig den Requestcode als Antwortcode und bei `39` zwei Antworten desselben Codes. **Das ist ein explizites Simulationsprofil, keine bestätigte Hardwareeigenschaft.** `HeatingClient(..., reply_commands={request_code: (reply_code, ...)})` kann eine belegte Zuordnung aufnehmen; Lesebefehle benötigen einen Code, `39` zwei. Das Defaultprofil darf nicht ungeprüft auf die Anlage übertragen werden.
 
-Die Rohbeobachtungen aus vorhandenen Logs und die Beleggrenzen stehen in [live-server.md](live-server.md). Echte Antwortzuordnungen, die Bedeutung der zwei Schreibantworten sowie Heizungsmodell/Firmware fehlen weiterhin. Ein TTY-Transport ist ein späterer eigener Implementierungsschritt; diese offenen Punkte blockieren die quellenbasierte Weiterentwicklung nicht. Es schreibt weder Heizungsuhr noch Force-/I/O-Manipulationsbefehle.
+Die Rohbeobachtungen aus vorhandenen Logs und die Beleggrenzen stehen in [live-server.md](live-server.md). Echte Antwortzuordnungen, die Bedeutung der zwei Schreibantworten sowie Heizungsmodell/Firmware fehlen weiterhin. Der neue TTY-Transport ist nur für den lesenden Hardwaretest freigegeben; diese offenen Punkte blockieren die quellenbasierte Weiterentwicklung nicht. Es schreibt weder Heizungsuhr noch Force-/I/O-Manipulationsbefehle.
 
 ## Anforderung an die spätere Web- und API-Schicht
 

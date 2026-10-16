@@ -14,7 +14,7 @@ from .errors import (
 
 
 class ByteTransport(Protocol):
-    """Contract for a future transport; no physical adapter is supplied here.
+    """Transport contract; the gated Linux TTY adapter is supplied separately.
 
     read(max_bytes, timeout) returns available bytes, or b'' on timeout.
     timeout=0 must never block. write(data, timeout) returns bytes accepted;

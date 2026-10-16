@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fr\u00f6ling Bridge local prototype API",
-    "version": "0.2.0",
-    "description": "Simulator and read-only p4d database API. Loopback only. Jobs are bounded and ephemeral; never automatically replay writes. No physical controller integration."
+    "version": "0.3.0",
+    "description": "Local web menu, simulator, read-only p4d database and explicitly gated hardware-read test. Heating writes are only enabled in simulator modes; jobs are never replayed."
   },
   "servers": [
     {
@@ -429,6 +429,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Heating writes are disabled in hardware-read mode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -446,6 +456,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/menu/search": {
+      "get": {
+        "operationId": "menu_search",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "At most 100 matching menu items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Items"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid search"
+          },
+          "503": {
+            "description": "Database unavailable"
           }
         }
       }
@@ -746,7 +791,8 @@
             "enum": [
               "demo",
               "demo-db",
-              "database"
+              "database",
+              "hardware-read"
             ]
           },
           "hardware_verified": {
@@ -764,6 +810,31 @@
           },
           "timezone": {
             "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "read_connection_verified": {
+            "type": "boolean"
+          },
+          "fatal_reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "capabilities": {
+            "type": "object",
+            "properties": {
+              "controller_read": {
+                "type": "boolean"
+              },
+              "heating_write": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "controller_read",
+              "heating_write"
+            ]
           }
         },
         "required": [
@@ -810,6 +881,9 @@
             "items": {
               "type": "object"
             }
+          },
+          "successful_cycles": {
+            "type": "integer"
           }
         }
       },

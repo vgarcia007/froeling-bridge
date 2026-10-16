@@ -1,0 +1,10 @@
+[Unit]
+Description=Restore original p4d after Froeling Bridge test
+After=froeling-bridge-hardware-test.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/froeling-bridge-test rollback
+TimeoutStartSec=150
+Restart=on-failure
+RestartSec=5
