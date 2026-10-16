@@ -91,3 +91,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Reale Prozessinspektion muss bereits vor p4d-Stop funktionieren. Fuser-Aufruf ohne nicht unterstütztes „--“ bei festem absolutem Pfad.
 - Regression prüft echten fuser-Prozess mit gehaltenem/freiem temporärem Objekt. Simulierte Koordinator-/Ersatzdiensttests allein belegen nicht die Kompatibilität externer Kommandos auf dem Zielhost.
 - Nach fehlgeschlagener Rückkehr Originalbetrieb zuerst wiederherstellen und Aufzeichnung bestätigen; kein weiterer Hardwaretest vor Anwendung der Korrektur.
+
+## 16.10.2026 — Bewährten p4d-Leseablauf übernehmen
+
+- Benutzer unterstreicht den zuverlässigen bisherigen p4d-Lesebetrieb und verlangt keine unnötige Zusatzkomplexität. Lesesequenzen und Datenübernahme am Original ausrichten; Abweichungen ausdrücklich begründen.
+- Zeitprogramme: ursprünglicher Check, First/Next und Speicherung nach Adresse; wiederholte Adresse ersetzt wie beim Original den vorherigen Eintrag. Auf dem Zielhost beobachtetes Antwortprofil 43 -> 42 ausdrücklich konfigurieren, statt alle Antwortcodes pauschal zu akzeptieren.
+- Frame-/CRC-Prüfung, Schreibsperren und begrenzte Laufzeit beibehalten. Noch nicht beobachtete Firmwareeigenschaften nicht als gesichert ausgeben.

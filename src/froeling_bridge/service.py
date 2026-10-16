@@ -12,6 +12,7 @@ from enum import Enum
 from queue import Queue, Full, Empty
 from threading import Event, Lock, Thread
 import math
+import logging
 import time
 import uuid
 
@@ -274,6 +275,8 @@ class BridgeService:
                 except Exception as exc:
                     errors.append(dict(**identity, error=failure(exc)))
                     if self.mode == "hardware-read":
+                        if isinstance(exc, ProtocolError):
+                            logging.getLogger(__name__).error("Heating read failed: %s", exc)
                         self.abort(type(exc).__name__)
                         break
             if samples and not self.stop.is_set():
@@ -386,6 +389,8 @@ class BridgeService:
             except Exception as exc:
                 update = dict(state="failed", error=failure(exc))
                 if self.mode == "hardware-read" and isinstance(exc, (ProtocolError, DatabaseUnavailable)):
+                    if isinstance(exc, ProtocolError):
+                        logging.getLogger(__name__).error("Heating read job failed: %s", exc)
                     self.abort(type(exc).__name__)
             with self.lock:
                 self.jobs[identifier].update(update, finished_at=datetime.now(ZONE).isoformat())

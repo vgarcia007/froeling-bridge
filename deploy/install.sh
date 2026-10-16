@@ -116,6 +116,9 @@ else
 fi
 "$release/venv/bin/python" -I "$bundle/install_state.py" database "$bundle"
 phase=services
+if [[ ! -e "$config/heating-reply-profile.json" ]]; then
+  install -m 0640 -g froeling-bridge-test heating-reply-profile.json "$config/heating-reply-profile.json"
+fi
 install -m 0755 froeling-bridge-test /usr/local/sbin/froeling-bridge-test
 install -m 0644 systemd/*.service systemd/*.timer /etc/systemd/system/
 systemd-analyze verify /etc/systemd/system/froeling-bridge-*.service /etc/systemd/system/froeling-bridge-*.timer

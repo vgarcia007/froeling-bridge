@@ -19,6 +19,11 @@ fi
 install -m 0644 "$bundle/wheels/froeling_bridge-0.3.0-py3-none-any.whl" "$release/wheels/"
 chgrp -R froeling-bridge-test "$release/venv"
 chmod -R g+rX "$release/venv"
+config=/etc/froeling-bridge-test/heating-reply-profile.json
+if [[ -e "$config" ]] && ! cmp --silent heating-reply-profile.json "$config"; then
+  echo 'An alternative reply profile already exists; preserved.' >&2; exit 2
+fi
+install -m 0640 -g froeling-bridge-test heating-reply-profile.json "$config"
 install -m 0644 systemd/froeling-bridge-preview.service systemd/froeling-bridge-hardware-test.service /etc/systemd/system/
 systemd-analyze verify /etc/systemd/system/froeling-bridge-preview.service /etc/systemd/system/froeling-bridge-hardware-test.service
 systemctl daemon-reload

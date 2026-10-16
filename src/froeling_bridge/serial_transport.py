@@ -81,7 +81,10 @@ class ReadOnlyTransport:
                     Command.ANALOG_OUT,
                     Command.PARAMETER,
                 }
-                if len(frame.payload) != (2 if frame.command in addressed else 0):
+                if frame.command == Command.CHECK:
+                    if frame.payload not in (b"", b"Tescht ;-)"):
+                        raise ValidationError("unexpected payload for read-only check")
+                elif len(frame.payload) != (2 if frame.command in addressed else 0):
                     raise ValidationError("unexpected payload for read-only command")
                 offset = 0
                 while offset < len(self._outgoing):

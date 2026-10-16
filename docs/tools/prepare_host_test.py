@@ -79,6 +79,8 @@ def prepare(root, upload=False):
         "update-lan.sh",
         "repair-test.sh",
         "export-traces.sh",
+        "fix-times.sh",
+        "heating-reply-profile.json",
         "froeling-bridge-test",
     ):
         shutil.copy2(root / "deploy" / name, bundle / name)

@@ -121,3 +121,7 @@ Bereits lokal geprüft: Browserabläufe in Chromium inklusive mobiler Darstellun
 ## Reparatur des ersten abgebrochenen Tests
 
 Die erste Helferfassung verwendete bei fuser die nicht unterstützte Option `--`. Das konnte sowohl den Teststart nach p4d-Stop als auch die Rückkehr blockieren. Die korrigierte Fassung prüft den tatsächlichen fuser-Aufruf bereits vor dem Stoppen. Für einen bereits betroffenen Host liegt im aktualisierten privaten Paket `repair-test.sh`: `sudo bash ~/froeling-bridge-test-0.3.0/repair-test.sh`. Sie prüft die Portbelegung, startet zuerst p4d, installiert das korrigierte Wheel und schließt den alten Fensterzustand über rollback. Sie startet keinen neuen Hardwaretest. Bis zur bestätigten Reparatur ist die Rückkehr auf dem betroffenen Host nicht gewährleistet.
+
+## Korrektur der Zeitprogrammabfrage
+
+Der echte Mitschnitt belegte `43 -> 42` als Antwortzuordnung für die Folgeabfrage. Das vorbereitete Update wird auf dem Zielhost über `sudo bash ~/fix-times.sh` angewendet. Es installiert Wheel, das explizite Profil unter `/etc/froeling-bridge-test/heating-reply-profile.json` und die passende Hardwaredienstdefinition. Der Lesepfad verwendet den ursprünglichen p4d-Check und ersetzt wiederholte Zeitgruppen nach Adresse. p4d bleibt während des Updates aktiv; ein neuer Hardwaretest wird separat über den Helfer gestartet. Die vollständige Zeitprogrammliste ist erst im folgenden Test zu bestätigen.

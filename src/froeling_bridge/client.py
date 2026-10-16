@@ -160,22 +160,22 @@ class HeatingClient:
             return self._list(tx, Command.ERRORS_FIRST, Command.ERRORS_NEXT, parse_error, max_items)
 
     def _times(self, tx):
-        result = []
-        seen = set()
+        # p4d stores each entry by address, replacing an earlier entry for the
+        # same address. Stop at DF, with a deadline/reply cap for a stuck list.
+        result = {}
         command = Command.TIMES_FIRST
         for _ in range(255):
             item = parse_time_ranges(self._request(tx, command).payload)
-            if item.address in seen:
-                raise MalformedPayload("time-program list repeats an address before its terminator")
-            seen.add(item.address)
-            result.append(item)
+            result[item.address] = item
             if item.address == 0xDF:
-                return tuple(result)
+                return tuple(result.values())
             command = Command.TIMES_NEXT
         raise ListLimitExceeded("time-program list lacks final address DF")
 
     def get_time_ranges(self, timeout=2.0):
         with self.session.transaction(timeout) as tx:
+            # Same read-only check used by p4d before updateTimeRangeData.
+            self._request(tx, Command.CHECK, b"Tescht ;-)")
             return self._times(tx)
 
     def set_time_range(self, address, index, interval: TimeRange, timeout=2.0):
