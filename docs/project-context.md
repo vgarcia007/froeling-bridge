@@ -54,6 +54,12 @@ Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`.
 - Referenzcheckout sauber. Live-Schemasnapshot enthält ausschließlich Strukturinformationen, keine Verbindungsdaten oder Datenzeilen.
 - Sicherungsprüfung für jedes Arbeitspaket: lokalen Commit und Remote-Commit auf `origin/main` vergleichen. Den tatsächlichen Sicherungsstand über Git prüfen, nicht aus dieser Datei ableiten.
 
+## Vorbereiteter manueller Logvergleich
+
+Der Benutzer hat angeboten, über die alte Installation selbst einen Parameter zu ändern. Ein lesender Ausgangsstand des aktiven Dateilogs liegt lokal unter `.local/write-capture-before.json` (Dateigröße, Inode und begrenzter Logauszug). Es wurde kein Schreibbefehl durch Fröling Bridge gesendet und keine Logstufe geändert. Der Versuch ist noch nicht als durchgeführt oder erfolgreich belegt.
+
+Nach Rückmeldung des Benutzers die seit dieser Baseline angehängten Logbytes begrenzt lesen und gegebenenfalls Rotation berücksichtigen. Die Baseline vorher nicht überschreiben. Für die Zuordnung werden Parametername/Adresse, alter und neuer Wert sowie Zeitpunkt und die Anzeige der alten Installation benötigt. Ob die vorhandene Logstufe eine vollständige Telegrammfolge liefert, ist offen. Rohdaten und konkrete Betriebswerte bleiben lokal; nur bereinigte Protokollbefunde tracken. Das manuelle Testangebot erteilt keine Freigabe für eigene Schreibbefehle, Portzugriffe oder Änderungen am Live-Dienst.
+
 ## Nächster sinnvoller Schritt
 
 1. Den DB-Kompatibilitätsadapter gegen das bekannte 0.10.2-Schema und lokale Fixtures planen/implementieren; zunächst keine Live-Schreibanbindung. Danach API und modernes Menü darauf aufbauen.
