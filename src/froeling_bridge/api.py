@@ -77,6 +77,14 @@ def create_app(service):
         # Never expose driver errors, connection configuration or traceback data.
         return response(dict(error=dict(code="internal_error", message="request failed")), 500)
 
+    @app.get(prefix + "/errors")
+    def controller_errors():
+        args_only()
+        runtime = getattr(service, "runtime", None)
+        if runtime is None:
+            raise ValidationError("heating error memory requires standalone mode")
+        return response(runtime.controller_errors())
+
     @app.get(prefix + "/health")
     def health():
         return response(dict(mode=service.mode, version=__version__, hardware_verified=False,

@@ -131,6 +131,10 @@ class Historian:
         self.aggregate_minutes = 30
         self._settings_loaded = False
         self._catalogue_stamp = None
+        self._errors_stamp = None
+        self._errors_retry = 0
+        self._errors_schema_ready = False
+        self.state["controller_errors"] = dict(available=None, last_success=None, error=None)
         self.next_aggregation = self._next_run()
         self.thread = (
             Thread(target=self._run, name="historian", daemon=True)
@@ -280,6 +284,50 @@ class Historian:
         with self.lock:
             self.state["pending_settings"] = len(self.local.pending_changes())
 
+    def sync_errors(self):
+        from .controller_errors import merge_events
+        snapshot = self.local.get_meta("controller_errors", {})
+        observed = snapshot.get("observed_at")
+        if not observed or observed == self._errors_stamp or time.monotonic() < self._errors_retry:
+            return
+        try:
+            if not self._errors_schema_ready:
+                with self.repository.transaction() as cursor:
+                    cursor.execute("SHOW COLUMNS FROM errors")
+                    required = {"id", "inssp", "updsp", "number", "info", "state", "text", "time1", "time2", "time4", "mailcnt"}
+                    if not required <= {r["Field"] for r in cursor.fetchall()}:
+                        raise ValidationError("incompatible p4d error table")
+                    cursor.execute("SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=%s AND TABLE_NAME='errors'", (self.repository.config.database,))
+                    if cursor.fetchone()["ENGINE"] != "InnoDB":
+                        raise ValidationError("heating errors require a transactional table")
+                self._errors_schema_ready = True
+            stamp = int(time.time())
+            with self.repository.transaction(writable=True) as cursor:
+                # Only occurrences present in the complete controller snapshot are touched.
+                proposed, _ = merge_events(snapshot["events"])
+                existing = {}
+                for number, time1 in proposed:
+                    cursor.execute("SELECT id,number,time1,time2,time4,state,info,text FROM errors WHERE number=%s AND time1=%s ORDER BY id LIMIT 1", (number, time1))
+                    row = cursor.fetchone()
+                    if row:
+                        existing[(number, time1)] = row
+                rows, changed = merge_events(snapshot["events"], existing)
+                for key in changed:
+                    row = rows[key]
+                    if key not in existing:
+                        cursor.execute("INSERT INTO errors (inssp,updsp,number,info,state,text,time1,time2,time4) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                       (stamp,stamp,row["number"],row["info"],row["state"],row["text"],row["time1"],row.get("time2"),row.get("time4")))
+                    else:
+                        cursor.execute("UPDATE errors SET updsp=%s,info=%s,state=%s,text=%s,time2=%s,time4=%s WHERE id=%s",
+                                       (stamp,row["info"],row["state"],row["text"],row.get("time2"),row.get("time4"),row["id"]))
+            self._errors_stamp = observed
+            with self.lock:
+                self.state["controller_errors"] = dict(available=True, last_success=datetime.now(ZONE).isoformat(), error=None)
+        except Exception:
+            self._errors_retry = time.monotonic() + 30
+            with self.lock:
+                self.state["controller_errors"].update(available=False, error="heating error database sync failed; previous rows preserved")
+
     def aggregate(self, now=None, max_days=7):
         """One transaction/day. Existing A buckets are never overwritten or double-counted."""
         now = now or datetime.now(ZONE)
@@ -389,6 +437,7 @@ class Historian:
                 self._settings()
                 self.sync_catalogue()
                 self.sync_flags()
+                self.sync_errors()
                 if item:
                     samples, when, stamp = item
                     stored = self.repository.store_cycle(samples, when, stamp)

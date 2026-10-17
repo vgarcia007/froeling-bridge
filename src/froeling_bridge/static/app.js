@@ -25,6 +25,7 @@ const views = {
     "Zeitprogramme",
     "Laufzeiten übersichtlich prüfen und gezielt ändern.",
   ],
+  errors: ["Fehlerspeicher", "Meldungen der Steuerung mit Zustand und Zeitpunkten."],
   collector: ["Aufzeichnung", "Datensammlung und Speicherung nachvollziehen."],
 };
 const errorMessages = {
@@ -534,6 +535,32 @@ async function loadValues() {
 }
 $("sensor-search").addEventListener("input", loadValues);
 $("sensor-filter").addEventListener("change", loadValues);
+async function loadErrors() {
+  try {
+    const data = await api("/errors");
+    if (state.view !== "errors") return;
+    const sync = (await api("/runtime")).history?.controller_errors;
+    $("errors-status").textContent =
+      (data.available ? "Zuletzt gelesen: " + stamp(data.observed_at) : "Noch keine vollständige Fehlerliste gelesen.") +
+      (data.stale ? " · Veraltet" : "") +
+      (data.error ? " · " + data.error : "") +
+      (sync?.error ? " · MariaDB-Abgleich gestört" : "");
+    const container = $("errors-list");
+    container.replaceChildren();
+    if (!data.items.length) container.append(element("p", data.available ? "Keine zuordenbaren Fehlereinträge im gelesenen Heizungsfehlerspeicher." : "Fehlerspeicher noch nicht verfügbar.", "empty"));
+    for (const item of data.items) {
+      const row = element("div", "", "menu-row");
+      const detail = element("div");
+      detail.append(element("strong", item.number + " · " + item.text));
+      detail.append(element("p", item.state));
+      for (const [key, title] of [["time1", "Gekommen"], ["time4", "Gegangen"], ["time2", "Quittiert"]]) {
+        if (item[key]) detail.append(element("p", title + ": " + stamp(item[key])));
+      }
+      row.append(detail); container.append(row);
+    }
+  } catch (error) { notice(explain(error), true); }
+}
+
 async function loadCollector() {
   try {
     const data = await api("/collector");
@@ -754,6 +781,7 @@ function switchView(view, timeGroupFilter = null) {
   if (view === "menu") loadMenu();
   if (view === "values") loadValues();
   if (view === "collector") loadCollector();
+  if (view === "errors") loadErrors();
   if (view === "times") {
     $("load-times").disabled = !state.health?.capabilities.controller_read;
     loadCachedTimes();
@@ -796,6 +824,7 @@ async function healthLoop() {
     if (first) loadMenu();
     if (state.view === "values") loadValues();
     if (state.view === "collector") loadCollector();
+    if (state.view === "errors") loadErrors();
   } catch (error) {
     $("connection").textContent = "Verbindung unterbrochen";
     $("connection-dot").className = "dot offline";

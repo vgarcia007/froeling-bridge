@@ -54,7 +54,7 @@ class HistoryIntegrationTests(unittest.TestCase):
         second.validate_schema()
         with self.repo.transaction() as c:
             c.execute("SHOW TABLES")
-            self.assertEqual(len(c.fetchall()), 6)
+            self.assertEqual(len(c.fetchall()), 7)
 
     def test_existing_compatible_database_never_initializes_or_changes_metadata(self):
         self.point(datetime(2026, 1, 1), 42)
@@ -197,6 +197,62 @@ class HistoryIntegrationTests(unittest.TestCase):
             (row["time"], row["value"], row["samples"]),
             (datetime(2025, 10, 26, 2, 30), 15, 2),
         )
+
+
+    def test_error_sync_preserves_occurrences_ids_mail_counters_and_does_not_delete(self):
+        from test_controller_errors import event
+        def sync(data, stamp):
+            self.local.set_meta('controller_errors', dict(events=data,observed_at=stamp))
+            self.history.sync_errors()
+            self.assertTrue(self.history.status()['controller_errors']['available'])
+        sync([event(1)],'first')
+        with self.repo.transaction(writable=True) as c:
+            c.execute("UPDATE errors SET mailcnt=9")
+        sync([event(1),event(4,11),event(2,12)],'second')
+        with self.repo.transaction() as c:
+            c.execute('SELECT * FROM errors'); rows=c.fetchall()
+        self.assertEqual(len(rows),1)
+        row=rows[0]
+        self.assertEqual(row['state'],'quittiert');self.assertEqual(row['mailcnt'],9)
+        self.assertEqual(row['time4'],datetime(2026,1,1,11))
+        self.assertEqual(row['time2'],datetime(2026,1,1,12))
+        sync([event(1),event(4,11)],'third')  # Old heater data cannot regress acknowledged state.
+        sync([],'empty')  # Empty heater list never erases database history.
+        with self.repo.transaction() as c:
+            c.execute('SELECT * FROM errors');self.assertEqual(c.fetchall(),rows)
+        sync([event(1,13)],'new occurrence')
+        with self.repo.transaction() as c:
+            c.execute('SELECT count(*) AS n FROM errors');self.assertEqual(c.fetchone()['n'],2)
+
+    def test_error_sync_rolls_back_partial_write_and_remains_independent_of_samples(self):
+        from test_controller_errors import event
+        self.history._errors_schema_ready=True
+        original=self.repo.transaction
+        class Cursor:
+            def __init__(self,c):self.c=c;self.count=0
+            def execute(self,sql,args=None):
+                if sql.startswith('INSERT INTO errors'):
+                    self.count+=1
+                    if self.count==2:raise RuntimeError('test interruption')
+                return self.c.execute(sql,args)
+            def __getattr__(self,name):return getattr(self.c,name)
+        @contextmanager
+        def failing(writable=False):
+            with original(writable=writable) as c:yield Cursor(c)
+        self.local.set_meta('controller_errors',dict(observed_at='first',events=[event(1),event(1,13)]))
+        self.repo.transaction=failing
+        self.history.sync_errors()
+        self.assertFalse(self.history.status()['controller_errors']['available'])
+        self.assertIsNone(self.history._errors_stamp)
+        self.repo.transaction=original
+        with self.repo.transaction() as c:
+            c.execute('SELECT count(*) AS n FROM errors');self.assertEqual(c.fetchone()['n'],0)
+        self.point(datetime(2026,1,1),42)
+        self.assertEqual(len(self.rows()),1)
+        self.history._errors_retry=0
+        self.history.sync_errors()
+        self.assertTrue(self.history.status()['controller_errors']['available'])
+
 
 
 class HistoryIsolationTests(unittest.TestCase):

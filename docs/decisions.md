@@ -163,3 +163,10 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Danach normales p4d-Parametermenü über geschützten Geräte-/Firmware-Nachweis für `write_parameter` freigeschaltet. `write_time_range` bleibt gesperrt. Keine beliebigen weiteren Teständerungen aus dieser Freigabe ableiten.
 - Exklusiver Portzugriff, privates Zustandsbackup und unabhängiger Rückkehrtimer; nach kurzer Pause wieder Bridge-Monitoring, Historie und Gesundheitsüberwachung aktiv. Langzeitbeobachtung enthält die geplante API-Unterbrechung und ist kein lückenloser 24h-Nachweis.
 - Bootet regulär mit Bridge und Gesundheits-Timer; p4d als Rückfall erhalten, regulärer Autostart deaktiviert. Wirksames Host-Drop-in `Restart=no` und OnFailure-Rückkehr lesend bestätigt. Benutzer sagt ausdrücklich, den Rechner jetzt nicht neu zu starten.
+
+## 17.10.2026 — Heizungsfehlerspeicher und vorhandene SQL-Clients
+
+- Benutzer meldet einen unabhängigen SQL-Client und erklärt den Fehlerspeicher für essentiell. Bestehendes Status-Recordflag erhalten, seine genaue SQL-Abfrage separat klären. p4d bindet auch Status-Messpunkte an Record; keinen ungefragten Sonderpfad mit unabhängigem Flag einführen.
+- Fehlerspeicher wie `P4d::afterUpdate` → `updateErrors` regelmäßig lesen und p4d-Zuordnung/Zustandsübergänge übernehmen. Nur vollständige Listen ersetzen den persistenten Cache; GET ist rein lesend. Steuerungseinträge und Dienstfehler klar unterscheiden.
+- MariaDB-`errors` separat vom seriellen Worker transaktional abgleichen. ID, Mailzähler, frühere Quittierungen und ältere DB-Historie erhalten. Keine Quittierbefehle an die Heizung, keine künstlichen Fehler erzeugen. Fehler dieses Abgleichs sichtbar machen, ohne Messwerterfassung zu beenden.
+- Neue leere Datenbank enthält ab 0.5.4 sieben kompatible Kerntabellen einschließlich `errors`. Vorhandene DB nicht migrieren. Reale Übernahme erst nach separater MariaDB-/Browser-/Installationsprüfung und mit Zustandsbackup/Rückkehrtimer.

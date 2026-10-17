@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fröling Bridge API",
-    "version": "0.5.3",
+    "version": "0.5.4",
     "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation."
   },
   "servers": [
@@ -649,6 +649,74 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/errors": {
+      "get": {
+        "summary": "Cached heating error memory (no serial request on GET)",
+        "description": "Standalone: grouped controller occurrences, p4d states and controller-local timestamps; observed_at, age_seconds, stale, error and last_attempt describe freshness. Older MariaDB occurrences are preserved separately. Unavailable is distinct from a successfully read empty list.",
+        "responses": {
+          "200": {
+            "description": "Last complete, persistent heating error snapshot with freshness metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "stale": {
+                      "type": "boolean"
+                    },
+                    "observed_at": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "number": {
+                            "type": "integer"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "gekommen",
+                              "gegangen",
+                              "quittiert"
+                            ]
+                          },
+                          "text": {
+                            "type": "string"
+                          },
+                          "time1": {
+                            "type": "string"
+                          },
+                          "time2": {
+                            "type": "string"
+                          },
+                          "time4": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported mode or query parameters"
           }
         }
       }

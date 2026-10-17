@@ -24,6 +24,9 @@
         <button id="nav-times" data-view="times">
           <span>◷</span> Zeitprogramme
         </button>
+        <button id="nav-errors" data-view="errors">
+          <span>!</span> Fehlerspeicher
+        </button>
         <button id="nav-collector" data-view="collector">
           <span>▤</span> Aufzeichnung
         </button>
@@ -89,6 +92,13 @@
         </div>
         <p id="sensor-summary" class="muted"></p>
         <div id="values-grid" class="values-grid"></div>
+      </section>
+      <section id="errors-view" class="view" hidden>
+        <div class="panel">
+          <div class="panel-header"><div><h2>Fehlerspeicher der Heizung</h2>
+            <p id="errors-status">Noch nicht gelesen.</p></div></div>
+          <div id="errors-list" class="menu-items"></div>
+        </div>
       </section>
       <section id="times-view" class="view" hidden>
         <div class="panel">

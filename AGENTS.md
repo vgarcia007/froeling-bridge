@@ -20,6 +20,12 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Neuer Auftrag: Fehlerspeicher und bestehender DB-Client
+
+Benutzer meldet einen weiteren Client, der Heizungsstatus regelmäßig aus MariaDB liest; erst aktiviertes Status-Recordflag lieferte wieder aktuelle Messpunkte. Fehlerspeicher ausdrücklich essentiell. Regelmäßiges Lesen und p4d-kompatible Synchronisation von `errors` sowie API-/Webanzeige ergänzen, separat testen und kontrolliert bei erhaltener Erfassung ausrollen. Dieser Auftrag ersetzt die folgende Beobachtungsabsprache für dieses Arbeitspaket. Gesetzte Sensorflags erhalten; nicht ungefragt Recordflag umgehen oder eine neue DB-Schnittstelle für den vorhandenen Client erfinden. Genaue Client-SQL-Abfrage ist angefragt, blockiert Fehlerspeicherarbeit nicht. Keine Heizungs-Schreibtests und kein Hostneustart.
+
+Umgesetzt und auf dem Host aktiviert als 0.5.4: Heizungsfehlerspeicher regelmäßig lesen, SQLite-Cache, API/Webansicht und transaktionaler MariaDB-Abgleich. 226 Tests mit isolierter MariaDB sowie Browser-/PTY-/Installationsprüfung erfolgreich. Reale Fehlerliste und Abgleich bestätigt, bestehende 86 Fehlerzeilen erhalten, Status-Recordflag weiterhin A. Konfiguration inklusive Schreibnachweis unverändert, keine Heizungsparameter-/Flagänderungen. Genaue Ergebnisse in docs/project-context.md. Nun wieder unverändert beobachten; aktuelle Sicherung im Remote prüfen.
+
 ## Aktuelle Absprache: unverändert beobachten
 
 Benutzer lässt den Stand zunächst einige Tage laufen und prüft selbst. Ohne neuen Auftrag keine weiteren Deployments, Neustarts oder Heizungs-Schreibtests. Bestehende automatische Erfassung, Aufzeichnung und Gesundheitsüberwachung unverändert laufen lassen. Aktuellen Quell-/Dokumentationsstand auf GitHub sichern; bei Rückmeldung mit dem dokumentierten Stand fortsetzen.

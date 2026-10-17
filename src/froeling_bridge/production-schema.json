@@ -493,5 +493,84 @@
       "primary": false,
       "auto_increment": false
     }
+  ],
+  "errors": [
+    {
+      "name": "id",
+      "type": "int(11) unsigned",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": true
+    },
+    {
+      "name": "inssp",
+      "type": "int(11)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "updsp",
+      "type": "int(11)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "time1",
+      "type": "datetime",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "time4",
+      "type": "datetime",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "time2",
+      "type": "datetime",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "number",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "info",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "state",
+      "type": "varchar(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "text",
+      "type": "varchar(100)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "mailcnt",
+      "type": "int(11)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    }
   ]
 }

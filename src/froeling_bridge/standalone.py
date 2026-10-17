@@ -151,6 +151,7 @@ class StandaloneRuntime:
             catalogue_recovered=self.repository.recovered,
             connection=self.client.status(),
             collector=self.service.collector_status(),
+            controller_errors=self.controller_errors(),
             catalogue_ready=bool(self.repository.get_meta("discovered_at")),
             history=(
                 historian.status()
@@ -164,6 +165,10 @@ class StandaloneRuntime:
                 )
             ),
         )
+
+    def controller_errors(self):
+        from .controller_errors import view
+        return view(self.repository.get_meta("controller_errors"), self.service.interval)
 
     def _history_setup(self):
         from .history import initialize_database, Historian
@@ -255,7 +260,25 @@ class StandaloneRuntime:
         self.service.read_connection_verified = True
         return previous is not None and previous != str(status.state)
 
+    def refresh_errors(self):
+        from .controller_errors import events, merge_events
+        previous = self.repository.get_meta("controller_errors", {})
+        attempted = datetime.now(ZONE).isoformat()
+        try:
+            entries = self.service._wait(self.service.worker.submit(
+                lambda: self.client.get_errors(timeout=30)))
+            data = events(entries)
+            merge_events(data)  # Reject unsupported interpretation before publishing/syncing.
+            snapshot = dict(events=data, observed_at=datetime.now(ZONE).isoformat(),
+                            last_attempt=attempted, error=None)
+            self.repository.set_meta("controller_errors", snapshot)
+        except Exception:
+            previous.update(last_attempt=attempted, error="heating error memory could not be refreshed")
+            self.repository.set_meta("controller_errors", previous)
+            logger.warning("Heating error memory refresh failed; previous snapshot preserved")
+
     def _run(self):
+        next_errors = 0
         next_values = next_status = 0
         failures = 0
         while not self.stop.is_set():
@@ -273,6 +296,9 @@ class StandaloneRuntime:
                     # A broken transaction was not replayed; reconnect on the next status attempt.
                     if not self.client.status()["connected"]:
                         raise ProtocolError("connection lost during collection")
+                if now >= next_errors or changed:
+                    self.refresh_errors()
+                    next_errors = time.monotonic() + self.service.interval
                 self.phase, self.error, failures = "ready", None, 0
                 self.stop.wait(
                     max(0.05, min(next_values, next_status) - time.monotonic())

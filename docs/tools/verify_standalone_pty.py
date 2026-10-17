@@ -94,6 +94,17 @@ with tempfile.TemporaryDirectory(prefix="froeling-independent-pty-") as tmp:
         runtime = get("/runtime")
         assert runtime["catalogue_ready"]
         assert not runtime["history"]["configured"]
+        # Periodic error polling uses the same physical worker, without GET side effects.
+        first_errors = get("/errors")
+        for _ in range(100):
+            refreshed_errors = get("/errors")
+            if refreshed_errors["available"] and refreshed_errors["observed_at"] != first_errors["observed_at"]:
+                break
+            time.sleep(.05)
+        else:
+            raise AssertionError("heating error memory was not refreshed periodically")
+        assert commands.count(Command.ERRORS_FIRST) >= 2
+
         request = Request(
             base + "/jobs",
             data=json.dumps(
