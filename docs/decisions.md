@@ -125,3 +125,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Hardware-Schreiben nur nach unabhängigem Nachweis für Gerät/Firmware/Operation, Änderungs-/Rückstelltool ohne automatische Wiederholung nach unklarem Ausgang. Installation erzeugt keine Schreibfreigabe. Echte Werte/Testauswahl bleiben gesondert abzustimmen.
 - systemd auf neuem Host: Bridge neu starten. Auf bestehendem p4d-Host: Restart=no und unmittelbare OnFailure-Rückkehr, weil reale systemd-Prüfung gezeigt hat, dass automatische Restarts OnFailure verzögern können.
 - Noch keine neue Hardware-/24h-Abnahme oder Rootinstallation aus erfolgreichen lokalen Tests ableiten.
+
+## 17.10.2026 — Monitoring hat Vorrang vor Abnahme
+
+- Ein 24-Stunden-Nachweis beobachtet bereits funktionierenden Betrieb; er rechtfertigt keine Unterbrechung des Heizungsmonitorings. Wenn die Bridge keine aktuellen Messwerte liefert, zuerst p4d wiederherstellen. Keine weiteren Umschaltungen vor Fehlerkorrektur.
+- Die erste reale 0.5.0-Discovery bleibt bei Sensoren hängen; noch keine erfolgreichen Messzyklen. Simulator-/Installationstests waren kein Beleg für diese Hardwaresequenz. Die genaue Ursache ist noch offen.
+- Aktivierung darf Notrückkehr und Status nicht durch ihre eigene lang gehaltene Prozesssperre blockieren. Status liest ohne exklusive Sperre; Rückkehr signalisiert zunächst Abbruch und wartet begrenzt auf die Sperre. Aktivierung prüft den Abbruch und stellt p4d wieder her. Regression prüft echte konkurrierende Dateisperren und Wiederherstellung.

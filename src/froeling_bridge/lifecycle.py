@@ -108,6 +108,8 @@ def control(action, system=None):
         opener = build_opener(ProxyHandler({}))
         deadline = time.monotonic() + 700
         while time.monotonic() < deadline:
+            if (STATE / "cancel-start").exists():
+                raise TestControlError("startup cancelled by rollback request")
             if not system.active(LIVE):
                 raise TestControlError("bridge stopped during startup")
             try:
@@ -121,6 +123,8 @@ def control(action, system=None):
                     and runtime["catalogue_ready"]
                     and runtime.get("collector", {}).get("successful_cycles", 0) >= 1
                 ):
+                    if (STATE / "cancel-start").exists():
+                        raise TestControlError("startup cancelled by rollback request")
                     system.stop(GUARD)
                     return control("status", system)
             except (OSError, ValueError):
@@ -133,9 +137,38 @@ def control(action, system=None):
         raise
 
 
-def main():
+def locked_control(action):
+    """Allow status and emergency cancellation while activation owns the lock."""
     import fcntl
 
+    if action == "status":
+        return control(action)
+    cancellation = STATE / "cancel-start"
+    if action in ("rollback", "rescue"):
+        cancellation.touch(mode=0o600)
+    with open(STATE / "control.lock", "a") as lock:
+        deadline = time.monotonic() + 30
+        while True:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if action == "start" or time.monotonic() >= deadline:
+                    raise TestControlError(
+                        "another lifecycle action is running; rollback cancellation requested"
+                        if action != "start" else "another lifecycle action is running"
+                    ) from None
+                time.sleep(0.1)
+        if action == "start":
+            if cancellation.exists():
+                raise TestControlError("rollback pending; complete rollback before starting")
+        result = control(action)
+        if action in ("rollback", "rescue"):
+            cancellation.unlink(missing_ok=True)
+        return result
+
+
+def main():
     if os.geteuid() != 0 or sys.argv[1:] not in (
         ["start"],
         ["rollback"],
@@ -145,9 +178,7 @@ def main():
         print("Use installed helper: start, rollback or status.", file=sys.stderr)
         return 2
     try:
-        with open(STATE / "control.lock", "a") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            print(json.dumps(control(sys.argv[1]), indent=2))
+        print(json.dumps(locked_control(sys.argv[1]), indent=2))
         return 0
     except Exception as exc:
         print(
