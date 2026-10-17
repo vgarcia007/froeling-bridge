@@ -10,7 +10,7 @@ from typing import Tuple
 
 from .codec import Frame, uint
 from .errors import (
-    ListLimitExceeded, MalformedPayload, UnexpectedReply,
+    ListLimitExceeded, MalformedPayload, ProtocolError, UnexpectedReply,
     ValidationError, WriteOutcomeUnknown, WriteVerificationError,
 )
 from .messages import (
@@ -60,8 +60,8 @@ class HeatingClient:
     def _codes(self, command):
         return self.reply_commands.get(command, (command, command) if command == Command.SET_PARAMETER else (command,))
 
-    def _request(self, tx, command, payload=b""):
-        return tx.exchange(Frame(command, payload), self._codes(command))[0]
+    def _request(self, tx, command, payload=b"", timeout=None):
+        return tx.exchange(Frame(command, payload), self._codes(command), timeout=timeout)[0]
 
     def get_status(self, timeout=2.0):
         with self.session.transaction(timeout) as tx:
@@ -133,33 +133,50 @@ class HeatingClient:
                 raise WriteOutcomeUnknown("parameter write", address, stage) from exc
             raise
 
-    def _list(self, tx, first, next_command, parser, max_items):
+    def _list(self, tx, first, next_command, parser, max_items, min_payload=0):
         if type(max_items) is not int or max_items <= 0:
             raise ValidationError("max_items must be positive")
         result = []
         command = first
+        entries = 0
         while True:
             # p4d reads these First/Next lists without checking the header command.
             # Accept the same-list First response on Next, without accepting unrelated replies.
-            if command == next_command and command not in self.reply_commands:
-                reply = tx.exchange(Frame(command), (frozenset((first, next_command)),))[0]
-            else:
-                reply = self._request(tx, command)
+            try:
+                if command == next_command and command not in self.reply_commands:
+                    reply = tx.exchange(Frame(command), (frozenset((first, next_command)),), timeout=2.0)[0]
+                else:
+                    reply = self._request(tx, command, timeout=2.0)
+            except ProtocolError as exc:
+                raise type(exc)(
+                    f"list 0x{first:02X}, request 0x{command:02X}, entry {entries + 1}: {exc}"
+                ) from exc
+            # p4d skips short, nonterminal entries (wrnEmpty/wrnSkip).
+            # Count skipped entries too, so an all-empty list remains bounded.
+            if reply.payload and reply.payload[0] and len(reply.payload) < min_payload:
+                if entries == max_items:
+                    raise ListLimitExceeded("controller list did not terminate within item limit")
+                entries += 1
+                command = next_command
+                continue
             item = parser(reply.payload)
             if item is None:
                 return tuple(result)
-            if len(result) == max_items:
+            if entries == max_items:
                 raise ListLimitExceeded("controller list did not terminate within item limit")
             result.append(item)
+            entries += 1
             command = next_command
 
     def get_value_specs(self, timeout=2.0, max_items=4096):
         with self.session.transaction(timeout) as tx:
-            return self._list(tx, Command.VALUES_FIRST, Command.VALUES_NEXT, parse_value_spec, max_items)
+            self._request(tx, Command.CHECK, b"Tescht ;-)", timeout=2.0)
+            return self._list(tx, Command.VALUES_FIRST, Command.VALUES_NEXT, parse_value_spec, max_items, min_payload=11)
 
     def get_menu(self, timeout=2.0, max_items=4096):
         with self.session.transaction(timeout) as tx:
-            return self._list(tx, Command.MENU_FIRST, Command.MENU_NEXT, parse_menu_item, max_items)
+            self._request(tx, Command.CHECK, b"Tescht ;-)", timeout=2.0)
+            return self._list(tx, Command.MENU_FIRST, Command.MENU_NEXT, parse_menu_item, max_items, min_payload=30)
 
     def get_errors(self, timeout=2.0, max_items=4096):
         with self.session.transaction(timeout) as tx:

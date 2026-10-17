@@ -125,6 +125,16 @@ class _Transaction:
             raise UnexpectedReply(f"expected command {names}, received 0x{frame.command:02X}")
         return frame
 
-    def exchange(self, frame: Frame, commands):
-        self.send(frame)
-        return tuple(self.receive(command) for command in commands)
+    def exchange(self, frame: Frame, commands, timeout=None):
+        # Lists have a long overall deadline, but a missing individual reply
+        # must not consume it. Keep one deadline across fragmented RX/TX.
+        deadline = self.deadline
+        if timeout is not None:
+            if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0:
+                raise ValidationError("exchange timeout must be finite and positive")
+            self.deadline = min(deadline, self.session._clock() + timeout)
+        try:
+            self.send(frame)
+            return tuple(self.receive(command) for command in commands)
+        finally:
+            self.deadline = deadline

@@ -11,6 +11,32 @@ from froeling_bridge.host_test import TestControlError
 
 
 class LifecycleTests(unittest.TestCase):
+    def test_first_reported_startup_failure_restores_p4d_without_waiting_for_deadline(self):
+        from io import BytesIO
+
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory)
+            (state / 'installation.json').write_text(json.dumps(dict(
+                p4d_fallback=True, p4d_enabled=True, device='/dev/test', port=8000)))
+            system = Mock()
+            active = {lifecycle.GUARD}
+            system.active.side_effect = lambda unit: unit in active
+            system.start.side_effect = active.add
+            system.stop.side_effect = active.discard
+            response = BytesIO(json.dumps(dict(last_failure=dict(
+                phase='discovery:sensors', error_type='RequestTimeout'))).encode())
+            opener = Mock()
+            opener.open.return_value = response
+            with patch.object(lifecycle, 'STATE', state), patch.object(
+                lifecycle, 'build_opener', return_value=opener
+            ), patch.object(lifecycle.time, 'sleep') as sleep:
+                with self.assertRaisesRegex(TestControlError, 'discovery:sensors'):
+                    lifecycle.control('start', system)
+            sleep.assert_not_called()
+            system.stop.assert_any_call(lifecycle.LIVE)
+            system.start.assert_any_call(lifecycle.P4D)
+            system.boot.assert_any_call(lifecycle.P4D, True)
+
     def test_status_available_while_start_owns_lock(self):
         with tempfile.TemporaryDirectory() as directory:
             with patch.object(lifecycle, 'STATE', Path(directory)):

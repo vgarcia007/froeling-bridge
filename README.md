@@ -16,7 +16,7 @@ Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, 
 
 ## Projektstand
 
-Version 0.5.0 ergänzt den **eigenständigen Betrieb ohne p4d und ohne MariaDB**: Discovery von Sensoren, Menü und Zeitprogrammen, lokaler persistenter Katalog, Status-/Messwertabfragen, vollständige Sensorübersicht und optional p4d-kompatible Historie mit automatischer Datenbankeinrichtung und Verdichtung. Ein natives Debian-/Ubuntu-Installationsskript richtet Dienst und USB-Zugriff ein. [Installation und Betrieb](docs/standalone.md).
+Version 0.5.0 ergänzt den **eigenständigen Betrieb ohne p4d und ohne MariaDB**: Discovery von Sensoren, Menü und Zeitprogrammen, lokaler persistenter Katalog, Status-/Messwertabfragen, vollständige Sensorübersicht und optional p4d-kompatible Historie mit automatischer Datenbankeinrichtung und Verdichtung. Ein natives Debian-/Ubuntu-Installationsskript richtet Dienst und USB-Zugriff ein. [Installation und Betrieb](docs/standalone.md). Korrekturstand 0.5.1 ergänzt p4d-konforme Discovery-Checks, Behandlung leerer Listeneinträge, begrenzte Antwortfristen und jederzeit anforderbare Rückkehr zu p4d.
 
 Die neuen Abläufe sind gegen Simulator, Pseudo-TTY, separate MariaDB, Browser und systemd-Ersatzdienste geprüft. Die vollständige neue Discovery auf der echten Anlage, ein 24-Stunden-Lauf und echte Schreibtests sind **noch ausstehend**. Ein früherer 15-Minuten-Lesetest mit bestehendem p4d-Katalog war erfolgreich; er ersetzt diese neue Abnahme nicht.
 

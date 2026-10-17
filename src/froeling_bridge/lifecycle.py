@@ -117,6 +117,14 @@ def control(action, system=None):
                     f"http://127.0.0.1:{state['port']}/api/v1/runtime", timeout=2
                 ) as response:
                     runtime = json.load(response)
+                failure = runtime.get("last_failure")
+                if failure:
+                    raise TestControlError(
+                        "bridge startup failed during "
+                        + str(failure.get("phase", "unknown"))
+                        + " (" + str(failure.get("error_type", "unknown"))
+                        + "); inspect service journal"
+                    )
                 if (
                     runtime["phase"] == "ready"
                     and runtime["connection"]["connected"]

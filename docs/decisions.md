@@ -131,3 +131,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Ein 24-Stunden-Nachweis beobachtet bereits funktionierenden Betrieb; er rechtfertigt keine Unterbrechung des Heizungsmonitorings. Wenn die Bridge keine aktuellen Messwerte liefert, zuerst p4d wiederherstellen. Keine weiteren Umschaltungen vor Fehlerkorrektur.
 - Die erste reale 0.5.0-Discovery bleibt bei Sensoren hängen; noch keine erfolgreichen Messzyklen. Simulator-/Installationstests waren kein Beleg für diese Hardwaresequenz. Die genaue Ursache ist noch offen.
 - Aktivierung darf Notrückkehr und Status nicht durch ihre eigene lang gehaltene Prozesssperre blockieren. Status liest ohne exklusive Sperre; Rückkehr signalisiert zunächst Abbruch und wartet begrenzt auf die Sperre. Aktivierung prüft den Abbruch und stellt p4d wieder her. Regression prüft echte konkurrierende Dateisperren und Wiederherstellung.
+
+## 17.10.2026 — Discovery-Korrektur 0.5.1
+
+- CHECK und das Überspringen kurzer nicht abschließender Listeneinträge anhand des vollständigen p4d-Aufrufpfades übernehmen. Prüfsummen, fremde Antwortfamilien, Gesamtfristen und Antwortlimit bleiben geprüft. Eine Antwort erhält höchstens zwei Sekunden innerhalb der gesamten Listenfrist; bei Fragmenten nicht neu starten.
+- Konkrete Phase/Fehlerklasse und sichere Protokolldetails sichtbar machen; keine beliebigen OS-/DB-Exceptiontexte ausgeben. Bei erstem gemeldeten Startfehler sofortige Rückkehr zum Original, statt weitere Minuten erfolglos neu zu versuchen.
+- 0.5.1 ist ein eigenes Release, überschreibt das vorhandene 0.5.0-Verzeichnis nicht. Privates Installationspaket samt kurzem Root-Skript vorbereitet und auf Ziel-Python unprivilegiert geprüft. Reale Discovery bleibt ausstehend; p4d während der Entwicklung aktiv lassen.

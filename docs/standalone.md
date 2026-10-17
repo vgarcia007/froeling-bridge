@@ -1,4 +1,4 @@
-# Eigenständiger Betrieb ab 0.5.0
+# Eigenständiger Betrieb ab 0.5.0 (Korrekturstand 0.5.1)
 
 Die Bridge kann ohne p4d und ohne MariaDB starten. Sie liest Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Steuerung. SQLite speichert den Arbeitskatalog und Einstellungen lokal; MariaDB ist ausschließlich die optionale p4d-kompatible Historie. Protokoll und Darstellung orientieren sich an linux-p4d von Jörg Wendel und Mitwirkenden.
 
@@ -23,6 +23,12 @@ sudo bash deploy/install-standalone.sh --config /geschuetzt/bridge-settings.json
 Felder: `device` (absoluter Gerätepfad), optional `host` (Standard `0.0.0.0`), `port` (8000), `interval` (60 Sekunden), `history` mit `host`, `port`, `database`, `user`, `password`. Keine Zugangsdaten in Shellargumente schreiben. Der native Dienst verwendet `/var/lib/froeling-bridge`; CLI-Demos erlauben eigene Zustandsordner.
 
 Das auf dem konkreten Zielhost beobachtete Zeitprogramm-Antwortprofil `43 -> 42` wird bei Einrichtung vorbelegt. `reply_profile` kann es ausdrücklich ersetzen. First/Next-Discovery akzeptiert auf Next sowohl den First- als auch den Next-Antwortcode derselben Liste; fremde Antworten und ungültige Prüfsummen bleiben Fehler. Dies bildet die ursprünglichen p4d-Listenabläufe ab, ohne beliebige Antwortbefehle freizugeben.
+
+0.5.1 korrigiert die quellenbasierten Listenabläufe: vor Sensor- und Menülisten jeweils `CHECK` mit `Tescht ;-)`; kurze nicht abschließende Einträge überspringen wie p4d (`wrnEmpty`/`wrnSkip`). Die Höchstzahl zählt auch übersprungene Einträge. Eine einzelne Anfrage/Antwort erhält maximal zwei Sekunden innerhalb der längeren Gesamtfrist; diese Frist wird bei fragmentierten Antworten nicht neu gestartet. Das Original verwendet zwei Sekunden für den Header und eigene Byte-Lesefristen. Die Bridge begrenzt zusätzlich die gesamte einzelne Anfrage/Antwort.
+
+`/api/v1/runtime.last_failure` und das Dienstjournal nennen Phase, Fehlerklasse und bei Listenfehlern Anfragebefehl sowie Eintragsnummer. Beliebige Betriebssystem-/Datenbankfehlermeldungen und rohe Betriebswerte werden nicht ausgegeben. Der letzte Fehler bleibt nach einer Erholung als Diagnose erhalten.
+
+Ein alter p4d-Host kehrt beim ersten vom Worker gemeldeten Startfehler sofort zu p4d zurück. `status` bleibt auch während Aktivierung erreichbar; `rollback` signalisiert einen Abbruch, bevor es begrenzt auf die Dienstsperre wartet. Der unabhängige Starttimer bleibt zusätzliche Absicherung. Ein 24-Stunden-Test beobachtet erst funktionierenden Lesebetrieb; er ist keine Wartezeit ohne Monitoring.
 
 Bei einer vorhandenen laufenden p4d-Installation ist der Wechsel ausdrücklich zu wählen:
 

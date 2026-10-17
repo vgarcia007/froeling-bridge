@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fröling Bridge API",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation."
   },
   "servers": [
@@ -623,6 +623,27 @@
                     "history": {
                       "type": "object",
                       "nullable": true
+                    },
+                    "last_failure": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Most recent worker failure, retained after recovery. Protocol details contain request command and list entry, never raw operating values or arbitrary storage exception text.",
+                      "properties": {
+                        "phase": {
+                          "type": "string"
+                        },
+                        "error_type": {
+                          "type": "string"
+                        },
+                        "detail": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "occurred_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
                     }
                   }
                 }
