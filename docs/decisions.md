@@ -144,3 +144,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Doppelte Sensoradressen entsprechend `initValueFacts` → `addValueFact` als Aktualisierung desselben Sensors behandeln; spätere Metadaten gewinnen, Benutzerflags bleiben erhalten. 161 Wiederholungen auf echter Hardware bestätigt; vollständige Erkennung mit 0.5.2 erfolgreich.
 - Unabhängige systemd-Überwachung liest nur HTTP-Cache. Aktueller Status darf ausgebliebene Messwertabfragen nicht verdecken. Bei anhaltendem Live-Ausfall vorhandenes p4d wiederherstellen, auf neuem Host Bridge neu starten; reine Historienstörung löst keine Umschaltung aus. Keine künstliche Störung an der Live-Heizung für diesen Test.
 - 24h-Beobachtung erst jetzt bei funktionierenden echten Messwerten im Hintergrund gestartet. Erfolgreicher Dienstneustart ist kein Beleg für vollständigen Hostneustart oder abgeschlossene 24h-Abnahme.
+
+## 17.10.2026 — Schreibumfang aus dem tatsächlichen p4d-Menü ableiten
+
+- Verbindliche Grundlage ist die serverseitige Typauswahl in `performMenuByParent` einschließlich Filter, frischer Editor-Metadaten und `urFullControl`, nicht die allgemeine Liste aller theoretischen Handbetriebsfunktionen. Messwerte und I/O sind im untersuchten Menü nicht bearbeitbar.
+- Die sechs normalen Parametertypen sind bereits in Browser und API übernommen; anhand der gepinnten Originalquelle gegen beide Implementierungen prüfen. Menü-ID und daraus gelesene Adresse bleiben gekoppelt. Zeitintervalle sind ein separater Schreibweg.
+- p4d-Bearbeitbarkeit ist eine Aussage über den unterstützten Menüpfad, keine eigenständige Zusicherung ungefährlicher Einstellungen. Tatsächliche Hardwarefreigabe und vereinbarter Testwert bleiben vom vorhandenen Codeumfang getrennt. Keine zusätzliche pauschale Funktionssperre aus dem allgemeinen Risikohinweis ableiten.
