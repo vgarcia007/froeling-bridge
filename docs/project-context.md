@@ -10,6 +10,10 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
+## Aktuelle Absprache: Betrieb beobachten
+
+Der Benutzer lässt den aktuellen Stand zunächst über die nächsten Tage laufen und prüft die Bedienung selbst. Bis zu einer neuen Rückmeldung keine weiteren Deployments, Neustarts oder Heizungs-Schreibtests durchführen. Bestehende Messwerterfassung, Historienaufzeichnung und automatische Gesundheitsüberwachung bleiben aktiv. Bei der nächsten Session hier anknüpfen und gemeldete Probleme anhand des Original-p4d-Verhaltens untersuchen. Offene Abnahmen weiter unten bleiben offen; Zeitprogramm-Schreiben bleibt gesperrt. Quellcode und bereinigte Projektdokumentation auf GitHub sichern; Zugangsdaten, reale Datenbanken und private Mitschnitte sind davon ausgenommen.
+
 ## Maßgeblicher Auftrag und Stand: eigenständiger Ersatz 0.5.0
 
 Benutzer hat nach weiterer Klärung den vollständigen Plan ausdrücklich mit „Implement the plan“ freigegeben: eigenständiger Erststart/Discovery ohne p4d-DB, lokale persistente Arbeitsdaten, Live-Betrieb unabhängig von MariaDB, modernes Sensor-/Parametermenü, automatische optionale MariaDB-Einrichtung, Record-Schalter und Verdichtung. Zwei Gebäude/50-kW-Heizung machen verlässliche Live-Anzeige und Bedienung wichtiger als historische Charts. Linux-Installationsskript ohne Docker ist gewählt. Keine selbst gepflegten fachlichen Sensoralias-Zuordnungen.

@@ -20,6 +20,10 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Aktuelle Absprache: unverändert beobachten
+
+Benutzer lässt den Stand zunächst einige Tage laufen und prüft selbst. Ohne neuen Auftrag keine weiteren Deployments, Neustarts oder Heizungs-Schreibtests. Bestehende automatische Erfassung, Aufzeichnung und Gesundheitsüberwachung unverändert laufen lassen. Aktuellen Quell-/Dokumentationsstand auf GitHub sichern; bei Rückmeldung mit dem dokumentierten Stand fortsetzen.
+
 ## Aktuelle Heizungs-Schreibfreigabe (17.10.2026)
 
 Der Benutzer hat den konkreten LED-Helligkeitstest mit Änderung um einen Prozentpunkt und unmittelbarer Rückstellung bestätigt. Test am echten Gerät erfolgreich: frische Ausgangsmetadaten, Änderung, beide Bestätigungen, frisches Nachlesen, Rückstellung und erneutes Nachlesen. Danach wie vereinbart `write_parameter` für das normale p4d-Parametermenü aktiviert. Aktuelle Produktionskonfiguration verwendet den geschützten Geräte-/Firmware-Nachweis unter `/etc/froeling-bridge/write-validation.json`. Keine eigene Parameter-Freigabeliste; dieselben sechs Menütypen wie p4d. Zeitprogramm-Schreiben bleibt gesperrt (`write_time_range` nicht validiert). Keine weiteren beliebigen Teständerungen autorisiert. Frühere pauschale Heizungs-Schreibsperren weiter unten sind historische Freigabestände.
