@@ -55,3 +55,16 @@ def view(snapshot, interval=60):
                 error=snapshot.get('error'), last_attempt=snapshot.get('last_attempt'),
                 interval_seconds=interval, source='controller-error-memory',
                 items=sorted(rows.values(), key=lambda r:r['time1'], reverse=True))
+
+
+def check_page(limit, offset):
+    if type(limit) is not int or not 1 <= limit <= 1000:
+        raise ValidationError('error limit must be 1..1000')
+    if type(offset) is not int or not 0 <= offset <= 1000000:
+        raise ValidationError('error offset must be 0..1000000')
+
+
+def page(items, total, limit, offset):
+    check_page(limit, offset)
+    return dict(items=list(items), total=total, limit=limit, offset=offset,
+                has_more=offset + len(items) < total)

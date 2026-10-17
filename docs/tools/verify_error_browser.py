@@ -53,8 +53,32 @@ def main():
                 assert set(layout['states'])=={'gekommen','gegangen','quittiert'}
                 assert all(row['width']>=min(220,width-100) and row['height']<380 for row in layout['rows']), (width,layout)
                 assert len(transport.requests)==before
+            # A fictional stored history is longer than one page. No MariaDB connection.
+            original_view = runtime.errors_view
+            def historical_view(source="auto", limit=100, offset=0):
+                from froeling_bridge.controller_errors import page
+                data = original_view("controller", 1000, 0)
+                original_items = data["items"]
+                all_items = [dict(original_items[index % len(original_items)], id=index+1) for index in range(105)]
+                data.update(page(all_items[offset:offset+limit],len(all_items),limit,offset),
+                            source="p4d-database",history_configured=True,history_available=True)
+                return data
+            runtime.errors_view = historical_view
+            browser.js("document.querySelector('#refresh').click()")
+            browser.wait("document.querySelectorAll('.error-entry').length===100")
+            assert browser.js("document.querySelector('#errors-status').textContent.includes('Datenbankhistorie')")
+            browser.js("document.querySelector('#errors-next').click()")
+            browser.wait("document.querySelectorAll('.error-entry').length===5")
+            assert browser.js("document.querySelector('#errors-page-status').textContent==='101–105 von 105'")
+            browser.js("document.querySelector('#errors-previous').click()")
+            browser.wait("document.querySelectorAll('.error-entry').length===100")
+            assert len(transport.requests)==before
+            for width in (320, 390):
+                browser.call('Emulation.setDeviceMetricsOverride',dict(width=width,height=900,deviceScaleFactor=1,mobile=True))
+                browser.call('Emulation.setPageScaleFactor',dict(pageScaleFactor=1))
+                assert browser.js('document.documentElement.scrollWidth') <= width
             assert not browser.errors
-            print('PASS Chromium: error entries at 320/390/768/1440px, full-width titles, compact dates, all states, no page overflow or HTML injection; fictional data only.')
+            print('PASS Chromium: error entries at 320/390/768/1440px, full-width titles, compact dates, all states, no page overflow or HTML injection, 105 stored entries with next/previous pagination; fictional data only.')
         finally:
             browser.close()
             runtime.close()

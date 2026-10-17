@@ -87,7 +87,7 @@ DB-Fehler führen zu Rollback und sichtbarem Fehlerzustand. Es gibt keinen Nachl
 | Endpunkt | Inhalt |
 | --- | --- |
 | `GET /api/v1/health` | Modus, Worker, zuletzt beobachtete DB-Verfügbarkeit, Hardwareprüfung immer false |
-| `GET /api/v1/errors` | Standalone ab 0.5.4: persistenter Heizungsfehlerspeicher mit Zuständen, Zeitpunkten und Aktualität; keine neue serielle Abfrage durch GET |
+| `GET /api/v1/errors` | Standalone ab 0.5.6: paginierte MariaDB-Fehlerhistorie als Default; source=controller für persistenten Steuerungsspeicher. Quelle, Gesamtzahl, Aktualität und ausdrücklicher Rückfall; keine neue serielle Abfrage durch GET |
 | `GET /api/v1/collector` | Intervall, letzter Zyklus, letzte erfolgreiche Speicherung, Fehler und übersprungene Sensoren |
 | `GET /api/v1/menu?parent=1` | Menüebene, lokale Zeilen-ID, Parent/Child, Typ, Adresse und Bearbeitbarkeit |
 | `GET /api/v1/sensors` | Sensormetadaten, einschließlich Auswahlflags |

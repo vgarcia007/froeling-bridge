@@ -182,3 +182,10 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Benutzer meldet unlesbare Fehlerliste auf Mobilgerät. Tatsächliche Browserprüfung bestätigt dieselbe Ursache auch am Desktop: kompletter Fehlerinhalt stand in der Symbolspalte des Menü-Rasters.
 - Eigenes Layout für Fehlereinträge: volle Titelbreite, beschrifteter Zustand, semantische Datumsliste; mobile Zeitpunkte untereinander, Desktop nebeneinander. Sehr schmale Kopfzeilen umbrechen lassen. Keine Änderung der Fehlerdaten oder Hardwareabfragen.
 - Browserregression bei 320/390/768/1440 Pixel mit langen fiktiven Meldungen und allen drei Zuständen. Seitenüberlauf gegen tatsächlich eingestellte Breite prüfen, da mobile Auto-Skalierung eine bloße Prüfung gegen innerWidth verfälschen kann. Darstellung und automatische UD-Aufzeichnung gemeinsam als 0.5.5 ausrollen.
+
+## 17.10.2026 — Fehlerhistorie statt ausschließlich Steuerungsspeicher anzeigen
+
+- Benutzer bemerkt zu Recht die kleinere Fehlerliste. Lesender Vergleich: 86 MariaDB-Zeilen gegenüber 16 Steuerungsvorkommnissen. Original `performErrors` liest `selectAllErrors` aus MariaDB (`time1 desc`); die bisherige Route/GUIdarstellung bildete nur den aktuellen Controllercache ab.
+- Ab 0.5.6 `/errors` mit Default `source=auto`: bei konfigurierter DB vollständige gespeicherte Historie in Seiten, sonst Steuerungscache. `source=history` verlangt MariaDB (503 bei Ausfall), `source=controller` wählt ausdrücklich den bisherigen Cache. Alle GETs ohne zusätzliche Heizungsabfrage.
+- Quelle, Gesamtzahl und Seitendaten sind Teil des Vertrags. Default 100, maximal 1000 pro Seite; Sortierung `time1 desc,id desc`. GUI zeigt Quelle/Gesamtzahl und Seitennavigation. Keine Bestandsdaten ändern oder löschen.
+- Automatischer DB-Ausfall-Rückfall muss ausdrücklich als unvollständige Steuerungsansicht markiert sein (`fallback`, `history_available`, `history_error`). Steuerungs-Lesezeit und SQL-Lesezeit auseinanderhalten, bisherigen Abgleichstatus separat ausweisen.

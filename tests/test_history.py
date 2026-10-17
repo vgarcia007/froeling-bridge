@@ -224,6 +224,21 @@ class HistoryIntegrationTests(unittest.TestCase):
         with self.repo.transaction() as c:
             c.execute('SELECT count(*) AS n FROM errors');self.assertEqual(c.fetchone()['n'],2)
 
+    def test_error_history_pages_all_database_rows_in_original_order_without_writes(self):
+        from froeling_bridge.storage import ReadOnlyDatabase
+        with self.repo.transaction(writable=True) as c:
+            for n in range(105):
+                c.execute("INSERT INTO errors(number,state,text,time1) VALUES(%s,'quittiert','Fictional stored error',%s)",(n,datetime(2020,1,1)))
+        reader=ReadOnlyDatabase(self.config)
+        first=reader.error_history(limit=100)
+        second=reader.error_history(limit=100,offset=100)
+        self.assertEqual((first['total'],len(first['items']),first['has_more']),(105,100,True))
+        self.assertEqual((len(second['items']),second['has_more']),(5,False))
+        ids=[row['id'] for row in first['items']+second['items']]
+        self.assertEqual(ids,sorted(ids,reverse=True))
+        self.assertEqual(len(set(ids)),105)
+        self.assertEqual(reader.error_history(offset=105)['items'],[])
+
     def test_error_sync_rolls_back_partial_write_and_remains_independent_of_samples(self):
         from test_controller_errors import event
         self.history._errors_schema_ready=True

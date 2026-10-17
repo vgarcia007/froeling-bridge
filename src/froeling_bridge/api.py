@@ -80,11 +80,12 @@ def create_app(service):
 
     @app.get(prefix + "/errors")
     def controller_errors():
-        args_only()
+        args_only("source", "limit", "offset")
         runtime = getattr(service, "runtime", None)
         if runtime is None:
             raise ValidationError("heating error memory requires standalone mode")
-        return response(runtime.controller_errors())
+        return response(runtime.errors_view(request.args.get("source", "auto"),
+                                            integer("limit", 100), integer("offset", 0)))
 
     @app.get(prefix + "/health")
     def health():

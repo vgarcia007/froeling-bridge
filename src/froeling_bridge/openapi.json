@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fröling Bridge API",
-    "version": "0.5.5",
+    "version": "0.5.6",
     "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation."
   },
   "servers": [
@@ -655,11 +655,11 @@
     },
     "/api/v1/errors": {
       "get": {
-        "summary": "Cached heating error memory (no serial request on GET)",
-        "description": "Standalone: grouped controller occurrences, p4d states and controller-local timestamps; observed_at, age_seconds, stale, error and last_attempt describe freshness. Older MariaDB occurrences are preserved separately. Unavailable is distinct from a successfully read empty list.",
+        "summary": "Read heating error history, or current controller memory",
+        "description": "Default source=auto reads all stored MariaDB occurrences in pages, like p4d, if a history database is configured. source=controller reads only the last complete persistent controller snapshot. Neither mode sends serial commands. Database failure in auto mode explicitly falls back to controller memory: fallback=true, history_available=false, history_error explains missing history. source=history requires MariaDB and returns 503 on failure, with no fallback. observed_at/stale/error still describe the last controller read; read_at is the database query time and history_sync describes its last synchronization. Use total, limit, offset and has_more to retrieve every page. Older stored rows and acknowledged states are retained.",
         "responses": {
           "200": {
-            "description": "Last complete, persistent heating error snapshot with freshness metadata",
+            "description": "Error occurrences with explicit source, freshness, history availability and pagination",
             "content": {
               "application/json": {
                 "schema": {
@@ -699,16 +699,68 @@
                             "type": "string"
                           },
                           "time1": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Controller-local timestamp without timezone offset."
                           },
                           "time2": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Controller-local timestamp without timezone offset."
                           },
                           "time4": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Controller-local timestamp without timezone offset."
+                          },
+                          "id": {
+                            "type": "integer",
+                            "description": "Persistent MariaDB occurrence ID; absent in controller-only view."
                           }
                         }
                       }
+                    },
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "p4d-database",
+                        "controller-error-memory"
+                      ]
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "history_configured": {
+                      "type": "boolean"
+                    },
+                    "history_available": {
+                      "type": "boolean",
+                      "nullable": true
+                    },
+                    "history_error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "fallback": {
+                      "type": "boolean"
+                    },
+                    "read_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    },
+                    "history_sync": {
+                      "type": "object",
+                      "nullable": true
                     }
                   }
                 }
@@ -717,8 +769,46 @@
           },
           "400": {
             "description": "Unsupported mode or query parameters"
+          },
+          "503": {
+            "description": "Explicit source=history requested, but history database is unavailable or not configured."
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "history",
+                "controller"
+              ],
+              "default": "auto"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000,
+              "default": 0
+            }
+          }
+        ]
       }
     }
   },

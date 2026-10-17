@@ -11,6 +11,7 @@ const state = {
   item: null,
   busy: false,
   times: [],
+  errorsOffset: 0,
   timeCatalog: [],
   timeGroupFilter: null,
 };
@@ -538,17 +539,25 @@ $("sensor-search").addEventListener("input", loadValues);
 $("sensor-filter").addEventListener("change", loadValues);
 async function loadErrors() {
   try {
-    const data = await api("/errors");
-    if (state.view !== "errors") return;
+    const offset = state.errorsOffset;
+    const data = await api("/errors?limit=100&offset=" + offset);
+    if (state.view !== "errors" || offset !== state.errorsOffset) return;
     const sync = (await api("/runtime")).history?.controller_errors;
+    if (state.view !== "errors" || offset !== state.errorsOffset) return;
     $("errors-status").textContent =
-      (data.available ? "Zuletzt gelesen: " + stamp(data.observed_at) : "Noch keine vollständige Fehlerliste gelesen.") +
+      (data.source === "p4d-database" ? "Datenbankhistorie · " : "Steuerungsspeicher · ") + data.total + " Einträge · " +
+      (data.observed_at ? "Heizung zuletzt gelesen: " + stamp(data.observed_at) : "Steuerung noch nicht vollständig gelesen.") +
       (data.stale ? " · Veraltet" : "") +
       (data.error ? " · " + data.error : "") +
-      (sync?.error ? " · MariaDB-Abgleich gestört" : "");
+      (sync?.error ? " · MariaDB-Abgleich gestört" : "") +
+      (data.fallback ? " · Datenbankhistorie nicht erreichbar – nur Steuerungseinträge sichtbar" : "");
+    $("errors-pagination").hidden = !data.has_more && data.offset === 0;
+    $("errors-previous").disabled = data.offset === 0;
+    $("errors-next").disabled = !data.has_more;
+    $("errors-page-status").textContent = data.items.length ? `${data.offset + 1}–${data.offset + data.items.length} von ${data.total}` : `0 von ${data.total}`;
     const container = $("errors-list");
     container.replaceChildren();
-    if (!data.items.length) container.append(element("p", data.available ? "Keine zuordenbaren Fehlereinträge im gelesenen Heizungsfehlerspeicher." : "Fehlerspeicher noch nicht verfügbar.", "empty"));
+    if (!data.items.length) container.append(element("p", data.available ? (data.source === "p4d-database" ? "Keine Fehler auf dieser Seite der Datenbankhistorie." : "Keine zuordenbaren Fehlereinträge im gelesenen Heizungsfehlerspeicher.") : "Fehlerspeicher noch nicht verfügbar.", "empty"));
     for (const item of data.items) {
       const row = element("article", "", "error-entry");
       const heading = element("div", "", "error-heading");
@@ -568,6 +577,13 @@ async function loadErrors() {
     }
   } catch (error) { notice(explain(error), true); }
 }
+
+$("errors-previous").addEventListener("click", () => {
+  state.errorsOffset = Math.max(0, state.errorsOffset - 100); loadErrors();
+});
+$("errors-next").addEventListener("click", () => {
+  state.errorsOffset += 100; loadErrors();
+});
 
 async function loadCollector() {
   try {
@@ -789,7 +805,7 @@ function switchView(view, timeGroupFilter = null) {
   if (view === "menu") loadMenu();
   if (view === "values") loadValues();
   if (view === "collector") loadCollector();
-  if (view === "errors") loadErrors();
+  if (view === "errors") { state.errorsOffset = 0; loadErrors(); }
   if (view === "times") {
     $("load-times").disabled = !state.health?.capabilities.controller_read;
     loadCachedTimes();

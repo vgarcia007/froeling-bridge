@@ -246,6 +246,16 @@ class ReadOnlyDatabase:
             cursor.execute("SELECT id,parent,child,type,address,title FROM menu WHERE id=%s", (item_id,))
             return cursor.fetchone()
 
+    def error_history(self, limit=100, offset=0):
+        from .controller_errors import check_page, page
+        check_page(limit, offset)
+        with self.transaction() as cursor:
+            cursor.execute("SELECT COUNT(*) AS total FROM errors")
+            total = cursor.fetchone()["total"]
+            cursor.execute("SELECT id,number,info,state,text,time1,time2,time4 FROM errors ORDER BY time1 DESC,id DESC LIMIT %s OFFSET %s", (limit, offset))
+            rows = cursor.fetchall()
+        return page(rows, total, limit, offset)
+
     def history(self, address, sensor_type, start, end, aggregate="S", limit=1000):
         check_history(address, sensor_type, start, end, aggregate, limit)
         with self.transaction() as cursor:

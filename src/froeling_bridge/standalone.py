@@ -170,6 +170,36 @@ class StandaloneRuntime:
         from .controller_errors import view
         return view(self.repository.get_meta("controller_errors"), self.service.interval)
 
+    def errors_view(self, source="auto", limit=100, offset=0):
+        from .controller_errors import check_page, page
+        from .storage import ReadOnlyDatabase, DatabaseUnavailable
+        check_page(limit, offset)
+        if source not in ("auto", "history", "controller"):
+            from .errors import ValidationError
+            raise ValidationError("error source must be auto, history or controller")
+        snapshot = self.controller_errors()
+        configured = bool(self.database_config)
+        snapshot.update(history_configured=configured, history_available=None,
+                        history_error=None, fallback=False, read_at=None)
+        historian = self.repository.historian
+        snapshot["history_sync"] = historian.status().get("controller_errors") if historian else None
+        if source != "controller" and configured:
+            try:
+                result = ReadOnlyDatabase(self.database_config).error_history(limit, offset)
+                snapshot.update(result, source="p4d-database", available=True,
+                                history_available=True, read_at=datetime.now(ZONE).isoformat())
+                return snapshot
+            except DatabaseUnavailable:
+                if source == "history":
+                    raise
+                snapshot.update(history_available=False, fallback=True,
+                                history_error="error history unavailable; showing controller memory only")
+        elif source == "history":
+            raise DatabaseUnavailable("error history database is not configured")
+        items = snapshot["items"]
+        snapshot.update(page(items[offset:offset + limit], len(items), limit, offset))
+        return snapshot
+
     def _history_setup(self):
         from .history import initialize_database, Historian
         from .storage import P4dDatabase, ReadOnlyDatabase
