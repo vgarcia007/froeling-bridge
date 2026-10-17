@@ -9,6 +9,7 @@ from .menu import visible_menu, demo_time_program_catalog
 from .service import QueueBusy, ServiceStopped, public
 from .storage import DatabaseUnavailable, ZONE
 from . import __version__
+from .recording import automatic_recording
 
 
 def create_app(service):
@@ -167,7 +168,8 @@ def create_app(service):
         args_only()
         from .local_store import supported
         latest = {(row['type'],row['address']): row for row in latest_values()}
-        items = [dict(row, supported=supported(row), active=row['state']=='A', recording=row['record']=='A',
+        items = [dict(row, supported=supported(row), active=row['state']=='A', recording=row['record']=='A' or automatic_recording(row, service.mode),
+                      configured_recording=row['record']=='A', recording_required=automatic_recording(row, service.mode),
                       latest=latest.get((row['type'],row['address']))) for row in service.repository.sensors()]
         return response(dict(source=service.repository.source, items=items))
 

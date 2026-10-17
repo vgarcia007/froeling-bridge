@@ -751,3 +751,60 @@ dialog::backdrop {
 }
 
 .sensor-option {display:flex;gap:.65rem;align-items:center;margin-top:.65rem;font-size:.9rem}.sensor-option input {width:auto}.toolbar select {max-width:100%;padding:.65rem;border:1px solid var(--border);border-radius:.5rem;background:white;color:inherit}
+
+/* Heating errors have full-width content, independent of the menu icon grid. */
+.error-entry {
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+.error-entry:last-child { border-bottom: 0; }
+.error-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.error-title {
+  flex: 1 1 220px;
+  min-width: 0;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.error-state {
+  display: inline-block;
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  background: #eef1f5;
+  color: #4c5d73;
+}
+.error-state-active { background: #fbe9e7; color: #92342d; }
+.error-state-gone { background: #fff3d9; color: #785417; }
+.error-state-acknowledged { background: var(--accent-soft); color: #11634f; }
+.error-times {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 20px;
+  margin: 14px 0 0;
+  font-size: 13px;
+}
+.error-times dt { color: var(--muted); font-size: 12px; }
+.error-times dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+  .error-times { grid-template-columns: 1fr; gap: 6px; }
+  .error-times > div { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; }
+  .error-times dd { margin: 0; }
+}
+@media (max-width: 650px) {
+  .error-entry { padding: 17px 16px; }
+}
+@media (max-width: 650px) {
+  .intro { flex-wrap: wrap; }
+  .intro > div { flex: 1 1 200px; min-width: 0; }
+  .intro > .button { flex: 0 0 auto; }
+}

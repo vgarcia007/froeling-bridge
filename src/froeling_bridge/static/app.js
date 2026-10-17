@@ -511,7 +511,7 @@ async function loadValues() {
         const control = document.createElement("input");
         control.type = "checkbox";
         control.checked = checked;
-        control.disabled = !state.health?.capabilities.sensor_configuration || !sensor.supported && !checked;
+        control.disabled = !state.health?.capabilities.sensor_configuration || (!sensor.supported && !checked) || (field === "record" && sensor.recording_required);
         control.setAttribute("aria-label", label + ": " + (sensor.usrtitle || sensor.title));
         control.addEventListener("change", async () => {
           control.disabled = true;
@@ -525,6 +525,7 @@ async function loadValues() {
         wrapper.append(control, document.createTextNode(label));
         card.append(wrapper);
       }
+      if (sensor.recording_required) card.append(element("small", "Wird wie bei p4d automatisch aufgezeichnet: Status, Betriebsart und Heizungszeit."));
       if (sensor.recording && !sensor.active) card.append(element("small", "Wird für die aktivierte Historie mit abgefragt."));
       container.append(card);
     }
@@ -549,14 +550,21 @@ async function loadErrors() {
     container.replaceChildren();
     if (!data.items.length) container.append(element("p", data.available ? "Keine zuordenbaren Fehlereinträge im gelesenen Heizungsfehlerspeicher." : "Fehlerspeicher noch nicht verfügbar.", "empty"));
     for (const item of data.items) {
-      const row = element("div", "", "menu-row");
-      const detail = element("div");
-      detail.append(element("strong", item.number + " · " + item.text));
-      detail.append(element("p", item.state));
+      const row = element("article", "", "error-entry");
+      const heading = element("div", "", "error-heading");
+      heading.append(element("h3", item.number + " · " + item.text, "error-title"));
+      const stateClass = {gekommen: "error-state-active", gegangen: "error-state-gone", quittiert: "error-state-acknowledged"}[item.state] || "";
+      heading.append(element("span", item.state, "error-state " + stateClass));
+      const times = element("dl", "", "error-times");
       for (const [key, title] of [["time1", "Gekommen"], ["time4", "Gegangen"], ["time2", "Quittiert"]]) {
-        if (item[key]) detail.append(element("p", title + ": " + stamp(item[key])));
+        if (!item[key]) continue;
+        const pair = element("div");
+        const value = element("dd");
+        const time = element("time", stamp(item[key]));
+        time.dateTime = item[key];
+        value.append(time); pair.append(element("dt", title), value); times.append(pair);
       }
-      row.append(detail); container.append(row);
+      row.append(heading, times); container.append(row);
     }
   } catch (error) { notice(explain(error), true); }
 }

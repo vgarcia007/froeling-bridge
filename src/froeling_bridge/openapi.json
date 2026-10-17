@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fröling Bridge API",
-    "version": "0.5.4",
+    "version": "0.5.5",
     "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation."
   },
   "servers": [
@@ -172,7 +172,7 @@
           }
         },
         "summary": "Discover all sensors and their latest known values",
-        "description": "Includes inactive sensors and sensors absent from the service menu. Find a sensor by title/usrtitle; retain type+address. latest=null means no observation is available. This request does not contact the controller."
+        "description": "Includes inactive sensors and sensors absent from the service menu. Find a sensor by title/usrtitle; retain type+address. latest=null means no observation is available. This request does not contact the controller. In standalone mode recording is effective: UD 1..3 are always recorded like p4d applyConfigurationSpecials. configured_recording reflects the stored flag; recording_required identifies the automatic policy. No valuefacts flags are overwritten."
       }
     },
     "/api/v1/values": {

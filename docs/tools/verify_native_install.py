@@ -43,7 +43,7 @@ if a=='start':
  state.setdefault(u,{})['active']=True
  if u=='froeling-bridge.service':
   log=open('/tmp/native-service.log','a')
-  proc=subprocess.Popen(['runuser','-u','froeling-bridge','--','/opt/froeling-bridge/0.5.4/venv/bin/python','-I','-m','froeling_bridge.run_config','/etc/froeling-bridge/settings.json'],stdout=log,stderr=log,start_new_session=True)
+  proc=subprocess.Popen(['runuser','-u','froeling-bridge','--','/opt/froeling-bridge/0.5.5/venv/bin/python','-I','-m','froeling_bridge.run_config','/etc/froeling-bridge/settings.json'],stdout=log,stderr=log,start_new_session=True)
   state[u]['pid']=proc.pid
 if a=='stop':
  unit=state.setdefault(u,{})

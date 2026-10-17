@@ -166,7 +166,19 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 
 ## 17.10.2026 — Heizungsfehlerspeicher und vorhandene SQL-Clients
 
-- Benutzer meldet einen unabhängigen SQL-Client und erklärt den Fehlerspeicher für essentiell. Bestehendes Status-Recordflag erhalten, seine genaue SQL-Abfrage separat klären. p4d bindet auch Status-Messpunkte an Record; keinen ungefragten Sonderpfad mit unabhängigem Flag einführen.
+- Benutzer meldet einen unabhängigen SQL-Client und erklärt den Fehlerspeicher für essentiell. Bestehendes Status-Recordflag erhalten, seine genaue SQL-Abfrage separat klären. Korrektur nach Benutzerhinweis: p4d überschreibt das interne Recordflag für UD 1–3 in `applyConfigurationSpecials` immer mit true. Diese Originalregel war zuvor übersehen worden; die sichtbare gespeicherte Auswahl ist dafür unerheblich.
 - Fehlerspeicher wie `P4d::afterUpdate` → `updateErrors` regelmäßig lesen und p4d-Zuordnung/Zustandsübergänge übernehmen. Nur vollständige Listen ersetzen den persistenten Cache; GET ist rein lesend. Steuerungseinträge und Dienstfehler klar unterscheiden.
 - MariaDB-`errors` separat vom seriellen Worker transaktional abgleichen. ID, Mailzähler, frühere Quittierungen und ältere DB-Historie erhalten. Keine Quittierbefehle an die Heizung, keine künstlichen Fehler erzeugen. Fehler dieses Abgleichs sichtbar machen, ohne Messwerterfassung zu beenden.
 - Neue leere Datenbank enthält ab 0.5.4 sieben kompatible Kerntabellen einschließlich `errors`. Vorhandene DB nicht migrieren. Reale Übernahme erst nach separater MariaDB-/Browser-/Installationsprüfung und mit Zustandsbackup/Rückkehrtimer.
+
+## 17.10.2026 — Übersehene Originalregel für UD 1–3 korrigieren
+
+- Benutzerbeobachtung bestätigt: `applyConfigurationSpecials` wird nach Einlesen der Sensorflags aufgerufen und aktiviert intern Status, Betriebsart und Heizungszeit immer. In Referenz-Pin und altem installierten Quellstand 1bc324d nachgewiesen. Frühere gegenteilige Erklärungen und Dokumentation berichtigt.
+- Ab 0.5.5 im Standalonebetrieb dieselben drei Werte immer abfragen und als Messpunkte aufzeichnen. Keine gespeicherten Sensorflags dafür ändern, keine Umgehung durch eine neue Status-Tabelle. API/UI zeigen effektive und konfigurierte Aufzeichnung getrennt; automatische Historie kann nicht irreführend abgeschaltet werden.
+- Regression vergleicht die Regel mit dem Originalquellcode und prüft erfolgreiche Aufzeichnung bei allen drei ausgeschalteten Flags, ohne deren Änderung. Keine Heizungs-Schreibtests und kein Hostneustart.
+
+## 17.10.2026 — Fehlerspeicher für Mobil und Desktop lesbar darstellen
+
+- Benutzer meldet unlesbare Fehlerliste auf Mobilgerät. Tatsächliche Browserprüfung bestätigt dieselbe Ursache auch am Desktop: kompletter Fehlerinhalt stand in der Symbolspalte des Menü-Rasters.
+- Eigenes Layout für Fehlereinträge: volle Titelbreite, beschrifteter Zustand, semantische Datumsliste; mobile Zeitpunkte untereinander, Desktop nebeneinander. Sehr schmale Kopfzeilen umbrechen lassen. Keine Änderung der Fehlerdaten oder Hardwareabfragen.
+- Browserregression bei 320/390/768/1440 Pixel mit langen fiktiven Meldungen und allen drei Zuständen. Seitenüberlauf gegen tatsächlich eingestellte Breite prüfen, da mobile Auto-Skalierung eine bloße Prüfung gegen innerWidth verfälschen kann. Darstellung und automatische UD-Aufzeichnung gemeinsam als 0.5.5 ausrollen.

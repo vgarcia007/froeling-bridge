@@ -22,6 +22,7 @@ from .messages import Command, ParameterType, TimeRange, parse_time
 from .session import ProtocolSession
 from .simulator import MemoryTransport
 from .storage import ZONE, DatabaseUnavailable, MemoryRepository
+from .recording import automatic_recording
 
 
 class QueueBusy(Exception):
@@ -274,7 +275,8 @@ class BridgeService:
             for sensor in sensors:
                 if self.stop.is_set():
                     break
-                if sensor["state"] != "A" and sensor["record"] != "A":
+                mandatory_recording = automatic_recording(sensor, self.mode)
+                if sensor["state"] != "A" and sensor["record"] != "A" and not mandatory_recording:
                     continue
                 identity = dict(address=sensor["address"], type=sensor["type"])
                 if sensor["type"] not in ("VA", "DO", "DI", "AO", "UD") or (
@@ -288,7 +290,7 @@ class BridgeService:
                     with self.lock:
                         self.values[(sensor["address"], sensor["type"])] = public(dict(
                             **sample, observed_at=observed_at, source=self.source, origin="controller", unit=sensor["unit"], title=sensor.get("usrtitle") or sensor.get("title")))
-                    if sensor["record"] == "A":
+                    if sensor["record"] == "A" or mandatory_recording:
                         samples.append(sample)
                 except ServiceStopped:
                     break

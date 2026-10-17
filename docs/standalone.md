@@ -87,7 +87,7 @@ Der Historien-Worker verbindet sich unabhängig vom Heizungsworker. Bei nicht vo
 
 Bestehende DBs werden geprüft und nicht migriert oder neu initialisiert. Bestehende Messreihen, Menüzeilen und individuelle Auswahl bleiben erhalten. Neue Sensordefinitionen können ergänzt werden; bestehende Auswahlflags ändern sich nur bei einer entsprechenden Benutzeränderung. Eine selbst begonnene leere Einrichtung kann anhand des lokalen Einrichtungsmarkers fortgesetzt werden; unbekannte Teilbestände werden erhalten und als unpassend gemeldet.
 
-Nur `record=A` erzeugt Messpunkte. `samples` und `peaks` werden gemeinsam transaktional geschrieben. MariaDB-Ausfälle erzeugen gemeldete Aufzeichnungslücken; kein nachträglicher Puffer und kein Wiederholen unklarer Commits. Die begrenzte Arbeitswarteschlange ist kein garantierter Ausfallspeicher.
+Im aktuellen Standalonebetrieb erzeugt `record=A` Messpunkte für normale Sensoren. UD 1–3 (Status, Betriebsart, Heizungszeit) werden ab 0.5.5 wie bei p4d intern immer aufgezeichnet, unabhängig vom gespeicherten Flag. `samples` und `peaks` werden gemeinsam transaktional geschrieben. MariaDB-Ausfälle erzeugen gemeldete Aufzeichnungslücken; kein nachträglicher Puffer und kein Wiederholen unklarer Commits. Die begrenzte Arbeitswarteschlange ist kein garantierter Ausfallspeicher.
 
 Verdichtung übernimmt `p4d.aggregateHistory` und `p4d.aggregateInterval` (aktuell im Bestand 91 Tage/30 Minuten; Defaults ebenso). Täglich um 01:00 Europe/Berlin, höchstens sieben Tagespakete pro Lauf mit gespeichertem Fortschritt. Nur vollständige alte Intervalle: Kennung A, Intervallende, auf zwei Stellen gerundeter `sum(value)/count(*)`-Wert und ursprüngliche Anzahl. Text stammt deterministisch vom letzten Messpunkt im Intervall. Vorhandene Aggregate werden nicht überschrieben; Konfliktintervalle bleiben mit ihren Einzelwerten erhalten und werden gezählt. Einfügen und Löschen erfolgen pro Tagespaket in derselben Transaktion. Ungültige Verdichtungseinstellungen deaktivieren die Verdichtung, nicht die Aufzeichnung.
 
@@ -139,7 +139,7 @@ Die Bridge liest die vollständige First-/Next-Fehlerliste beim Start, danach im
 
 Bei konfigurierter MariaDB synchronisiert der getrennte Historienworker die bestehende p4d-Tabelle `errors`. Zuordnung und Zustandsübergänge folgen `P4d::updateErrors`: Schlüssel Fehlernummer und Auftretenszeit, „gekommen“/„gegangen“/„quittiert“, `time1`/`time4`/`time2`. Bestehende IDs, Quittierungen, Mailzähler und außerhalb des Steuerungsspeichers liegende Historie bleiben erhalten. Keine Fehlerquittierung wird an die Heizung gesendet. Ein fehlgeschlagener DB-Abgleich wird separat in `/api/v1/runtime.history.controller_errors` gemeldet und beeinträchtigt weder aktuelle Messungen noch die übrige Aufzeichnung. Der DB-Abgleich wird nach 30 Sekunden erneut versucht, ohne neue serielle Schreibbefehle. Bestehende Tabellen werden nicht migriert; eine neue/leere Datenbank erhält die kompatible Fehler-Tabelle automatisch.
 
-**Bestehende SQL-Clients:** Aktuelle Status-Messpunkte in `samples` benötigen auch beim Original-p4d das Record-Flag für den entsprechenden UD-Sensor. API-Livewerte sind davon unabhängig. Bestehende Status-Recordflags erhalten; nicht voraussetzen, dass ein SQL-Client die aktuelleren API-Werte liest. Seine letzte Messung kann beim Ausfall/Abschalten der Aufzeichnung veralten; Zeitstempel mit auswerten.
+**Bestehende SQL-Clients:** Original-p4d erzwingt für Status, Betriebsart und Heizungszeit (UD 1–3) die interne Aufzeichnung in `applyConfigurationSpecials`, auch wenn das gespeicherte Recordflag ausgeschaltet ist. Der Standalone-Nachbau übernimmt dies ab 0.5.5; eine zuvor dokumentierte gegenteilige Aussage war falsch. Gespeicherte Flags bleiben unverändert. API-Livewerte sind weiterhin von MariaDB unabhängig. SQL-Clients sollten den Messzeitpunkt prüfen, um einen ausgefallenen Collector nicht mit einem aktuellen Zustand zu verwechseln.
 
 Ein vorhandener Client liest `samples` für `address=1 AND type='UD'` nach `updsp DESC`. Das liefert bei aktiver Aufzeichnung aktuell den richtigen Status, ist aber gegenüber Verdichtung anfällig: `updsp` bezeichnet die Datenbankaktualisierung, nicht den Messzeitpunkt. Für den jüngsten Einzelmesspunkt verwenden:
 
@@ -152,3 +152,15 @@ LIMIT 1;
 ```
 
 Der Client sollte `time` auf ausreichende Aktualität prüfen. Ein erfolgreicher SELECT allein belegt keinen laufenden Heizungszugriff. Diese Empfehlung ändert weder die vorhandene Clientsoftware noch ihre Recordflags.
+
+### Automatische interne Werte ab 0.5.5
+
+`GET /api/v1/sensors` liefert `recording` als effektive Aufzeichnung, `configured_recording` als gespeichertes Flag und `recording_required` für die automatische UD-Regel. Bei UD 1–3 ist `recording=true` auch bei leerem/ausgeschaltetem Flag. Die Webansicht kennzeichnet diese Werte ausdrücklich als automatisch aufgezeichnet; ihr Historie-Kästchen ist aktiviert und nicht abschaltbar. Normale Sensorflags bleiben frei einstellbar. Automatische Aufzeichnung führt ohne konfigurierte MariaDB nicht zur Pflicht, eine Historien-DB einzurichten; Livewerte funktionieren weiterhin allein.
+
+Originalbeleg: [applyConfigurationSpecials im Referenzstand](https://github.com/vgarcia007/linux-p4d/blob/4d1176c4a9081893e4c2cc27a535bb2bc4737d0a/specific.c#L389), ebenso im tatsächlich installierten Originalquellstand 1bc324d. Der Speicherpfad allein zeigt nur die Prüfung des **bereits intern überschriebenen** Recordflags; daraus darf keine Abhängigkeit vom sichtbaren gespeicherten Flag abgeleitet werden.
+
+### Darstellung des Fehlerspeichers
+
+Ab 0.5.5 verwenden Fehlermeldungen eigene Einträge mit voller Textbreite, Zustandskennzeichnung und zugehörigen Zeitpunkten. Sie verwenden nicht mehr das Menü-Raster mit schmaler Symbolspalte. Auf kleinen Displays stehen die Zeitpunkte untereinander; auf dem Desktop nebeneinander. Auch die Kopfzeile bricht bei sehr kleinen Displays um.
+
+`PYTHONPATH=src .venv/bin/python docs/tools/verify_error_browser.py --simulate-only` prüft im Chromium 320/390/768/1440 Pixel, lange fiktive Meldungen, alle drei Zustände, Zeitdarstellung, Seitenbreite und sichere Textausgabe ohne HTML-Auswertung. Ausschließlich Simulator, kein Zugriff auf die echte Heizung.
