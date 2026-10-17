@@ -150,3 +150,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Verbindliche Grundlage ist die serverseitige Typauswahl in `performMenuByParent` einschließlich Filter, frischer Editor-Metadaten und `urFullControl`, nicht die allgemeine Liste aller theoretischen Handbetriebsfunktionen. Messwerte und I/O sind im untersuchten Menü nicht bearbeitbar.
 - Die sechs normalen Parametertypen sind bereits in Browser und API übernommen; anhand der gepinnten Originalquelle gegen beide Implementierungen prüfen. Menü-ID und daraus gelesene Adresse bleiben gekoppelt. Zeitintervalle sind ein separater Schreibweg.
 - p4d-Bearbeitbarkeit ist eine Aussage über den unterstützten Menüpfad, keine eigenständige Zusicherung ungefährlicher Einstellungen. Tatsächliche Hardwarefreigabe und vereinbarter Testwert bleiben vom vorhandenen Codeumfang getrennt. Keine zusätzliche pauschale Funktionssperre aus dem allgemeinen Risikohinweis ableiten.
+
+## 17.10.2026 — Schreibbedienung wie im p4d-Heizungsmenü
+
+- Benutzer bestätigt die Umsetzung ausdrücklich nach Originalvorlage. Derselbe Typumfang und dieselbe automatische Menüzuordnung; keine zusätzlichen pro Parameter selbst zu pflegenden Freigabelisten. Editor mit frischen Metadaten, nativen Zahlengrenzen/Schrittweiten für Typ 07 und direktem Speichern. Zusätzliche Bestätigungsdialoge entfallen.
+- Erfolgreiches Nachlesen und kein automatisches Wiederholen nach unklarem Ergebnis bleiben beibehaltene Verbesserungen. Frisches Neuöffnen des Editors ermöglicht nach einer Unklarheit wieder eine bewusste Änderung, wenn die Operation freigegeben ist.
+- 0.5.3 zunächst neben laufender 0.5.2 vollständig vorbereitet und geprüft, danach mit Katalog-/Konfigurationsbackup und Rückkehrtimer auf dem Host aktiviert. Reale Parameter bleiben gesperrt, keine Teständerung an der Heizung.

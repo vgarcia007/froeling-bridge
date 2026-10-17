@@ -1,4 +1,4 @@
-# Eigenständiger Betrieb ab 0.5.0 (Korrekturstand 0.5.2)
+# Eigenständiger Betrieb ab 0.5.0 (Korrekturstand 0.5.3)
 
 Die Bridge kann ohne p4d und ohne MariaDB starten. Sie liest Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Steuerung. SQLite speichert den Arbeitskatalog und Einstellungen lokal; MariaDB ist ausschließlich die optionale p4d-kompatible Historie. Protokoll und Darstellung orientieren sich an linux-p4d von Jörg Wendel und Mitwirkenden.
 
@@ -126,3 +126,7 @@ python3 docs/tools/monitor_standalone.py --url http://SERVER-IP:8000 --report .l
 ```
 
 Der Monitor fragt nur HTTP-Zustand/Cache ab, sendet keine Heizungsjobs und speichert keine Messwerte/Zugangsdaten. Standarddauer 24 Stunden; ein abgebrochener oder fehlgeschlagener Lauf wird nicht als bestanden ausgegeben. Vorhandene Berichte werden erhalten. Native Installationsprüfung: `docs/tools/verify_native_install.py --in-container` ausschließlich in einem wegwerfbaren Debian-Container mit Python, psmisc und sudo, Checkout read-only unter `/source`. Sie ersetzt nur dort systemd-Kommandos durch den Testadapter; auf dem Host wird sie ausdrücklich abgewiesen.
+
+### Parametermenü ab 0.5.3
+
+Die Bearbeitung folgt dem p4d-Menüumfang: unterstützte Zahlen-, Ja/Nein- und Uhrzeitparameter sowie benannte Zeitprogramme. Aktuelle Editorwerte und Grenzen kommen aus der Steuerung; einmal „Speichern“ genügt. Nachlesen, Fehlermeldung bei unklarem Ausgang und Schreibsperren bleiben erhalten. Details und Simulator-Browserprüfung in [parameter-menu.md](parameter-menu.md#bedienung-nach-originalvorlage-ab-053). Die Produktionsinstallation von 0.5.3 erweitert keine Heizungs-Schreibfreigaben.

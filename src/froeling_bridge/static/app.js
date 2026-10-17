@@ -10,7 +10,6 @@ const state = {
   parameter: null,
   item: null,
   busy: false,
-  pending: null,
   times: [],
   timeCatalog: [],
   timeGroupFilter: null,
@@ -249,7 +248,7 @@ function renderRows(items, search = false) {
       group
         ? "Öffnen →"
         : editableTypes.has(item.type)
-        ? state.health?.capabilities?.heating_write
+        ? canWrite("write_parameter")
           ? "Bearbeiten"
           : "Ansehen"
         : "Details",
@@ -378,7 +377,7 @@ async function openParameter(item, rowValueNode) {
     const input = element("input");
     input.id = "parameter-input";
     input.type =
-      item.type === 8 ? "checkbox" : item.type === 10 ? "time" : "text";
+      item.type === 8 ? "checkbox" : item.type === 10 ? "time" : item.type === 7 ? "number" : "text";
     if (item.type === 8) input.checked = Boolean(result.raw_value);
     else if (item.type === 10) {
       input.value = current;
@@ -386,7 +385,13 @@ async function openParameter(item, rowValueNode) {
     } else {
       input.inputMode = "decimal";
       input.value = result.value;
-      input.maxLength = 40;
+      if (item.type === 7) {
+        input.min = result.minimum;
+        input.max = result.maximum;
+        input.step = String(1 / Math.pow(10, result.digits));
+      } else {
+        input.maxLength = 40;
+      }
     }
     input.disabled = !canWrite("write_parameter");
     $("input-wrap").replaceChildren(input);
@@ -394,6 +399,7 @@ async function openParameter(item, rowValueNode) {
     $("input-label").textContent = canWrite("write_parameter")
       ? "Neuer Wert"
       : "Aktueller Wert";
+    $("save-parameter").disabled = !canWrite("write_parameter");
     $("save-parameter").hidden = !canWrite("write_parameter");
     $("edit-result").textContent = canWrite("write_parameter")
       ? "Änderungen werden nach dem Schreiben erneut geprüft."
@@ -416,7 +422,7 @@ $("editor").addEventListener("cancel", (event) => {
   if (state.busy) event.preventDefault();
   else state.editorGeneration++;
 });
-$("edit-form").addEventListener("submit", (event) => {
+$("edit-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   if (
     state.busy ||
@@ -431,23 +437,11 @@ $("edit-form").addEventListener("submit", (event) => {
       : state.item.type === 10
       ? input.value
       : input.value.trim().replace(",", ".");
-  state.pending = {
+  const pending = {
     operation: "write_parameter",
     menu_id: state.item.id,
     value,
   };
-  $("confirm-description").textContent = `${state.item.title}: neuer Wert ${
-    typeof value === "boolean" ? (value ? "Ja" : "Nein") : value
-  }`;
-  $("confirmation").showModal();
-});
-$("cancel-confirm").addEventListener("click", () => $("confirmation").close());
-$("confirm-form").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  if (state.busy || !state.pending) return;
-  const pending = state.pending;
-  state.pending = null;
-  $("confirmation").close();
   state.busy = true;
   let mustReadAgain = false;
   $("save-parameter").disabled = true;
@@ -696,7 +690,7 @@ function renderTimes() {
       endLabel.htmlFor = end.id;
       const button = element(
         "button",
-        "Prüfen & speichern",
+        "Speichern",
         "button secondary"
       );
       button.type = "submit";
@@ -709,14 +703,6 @@ function renderTimes() {
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (!canEdit) return;
-        if (
-          !window.confirm(
-            `Intervall ${index + 1} auf ${start.value || "unbelegt"} – ${
-              end.value || "unbelegt"
-            } setzen?`
-          )
-        )
-          return;
         button.disabled = true;
         let uncertain = false;
         try {
