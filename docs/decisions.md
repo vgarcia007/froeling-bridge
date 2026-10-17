@@ -137,3 +137,10 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - CHECK und das Überspringen kurzer nicht abschließender Listeneinträge anhand des vollständigen p4d-Aufrufpfades übernehmen. Prüfsummen, fremde Antwortfamilien, Gesamtfristen und Antwortlimit bleiben geprüft. Eine Antwort erhält höchstens zwei Sekunden innerhalb der gesamten Listenfrist; bei Fragmenten nicht neu starten.
 - Konkrete Phase/Fehlerklasse und sichere Protokolldetails sichtbar machen; keine beliebigen OS-/DB-Exceptiontexte ausgeben. Bei erstem gemeldeten Startfehler sofortige Rückkehr zum Original, statt weitere Minuten erfolglos neu zu versuchen.
 - 0.5.1 ist ein eigenes Release, überschreibt das vorhandene 0.5.0-Verzeichnis nicht. Privates Installationspaket samt kurzem Root-Skript vorbereitet und auf Ziel-Python unprivilegiert geprüft. Reale Discovery bleibt ausstehend; p4d während der Entwicklung aktiv lassen.
+
+## 17.10.2026 — Reale Discovery und fortlaufendes Monitoring
+
+- Tatsächliche administrative Zugriffslage vor freigegebenen Arbeiten prüfen; persönliche Berechtigungsdetails ausschließlich privat dokumentieren.
+- Doppelte Sensoradressen entsprechend `initValueFacts` → `addValueFact` als Aktualisierung desselben Sensors behandeln; spätere Metadaten gewinnen, Benutzerflags bleiben erhalten. 161 Wiederholungen auf echter Hardware bestätigt; vollständige Erkennung mit 0.5.2 erfolgreich.
+- Unabhängige systemd-Überwachung liest nur HTTP-Cache. Aktueller Status darf ausgebliebene Messwertabfragen nicht verdecken. Bei anhaltendem Live-Ausfall vorhandenes p4d wiederherstellen, auf neuem Host Bridge neu starten; reine Historienstörung löst keine Umschaltung aus. Keine künstliche Störung an der Live-Heizung für diesen Test.
+- 24h-Beobachtung erst jetzt bei funktionierenden echten Messwerten im Hintergrund gestartet. Erfolgreicher Dienstneustart ist kein Beleg für vollständigen Hostneustart oder abgeschlossene 24h-Abnahme.

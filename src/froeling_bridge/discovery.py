@@ -1,7 +1,9 @@
 """p4d discovery without an existing SQL catalogue or hardcoded sensor addresses."""
 
 from .menu import menu_paths, visible_menu
-from .errors import ValidationError
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def discover(client, repository, progress=lambda stage: None):
@@ -9,7 +11,13 @@ def discover(client, repository, progress=lambda stage: None):
     client.get_status()
     firmware = client.get_firmware()
     progress("sensors")
-    specs = client.get_value_specs(timeout=300)
+    received_specs = client.get_value_specs(timeout=300)
+    # initValueFacts -> addValueFact keys by (type, address) and updates an
+    # existing entry. Later definitions therefore replace earlier metadata.
+    specs = tuple({v.address: v for v in received_specs}.values())
+    logger.info("Sensor discovery: %d definitions, %d distinct addresses", len(received_specs), len(specs))
+    if len(specs) != len(received_specs):
+        logger.warning("Sensor discovery: merged %d repeated definitions as p4d updates", len(received_specs) - len(specs))
     progress("menu")
     raw_menu = client.get_menu(timeout=300)
     menu = [
@@ -33,8 +41,6 @@ def discover(client, repository, progress=lambda stage: None):
         )
         for i, m in enumerate(raw_menu, 1)
     ]
-    if len({v.address for v in specs}) != len(specs):
-        raise ValidationError("duplicate measurement address in discovery")
     paths = menu_paths(menu)
     visible = [m for m in visible_menu(menu) if m["parent"] in paths]
     selected_va = {m["address"] for m in visible if m["type"] in (3, 70)}

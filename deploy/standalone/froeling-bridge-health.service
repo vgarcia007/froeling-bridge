@@ -1,0 +1,9 @@
+[Unit]
+Description=Check current Bridge readings and restore heating monitoring on failure
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /usr/local/libexec/froeling-bridge-health.py
+TimeoutStartSec=100
+UMask=0077

@@ -1,4 +1,4 @@
-# Eigenständiger Betrieb ab 0.5.0 (Korrekturstand 0.5.1)
+# Eigenständiger Betrieb ab 0.5.0 (Korrekturstand 0.5.2)
 
 Die Bridge kann ohne p4d und ohne MariaDB starten. Sie liest Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Steuerung. SQLite speichert den Arbeitskatalog und Einstellungen lokal; MariaDB ist ausschließlich die optionale p4d-kompatible Historie. Protokoll und Darstellung orientieren sich an linux-p4d von Jörg Wendel und Mitwirkenden.
 
@@ -29,6 +29,10 @@ Das auf dem konkreten Zielhost beobachtete Zeitprogramm-Antwortprofil `43 -> 42`
 `/api/v1/runtime.last_failure` und das Dienstjournal nennen Phase, Fehlerklasse und bei Listenfehlern Anfragebefehl sowie Eintragsnummer. Beliebige Betriebssystem-/Datenbankfehlermeldungen und rohe Betriebswerte werden nicht ausgegeben. Der letzte Fehler bleibt nach einer Erholung als Diagnose erhalten.
 
 Ein alter p4d-Host kehrt beim ersten vom Worker gemeldeten Startfehler sofort zu p4d zurück. `status` bleibt auch während Aktivierung erreichbar; `rollback` signalisiert einen Abbruch, bevor es begrenzt auf die Dienstsperre wartet. Der unabhängige Starttimer bleibt zusätzliche Absicherung. Ein 24-Stunden-Test beobachtet erst funktionierenden Lesebetrieb; er ist keine Wartezeit ohne Monitoring.
+
+0.5.2 behandelt wiederholte Sensordefinitionen wie Original-`initValueFacts`/`addValueFact`: pro Typ und Adresse ein Sensor, spätere Definition aktualisiert die Metadaten; individuelle Auswahl und Aufzeichnungsflags bleiben erhalten. Die echte Steuerung hat beim Erststart 161 wiederholte Definitionen geliefert. Die frühere pauschale Ablehnung war ein Fehler der Bridge.
+
+Der unabhängige `froeling-bridge-health.timer` prüft alle 30 Sekunden ausschließlich die gespeicherten HTTP-Ansichten. Er öffnet weder Adapter noch Datenbank. Eine aktuelle Statusantwort allein genügt bei ausgewählten Messsensoren nicht: mindestens eine ausgewählte Messung muss aus der Steuerung stammen und innerhalb von drei Abfrageintervallen (mindestens 180 Sekunden) gelesen worden sein. Nach 60 Sekunden anhaltendem Fehler kehrt ein vorhandener p4d-Host über den normalen Helfer zum Original zurück; ein neuer Host startet die Bridge neu. Einzelne defekte Sensoren lösen bei sonst aktuellen Messwerten keine vollständige Umschaltung aus. MariaDB-Ausfall löst keine Rückkehr aus, solange das Live-Monitoring funktioniert. Die initiale abgesicherte Umschaltung hat ihren eigenen Starttimer; auf einem neuen Host erhält ein fehlerfreier Katalogneuaufbau ausreichend Zeit.
 
 Bei einer vorhandenen laufenden p4d-Installation ist der Wechsel ausdrücklich zu wählen:
 
@@ -110,7 +114,7 @@ Backup verwendet die SQLite-Backupfunktion und enthält Katalog/Einstellungen, l
 
 ## Stand des Nachweises
 
-Automatisierte Tests, separate MariaDB, echte Pseudo-TTY mit HTTP, Browser und reale systemd-Ersatzdienste prüfen die Implementierung. Eine isolierte Debian-Installation prüft Paketinstallation, Dienstbenutzer/Rechte, seriellen Erststart und Wiederholung; systemd-Aufrufe sind in diesem Container simuliert und separat gegen echte Ersatzdienste geprüft. Noch erforderlich: vollständige Discovery an der tatsächlichen Steuerung, mindestens 24 Stunden echter Lesebetrieb, kontrollierter Neustart des Hosts und separat vereinbarte reale Schreibtests. Bis dahin keine Zusage vollständiger Hardwarevalidierung.
+Automatisierte Tests, separate MariaDB, echte Pseudo-TTY mit HTTP, Browser und reale systemd-Ersatzdienste prüfen die Implementierung. Eine isolierte Debian-Installation prüft Paketinstallation, Dienstbenutzer/Rechte, seriellen Erststart und Wiederholung; systemd-Aufrufe sind in diesem Container simuliert und separat gegen echte Ersatzdienste geprüft. Auf der tatsächlichen Steuerung sind vollständige Discovery, aktuelle Werte, fortlaufende Aufzeichnung und Dienstneustart mit 0.5.2 bestätigt. Die 24h-Beobachtung läuft im Hintergrund bei funktionierendem Monitoring. Noch erforderlich: deren erfolgreicher Abschluss, kontrollierter Neustart des gesamten Hosts und separat vereinbarte reale Schreibtests. Bis dahin keine Zusage vollständiger Hardwarevalidierung.
 
 
 Reproduzierbare Zusatzprüfungen aus dem Checkout:

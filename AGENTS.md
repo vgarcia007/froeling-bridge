@@ -20,6 +20,10 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Aktueller administrativer Zugriff (17.10.2026)
+
+Administrative Zugriffsdaten und Berechtigungen werden ausschließlich im privaten Betreiberkontext festgehalten. Bestehende Autorisierung beachten, verfügbare Rechte bei Bedarf lesend prüfen und den laufenden Betrieb schützen. Daraus folgt keine Freigabe für Heizungsänderungen.
+
 ## Neuer Auftrag: eigenständiger Ersatz ab 0.5.0
 
 Der Benutzer hat den Plan für unabhängigen Erststart, Discovery, lokale SQLite-Arbeitsdaten, optionale automatische MariaDB-Einrichtung, Sensor-Auswahl und Verdichtung ausdrücklich zur Implementierung freigegeben. Live-Werte und Menü haben Vorrang vor Historie. Dies erweitert die früheren Nur-Lesen-/Nur-samples-Grenzen im beschriebenen Umfang:

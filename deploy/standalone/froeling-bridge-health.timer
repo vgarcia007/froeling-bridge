@@ -1,0 +1,11 @@
+[Unit]
+Description=Watch current Bridge heating readings
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=30s
+AccuracySec=1s
+Unit=froeling-bridge-health.service
+
+[Install]
+WantedBy=timers.target

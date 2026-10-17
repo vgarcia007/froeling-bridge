@@ -57,6 +57,24 @@ class StandaloneTests(unittest.TestCase):
             self.http.get("/api/v1/runtime").get_json()["history"]["configured"]
         )
 
+    def test_repeated_sensor_definitions_update_metadata_and_keep_preferences(self):
+        self.runtime.discover_once()
+        self.runtime.repository.patch_sensor("VA", 43, dict(record=True, active=False))
+        self.transport.heater.value_specs += (
+            replace(self.transport.heater.value_specs[0], factor=20,
+                    description_raw=b"Repeated updated temperature"),
+        )
+        with self.assertLogs("froeling_bridge.discovery", level="WARNING") as logs:
+            self.runtime.discover_once()
+        sensors = [s for s in self.runtime.repository.sensors()
+                   if s["type"] == "VA" and s["address"] == 43]
+        self.assertEqual(len(sensors), 1)
+        self.assertEqual(sensors[0]["factor"], 20)
+        self.assertEqual(sensors[0]["title"], "Repeated updated temperature")
+        self.assertEqual((sensors[0]["record"], sensors[0]["state"]), ("A", "D"))
+        self.assertIn("merged 1 repeated definitions", logs.output[0])
+        self.assertEqual(self.runtime.phase, "ready")
+
     def test_persisted_values_after_restart_are_explicitly_stale_and_not_refreshed(
         self,
     ):

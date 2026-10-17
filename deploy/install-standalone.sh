@@ -37,7 +37,7 @@ fi
 command -v fuser >/dev/null || { apt-get update; apt-get install -y psmisc; }
 id froeling-bridge >/dev/null 2>&1 || useradd --system --home /var/lib/froeling-bridge --shell /usr/sbin/nologin froeling-bridge
 usermod -a -G dialout froeling-bridge
-release=/opt/froeling-bridge/0.5.1
+release=/opt/froeling-bridge/0.5.2
 if [[ -e "$release" && ! -f "$release/source.sha256" ]]; then
   echo 'An unrecognized release directory exists; preserved.' >&2; exit 2
 fi
@@ -59,7 +59,7 @@ else
 fi
 python3 -m venv "$release/venv"
 if [[ -d "$source_root/wheels" ]]; then
-  "$release/venv/bin/python" -I -m pip install --no-index --find-links "$source_root/wheels" 'froeling-bridge[service]==0.5.1'
+  "$release/venv/bin/python" -I -m pip install --no-index --find-links "$source_root/wheels" 'froeling-bridge[service]==0.5.2'
 else
   "$release/venv/bin/python" -I -m pip install "$source_root[service]"
 fi
@@ -92,7 +92,7 @@ PY
 install -d -m 0700 -o froeling-bridge -g froeling-bridge /var/lib/froeling-bridge
 # Existing 0.4 state has a different service user; preserve private caches and transfer ownership.
 chown -R froeling-bridge:froeling-bridge /var/lib/froeling-bridge
-printf '%s\n' '#!/bin/sh' 'exec /opt/froeling-bridge/0.5.1/venv/bin/python -I -m froeling_bridge.lifecycle "$@"' > "$release/control"
+printf '%s\n' '#!/bin/sh' 'exec /opt/froeling-bridge/0.5.2/venv/bin/python -I -m froeling_bridge.lifecycle "$@"' > "$release/control"
 install -m 0755 "$release/control" /usr/local/sbin/froeling-bridge-control
 for unit in "$source_root"/deploy/standalone/*; do
   if [[ -f /etc/systemd/system/${unit##*/} && ! -e $release/${unit##*/}.previous ]]; then
@@ -100,7 +100,9 @@ for unit in "$source_root"/deploy/standalone/*; do
   fi
   install -m 0644 "$unit" /etc/systemd/system/
 done
-systemd-analyze verify /etc/systemd/system/froeling-bridge.service /etc/systemd/system/froeling-bridge-rescue.service /etc/systemd/system/froeling-bridge-startup.timer
+systemd-analyze verify /etc/systemd/system/froeling-bridge.service /etc/systemd/system/froeling-bridge-rescue.service /etc/systemd/system/froeling-bridge-startup.timer /etc/systemd/system/froeling-bridge-health.service /etc/systemd/system/froeling-bridge-health.timer
+install -d -m 0755 /usr/local/libexec
+install -m 0644 "$source_root/deploy/libexec/froeling-bridge-health.py" /usr/local/libexec/froeling-bridge-health.py
 systemctl daemon-reload
 if [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]]; then
   [[ $SUDO_USER =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] || exit 2
@@ -111,3 +113,4 @@ if [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]]; then
   install -m 0440 "$sudoers" /etc/sudoers.d/froeling-bridge-control
 fi
 /usr/local/sbin/froeling-bridge-control start
+systemctl enable --now froeling-bridge-health.timer
