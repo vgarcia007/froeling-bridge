@@ -32,13 +32,23 @@ class ErrorMergeTests(unittest.TestCase):
         key=(7,datetime(2026,1,1,10))
         existing={key:dict(id=42,number=7,time1=key[1],state='quittiert',text='Original',info=9)}
         rows,changed=merge_events([event(1),event(4,11)],existing)
-        self.assertFalse(changed)
-        self.assertEqual(rows,existing)
+        self.assertEqual(changed,{key})
+        self.assertEqual(rows[key]['state'],'quittiert')
+        self.assertEqual(rows[key]['text'],'Original')
+        self.assertEqual(rows[key]['info'],9)
+        self.assertEqual(rows[key]['time4'],datetime(2026,1,1,11))
+        self.assertNotIn('time4',existing[key])
 
     def test_orphans_skipped_and_ack_resets_anchor_like_original(self):
         rows,_=merge_events([event(4),event(2),event(1),event(2,11),event(4,12)])
         self.assertEqual(len(rows),1)
         self.assertNotIn('time4',next(iter(rows.values())))
+
+    def test_repeated_full_list_with_multiple_departure_events_is_idempotent(self):
+        entries=[event(1),event(4,11),event(4,12),event(2,13)]
+        rows,_=merge_events(entries)
+        repeated,changed=merge_events(entries,rows)
+        self.assertEqual(repeated,rows);self.assertFalse(changed)
 
     def test_empty_snapshot_preserves_old_rows_and_unknown_state_rejected(self):
         self.assertEqual(merge_events([],{'old':{'state':'quittiert'}}),({'old':{'state':'quittiert'}},set()))

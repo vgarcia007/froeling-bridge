@@ -562,8 +562,10 @@ async function loadErrors() {
       const row = element("article", "", "error-entry");
       const heading = element("div", "", "error-heading");
       heading.append(element("h3", item.number + " · " + item.text, "error-title"));
-      const stateClass = {gekommen: "error-state-active", gegangen: "error-state-gone", quittiert: "error-state-acknowledged"}[item.state] || "";
-      heading.append(element("span", item.state, "error-state " + stateClass));
+      const unconfirmed = item.active !== true && item.active !== false;
+      const label = unconfirmed ? "Nicht bestätigt" : item.active ? "Aktiv bestätigt" : item.state === "gekommen" ? "Nicht aktiv" : item.state;
+      const stateClass = unconfirmed ? "" : item.active ? "error-state-active" : item.state === "gegangen" ? "error-state-gone" : "error-state-acknowledged";
+      heading.append(element("span", label, "error-state " + stateClass));
       const times = element("dl", "", "error-times");
       for (const [key, title] of [["time1", "Gekommen"], ["time4", "Gegangen"], ["time2", "Quittiert"]]) {
         if (!item[key]) continue;
@@ -573,7 +575,11 @@ async function loadErrors() {
         time.dateTime = item[key];
         value.append(time); pair.append(element("dt", title), value); times.append(pair);
       }
-      row.append(heading, times); container.append(row);
+      row.append(heading);
+      if (unconfirmed) row.append(element("p", item.activity_basis === "not_in_controller"
+        ? "Historischer Eintrag ohne dokumentiertes Ende. Im aktuellen Steuerungsspeicher nicht mehr enthalten; keine aktuell bestätigte Störung."
+        : "Der zuletzt gespeicherte Zustand ist aktuell nicht durch eine frische Steuerungsabfrage bestätigt.", "error-context"));
+      row.append(times); container.append(row);
     }
   } catch (error) { notice(explain(error), true); }
 }

@@ -171,7 +171,7 @@ class StandaloneRuntime:
         return view(self.repository.get_meta("controller_errors"), self.service.interval)
 
     def errors_view(self, source="auto", limit=100, offset=0):
-        from .controller_errors import check_page, page
+        from .controller_errors import check_page, page, activity
         from .storage import ReadOnlyDatabase, DatabaseUnavailable
         check_page(limit, offset)
         if source not in ("auto", "history", "controller"):
@@ -186,6 +186,9 @@ class StandaloneRuntime:
         if source != "controller" and configured:
             try:
                 result = ReadOnlyDatabase(self.database_config).error_history(limit, offset)
+                result["items"] = activity(result["items"], snapshot["items"],
+                                           fresh=snapshot["available"] and not snapshot["stale"] and not snapshot["error"],
+                                           observed_at=snapshot["observed_at"])
                 snapshot.update(result, source="p4d-database", available=True,
                                 history_available=True, read_at=datetime.now(ZONE).isoformat())
                 return snapshot

@@ -224,6 +224,31 @@ class HistoryIntegrationTests(unittest.TestCase):
         with self.repo.transaction() as c:
             c.execute('SELECT count(*) AS n FROM errors');self.assertEqual(c.fetchone()['n'],2)
 
+    def test_live_error_transitions_refresh_existing_row_and_repair_missing_times(self):
+        from test_controller_errors import event
+        def sync(events,stamp):
+            self.local.set_meta('controller_errors',dict(events=events,observed_at=stamp))
+            self.history.sync_errors()
+            self.assertTrue(self.history.status()['controller_errors']['available'])
+            with self.repo.transaction() as c:
+                c.execute('SELECT * FROM errors');rows=c.fetchall()
+            self.assertEqual(len(rows),1)
+            return rows[0]
+        first=sync([event(1)],'arrival')
+        gone=sync([event(1),event(4,11)],'departure')
+        self.assertEqual((gone['id'],gone['state'],gone['time4']),(first['id'],'gegangen',datetime(2026,1,1,11)))
+        ack=sync([event(1),event(4,11),event(2,12)],'acknowledgement')
+        self.assertEqual((ack['id'],ack['state'],ack['time2']),(first['id'],'quittiert',datetime(2026,1,1,12)))
+        with self.repo.transaction(writable=True) as c:
+            c.execute('UPDATE errors SET time2=NULL,time4=NULL,mailcnt=7')
+        repaired=sync([event(1),event(4,11),event(2,12)],'repair same label')
+        self.assertEqual(repaired['id'],first['id'])
+        self.assertEqual(repaired['state'],'quittiert');self.assertEqual(repaired['mailcnt'],7)
+        self.assertEqual(repaired['time4'],datetime(2026,1,1,11))
+        self.assertEqual(repaired['time2'],datetime(2026,1,1,12))
+        repeated=sync([event(1),event(4,11),event(2,12)],'repeat after restart')
+        self.assertEqual(repaired,repeated)
+
     def test_error_history_pages_all_database_rows_in_original_order_without_writes(self):
         from froeling_bridge.storage import ReadOnlyDatabase
         with self.repo.transaction(writable=True) as c:

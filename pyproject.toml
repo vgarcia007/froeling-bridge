@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "froeling-bridge"
-version = "0.5.6"
+version = "0.5.7"
 description = "Web menu, S3200 reader and continuous p4d-compatible recording"
 readme = "README.md"
 requires-python = ">=3.9"

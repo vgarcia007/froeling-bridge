@@ -168,3 +168,11 @@ Originalbeleg: [applyConfigurationSpecials im Referenzstand](https://github.com/
 Ab 0.5.5 verwenden Fehlermeldungen eigene Einträge mit voller Textbreite, Zustandskennzeichnung und zugehörigen Zeitpunkten. Sie verwenden nicht mehr das Menü-Raster mit schmaler Symbolspalte. Auf kleinen Displays stehen die Zeitpunkte untereinander; auf dem Desktop nebeneinander. Auch die Kopfzeile bricht bei sehr kleinen Displays um.
 
 `PYTHONPATH=src .venv/bin/python docs/tools/verify_error_browser.py --simulate-only` prüft im Chromium 320/390/768/1440 Pixel, lange fiktive Meldungen, alle drei Zustände, Zeitdarstellung, Seitenbreite und sichere Textausgabe ohne HTML-Auswertung. Ausschließlich Simulator, kein Zugriff auf die echte Heizung.
+
+### Aktueller Fehlerzustand und historische Einträge ab 0.5.7
+
+`state` ist der letzte gespeicherte historische Übergang. Ein alter Eintrag „gekommen“ ohne dokumentiertes Ende beweist keine heute aktive Störung. Dafür liefert die API zusätzlich `active`: **true** nur bei frischer vollständiger Steuerungsabfrage, die genau dasselbe Vorkommnis noch als offen meldet; **false** bei dokumentiertem Ende/Quittierung; **null** bei unbestätigtem Zustand. `activity_basis` nennt die Grundlage (`controller`, `documented_end`, `not_in_controller`, `controller_unavailable`), `activity_checked_at` bei Steuerungsbestätigung den Lesezeitpunkt. Eine fehlgeschlagene oder veraltete Abfrage darf keine aktuelle Aktivität bestätigen. Fehlende ältere Meldungen im begrenzten Steuerungsspeicher beweisen kein Ende.
+
+Clients sollen für aktuelle Störungen `active === true` verwenden und null als unbekannt behandeln. Die GUI markiert Unbestätigtes neutral statt als aktive Störung. Historische Rohzustände und vorhandene Zeitpunkte bleiben erhalten; kein Quittierbefehl und keine erfundene Endzeit.
+
+Der DB-Abgleich aktualisiert dasselbe Vorkommnis bei neuen bestätigten Zuständen (gekommen → gegangen → quittiert), ohne eine neue ID anzulegen. Nachgelieferte oder korrigierte Steuerungszeitpunkte werden auch dann übernommen, wenn der gespeicherte Zustandsname bereits passt. Wiederholte vollständige Listen bleiben idempotent; frühere Quittierung wird nicht durch wiederholtes Lesen älterer Anfangsmeldungen zurückgenommen. Ein neuer Auftretenszeitpunkt derselben Fehlernummer ist dagegen ein neues historisches Vorkommnis.

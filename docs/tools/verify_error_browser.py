@@ -50,7 +50,7 @@ def main():
                 assert not layout['overflow'], (width,layout)
                 assert browser.js('document.documentElement.scrollWidth') <= width, (width,layout)
                 assert layout['images']==0
-                assert set(layout['states'])=={'gekommen','gegangen','quittiert'}
+                assert set(layout['states'])=={'Aktiv bestätigt','gegangen','quittiert'}
                 assert all(row['width']>=min(220,width-100) and row['height']<380 for row in layout['rows']), (width,layout)
                 assert len(transport.requests)==before
             # A fictional stored history is longer than one page. No MariaDB connection.
@@ -60,6 +60,8 @@ def main():
                 data = original_view("controller", 1000, 0)
                 original_items = data["items"]
                 all_items = [dict(original_items[index % len(original_items)], id=index+1) for index in range(105)]
+                old_open = next(item for item in original_items if item["state"] == "gekommen")
+                all_items[0] = dict(old_open,id=999,active=None,activity_basis="not_in_controller",activity_checked_at=None,time1=datetime(2020,1,1))
                 data.update(page(all_items[offset:offset+limit],len(all_items),limit,offset),
                             source="p4d-database",history_configured=True,history_available=True)
                 return data
@@ -67,6 +69,9 @@ def main():
             browser.js("document.querySelector('#refresh').click()")
             browser.wait("document.querySelectorAll('.error-entry').length===100")
             assert browser.js("document.querySelector('#errors-status').textContent.includes('Datenbankhistorie')")
+            assert browser.js("document.querySelector('.error-entry .error-state').textContent==='Nicht bestätigt'")
+            assert not browser.js("document.querySelector('.error-entry .error-state').classList.contains('error-state-active')")
+            assert browser.js("document.querySelector('.error-entry .error-context').textContent.includes('Historischer Eintrag')")
             browser.js("document.querySelector('#errors-next').click()")
             browser.wait("document.querySelectorAll('.error-entry').length===5")
             assert browser.js("document.querySelector('#errors-page-status').textContent==='101–105 von 105'")
@@ -78,7 +83,7 @@ def main():
                 browser.call('Emulation.setPageScaleFactor',dict(pageScaleFactor=1))
                 assert browser.js('document.documentElement.scrollWidth') <= width
             assert not browser.errors
-            print('PASS Chromium: error entries at 320/390/768/1440px, full-width titles, compact dates, all states, no page overflow or HTML injection, 105 stored entries with next/previous pagination; fictional data only.')
+            print('PASS Chromium: error entries at 320/390/768/1440px, full-width titles, compact dates, all states, no page overflow or HTML injection, 105 stored entries with next/previous pagination, unconfirmed history not labeled active; fictional data only.')
         finally:
             browser.close()
             runtime.close()

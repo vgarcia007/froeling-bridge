@@ -54,6 +54,15 @@ class ErrorHistoryApiTests(unittest.TestCase):
         self.assertFalse(data['fallback'])
         self.assertEqual(self.http.get('/api/v1/errors?source=history').status_code,503)
 
+    def test_old_open_history_is_not_reported_as_currently_active(self):
+        self.runtime.database_config=DatabaseConfig('froeling_bridge_test_mock','test')
+        old=dict(id=9,number=7,state='gekommen',text='Old incomplete history',time1=datetime(2020,1,1),time4=None,time2=None)
+        with patch('froeling_bridge.storage.ReadOnlyDatabase') as db:
+            db.return_value.error_history.return_value=dict(items=[old],total=1,offset=0,limit=100,has_more=False)
+            result=self.http.get('/api/v1/errors').get_json()['items'][0]
+            self.assertIsNone(result['active']);self.assertEqual(result['activity_basis'],'not_in_controller')
+            self.assertEqual(result['state'],'gekommen');self.assertIsNone(result['time4'])
+
     def test_query_validation(self):
         for query in ('source=other','limit=0','limit=1001','offset=-1','offset=1000001','limit=hello','extra=1','limit=1&limit=2'):
             with self.subTest(query=query):self.assertEqual(self.http.get('/api/v1/errors?'+query).status_code,400)
