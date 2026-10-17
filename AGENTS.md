@@ -20,6 +20,12 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Aktuelle Heizungs-Schreibfreigabe (17.10.2026)
+
+Der Benutzer hat den konkreten LED-Helligkeitstest mit Änderung um einen Prozentpunkt und unmittelbarer Rückstellung bestätigt. Test am echten Gerät erfolgreich: frische Ausgangsmetadaten, Änderung, beide Bestätigungen, frisches Nachlesen, Rückstellung und erneutes Nachlesen. Danach wie vereinbart `write_parameter` für das normale p4d-Parametermenü aktiviert. Aktuelle Produktionskonfiguration verwendet den geschützten Geräte-/Firmware-Nachweis unter `/etc/froeling-bridge/write-validation.json`. Keine eigene Parameter-Freigabeliste; dieselben sechs Menütypen wie p4d. Zeitprogramm-Schreiben bleibt gesperrt (`write_time_range` nicht validiert). Keine weiteren beliebigen Teständerungen autorisiert. Frühere pauschale Heizungs-Schreibsperren weiter unten sind historische Freigabestände.
+
+Benutzer fragt nach Bootverhalten und sagt ausdrücklich „nicht machen“: keinen Hostneustart ausführen. Lesend bestätigt: Bridge enabled/active, p4d disabled/inactive, Gesundheits-Timer enabled/active; wirksame Host-Drop-in setzt `Restart=no` und `OnFailure` auf Rückkehr zu p4d.
+
 ## Aktueller administrativer Zugriff (17.10.2026)
 
 Administrative Zugriffsdaten und Berechtigungen werden ausschließlich im privaten Betreiberkontext festgehalten. Bestehende Autorisierung beachten, verfügbare Rechte bei Bedarf lesend prüfen und den laufenden Betrieb schützen. Daraus folgt keine Freigabe für Heizungsänderungen.

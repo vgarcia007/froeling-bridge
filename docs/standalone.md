@@ -93,7 +93,7 @@ Verdichtung übernimmt `p4d.aggregateHistory` und `p4d.aggregateInterval` (aktue
 
 ## Heizungs-Schreiben und Abnahme
 
-Im neuen Hardwarebetrieb bleibt Schreiben standardmäßig gesperrt. Die vorhandenen Parameter-/Zeit-Schreibpfade sind implementiert, aber auf der echten Anlage noch nicht bestätigt. Simulator-Modus dient zur Prüfung der Abläufe:
+Im neuen Hardwarebetrieb bleibt Schreiben standardmäßig gesperrt. Die Parameter-/Zeit-Schreibpfade sind implementiert. Auf der Bestandsanlage wurde normales Parameterschreiben am 17.10.2026 mit Änderung und Rückstellung der LED-Helligkeit bestätigt und anschließend freigeschaltet; Zeitprogramm-Schreiben bleibt gesperrt. Simulator-Modus dient zur Prüfung der Abläufe:
 
 ```sh
 .venv/bin/python -m froeling_bridge serve --mode standalone-demo --state-dir .local/demo-independent
@@ -114,7 +114,7 @@ Backup verwendet die SQLite-Backupfunktion und enthält Katalog/Einstellungen, l
 
 ## Stand des Nachweises
 
-Automatisierte Tests, separate MariaDB, echte Pseudo-TTY mit HTTP, Browser und reale systemd-Ersatzdienste prüfen die Implementierung. Eine isolierte Debian-Installation prüft Paketinstallation, Dienstbenutzer/Rechte, seriellen Erststart und Wiederholung; systemd-Aufrufe sind in diesem Container simuliert und separat gegen echte Ersatzdienste geprüft. Auf der tatsächlichen Steuerung sind vollständige Discovery, aktuelle Werte, fortlaufende Aufzeichnung und Dienstneustart mit 0.5.2 bestätigt. Die 24h-Beobachtung läuft im Hintergrund bei funktionierendem Monitoring. Noch erforderlich: deren erfolgreicher Abschluss, kontrollierter Neustart des gesamten Hosts und separat vereinbarte reale Schreibtests. Bis dahin keine Zusage vollständiger Hardwarevalidierung.
+Automatisierte Tests, separate MariaDB, echte Pseudo-TTY mit HTTP, Browser und reale systemd-Ersatzdienste prüfen die Implementierung. Eine isolierte Debian-Installation prüft Paketinstallation, Dienstbenutzer/Rechte, seriellen Erststart und Wiederholung; systemd-Aufrufe sind in diesem Container simuliert und separat gegen echte Ersatzdienste geprüft. Auf der tatsächlichen Steuerung sind vollständige Discovery, aktuelle Werte, fortlaufende Aufzeichnung und Dienstneustart mit 0.5.2 bestätigt. Die 24h-Beobachtung läuft im Hintergrund bei funktionierendem Monitoring. Noch erforderlich: deren erfolgreicher Abschluss, kontrollierter Neustart des gesamten Hosts und ein separat vereinbarter realer Zeitprogramm-Schreibtest. Normales Parameterschreiben wurde inzwischen durch den LED-Test bestätigt. Ein Hostneustart ist aktuell ausdrücklich nicht beauftragt. Bis dahin keine Zusage vollständiger Hardwarevalidierung.
 
 
 Reproduzierbare Zusatzprüfungen aus dem Checkout:
@@ -129,4 +129,4 @@ Der Monitor fragt nur HTTP-Zustand/Cache ab, sendet keine Heizungsjobs und speic
 
 ### Parametermenü ab 0.5.3
 
-Die Bearbeitung folgt dem p4d-Menüumfang: unterstützte Zahlen-, Ja/Nein- und Uhrzeitparameter sowie benannte Zeitprogramme. Aktuelle Editorwerte und Grenzen kommen aus der Steuerung; einmal „Speichern“ genügt. Nachlesen, Fehlermeldung bei unklarem Ausgang und Schreibsperren bleiben erhalten. Details und Simulator-Browserprüfung in [parameter-menu.md](parameter-menu.md#bedienung-nach-originalvorlage-ab-053). Die Produktionsinstallation von 0.5.3 erweitert keine Heizungs-Schreibfreigaben.
+Die Bearbeitung folgt dem p4d-Menüumfang: unterstützte Zahlen-, Ja/Nein- und Uhrzeitparameter sowie benannte Zeitprogramme. Aktuelle Editorwerte und Grenzen kommen aus der Steuerung; einmal „Speichern“ genügt. Nachlesen, Fehlermeldung bei unklarem Ausgang und Schreibsperren bleiben erhalten. Details und Simulator-Browserprüfung in [parameter-menu.md](parameter-menu.md#bedienung-nach-originalvorlage-ab-053). Die Installation allein erweitert keine Heizungs-Schreibfreigaben. Auf dem Bestandsrechner wurde `write_parameter` anschließend nach dem vereinbarten erfolgreichen LED-Test ausdrücklich aktiviert.

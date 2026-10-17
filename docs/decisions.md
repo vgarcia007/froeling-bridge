@@ -156,3 +156,10 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Benutzer bestätigt die Umsetzung ausdrücklich nach Originalvorlage. Derselbe Typumfang und dieselbe automatische Menüzuordnung; keine zusätzlichen pro Parameter selbst zu pflegenden Freigabelisten. Editor mit frischen Metadaten, nativen Zahlengrenzen/Schrittweiten für Typ 07 und direktem Speichern. Zusätzliche Bestätigungsdialoge entfallen.
 - Erfolgreiches Nachlesen und kein automatisches Wiederholen nach unklarem Ergebnis bleiben beibehaltene Verbesserungen. Frisches Neuöffnen des Editors ermöglicht nach einer Unklarheit wieder eine bewusste Änderung, wenn die Operation freigegeben ist.
 - 0.5.3 zunächst neben laufender 0.5.2 vollständig vorbereitet und geprüft, danach mit Katalog-/Konfigurationsbackup und Rückkehrtimer auf dem Host aktiviert. Reale Parameter bleiben gesperrt, keine Teständerung an der Heizung.
+
+## 17.10.2026 — Reales Parameterschreiben bestätigt und aktiviert
+
+- Benutzer bestätigt den ausgewählten LED-Helligkeitstest: ein Prozentpunkt Änderung, unmittelbar bestätigte Rückstellung. Mit bestehendem Validierungswerkzeug durchgeführt; jeweils zwei `39`-Antworten und frisches `55`-Nachlesen erfolgreich, keine Wiederholung/Protokolländerung nötig.
+- Danach normales p4d-Parametermenü über geschützten Geräte-/Firmware-Nachweis für `write_parameter` freigeschaltet. `write_time_range` bleibt gesperrt. Keine beliebigen weiteren Teständerungen aus dieser Freigabe ableiten.
+- Exklusiver Portzugriff, privates Zustandsbackup und unabhängiger Rückkehrtimer; nach kurzer Pause wieder Bridge-Monitoring, Historie und Gesundheitsüberwachung aktiv. Langzeitbeobachtung enthält die geplante API-Unterbrechung und ist kein lückenloser 24h-Nachweis.
+- Bootet regulär mit Bridge und Gesundheits-Timer; p4d als Rückfall erhalten, regulärer Autostart deaktiviert. Wirksames Host-Drop-in `Restart=no` und OnFailure-Rückkehr lesend bestätigt. Benutzer sagt ausdrücklich, den Rechner jetzt nicht neu zu starten.
