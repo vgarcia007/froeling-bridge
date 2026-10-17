@@ -119,8 +119,10 @@ class _Transaction:
             self.session._pending.extend(self.session._decoder.feed(data))
         self.remaining()
         frame = self.session._pending.popleft()
-        if frame.command != command:
-            raise UnexpectedReply(f"expected command 0x{command:02X}, received 0x{frame.command:02X}")
+        expected = command if isinstance(command, frozenset) else frozenset((command,))
+        if frame.command not in expected:
+            names = '/'.join(f'0x{code:02X}' for code in sorted(expected))
+            raise UnexpectedReply(f"expected command {names}, received 0x{frame.command:02X}")
         return frame
 
     def exchange(self, frame: Frame, commands):

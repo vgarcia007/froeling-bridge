@@ -191,7 +191,7 @@ async function readMenuValues(items, generation) {
     } catch (error) {
       if (generation !== state.generation) return;
       node.append(element("small", "Nicht frisch gelesen", "stale"));
-      if (["hardware-read", "hardware-live"].includes(state.health.mode)) return;
+      if (["hardware-read", "hardware-live", "standalone"].includes(state.health.mode)) return;
     }
   }
 }
@@ -309,8 +309,11 @@ async function loadMenu(parent = state.parent, search = "") {
     }
   }
 }
+function canWrite(operation) {
+  return state.health?.write_operations ? state.health.write_operations.includes(operation) : !!state.health?.capabilities.heating_write;
+}
 function readOnlyLabel() {
-  return ["hardware-read", "hardware-live"].includes(state.health?.mode)
+  return ["hardware-read", "hardware-live", "standalone"].includes(state.health?.mode)
     ? "Heizungsparameter: Änderungen gesperrt."
     : "Bestandsansicht: gespeicherte Daten, keine direkte Heizungsabfrage.";
 }
@@ -385,14 +388,14 @@ async function openParameter(item, rowValueNode) {
       input.value = result.value;
       input.maxLength = 40;
     }
-    input.disabled = !state.health.capabilities.heating_write;
+    input.disabled = !canWrite("write_parameter");
     $("input-wrap").replaceChildren(input);
     $("input-label").hidden = false;
-    $("input-label").textContent = state.health.capabilities.heating_write
+    $("input-label").textContent = canWrite("write_parameter")
       ? "Neuer Wert"
       : "Aktueller Wert";
-    $("save-parameter").hidden = !state.health.capabilities.heating_write;
-    $("edit-result").textContent = state.health.capabilities.heating_write
+    $("save-parameter").hidden = !canWrite("write_parameter");
+    $("edit-result").textContent = canWrite("write_parameter")
       ? "Änderungen werden nach dem Schreiben erneut geprüft."
       : readOnlyLabel();
   } catch (error) {
@@ -418,7 +421,7 @@ $("edit-form").addEventListener("submit", (event) => {
   if (
     state.busy ||
     !state.parameter ||
-    !state.health.capabilities.heating_write
+    !canWrite("write_parameter")
   )
     return;
   const input = $("parameter-input");
@@ -487,42 +490,56 @@ $("confirm-form").addEventListener("submit", async (event) => {
 async function loadValues() {
   const generation = state.generation;
   try {
-    const data = await api("/values");
+    const data = await api("/sensors");
     if (state.view !== "values" || generation !== state.generation) return;
+    const query = $("sensor-search").value.trim().toLocaleLowerCase();
+    const filter = $("sensor-filter").value;
+    const items = data.items.filter(row => {
+      const title = `${row.title || ""} ${row.usrtitle || ""}`.toLocaleLowerCase();
+      if (query && !title.includes(query)) return false;
+      if (filter === "active" && !row.active && !row.recording) return false;
+      if (filter === "record" && !row.recording) return false;
+      return filter !== "current" || row.latest && !row.latest.stale;
+    });
+    $("sensor-summary").textContent = `${items.length} von ${data.items.length} Sensoren · Werte aus dem letzten Auslesen, keine zusätzliche Heizungsabfrage.`;
     const container = $("values-grid");
     container.replaceChildren();
-    if (!data.items.length)
-      container.append(
-        element(
-          "p",
-          "Noch keine Werte gelesen. Der erste Sammeldurchlauf läuft möglicherweise noch.",
-          "empty"
-        )
-      );
-    for (const row of data.items) {
+    for (const sensor of items) {
+      const row = sensor.latest;
       const card = element("article", "", "value-card");
-      card.append(
-        element(
-          "h2",
-          row.title ||
-            `${row.type} · 0x${row.address.toString(16).toUpperCase()}`
-        ),
-        element(
-          "strong",
-          row.type === "UD" && row.text ? row.text : format(row.value, row.unit)
-        ),
-        element(
-          "small",
-          `${row.stale ? "Veraltet · " : ""}Gelesen ${stamp(row.observed_at)}`,
-          row.stale ? "stale" : ""
-        )
-      );
+      card.append(element("h2", sensor.usrtitle || sensor.title),
+        element("strong", row ? row.type === "UD" && row.text ? row.text : format(row.value, sensor.unit) : "Noch kein Wert gelesen"),
+        element("small", row ? `${row.stale ? "Veraltet · " : ""}${row.origin === "local-persisted" ? "Letzter gespeicherter Stand · " : ""}Gelesen ${stamp(row.observed_at)}` : "Nicht abgefragt oder noch nicht erreichbar", row?.stale ? "stale" : ""),
+        element("small", `${sensor.type} · Adresse ${sensor.address}`));
+      if (!sensor.supported) card.append(element("p", "Dieser Sensortyp wird noch nicht unterstützt.", "stale"));
+      for (const [field, label, checked] of [["active", "Regelmäßig abfragen", sensor.active], ["record", "Historie aufzeichnen", sensor.recording]]) {
+        const control = document.createElement("input");
+        control.type = "checkbox";
+        control.checked = checked;
+        control.disabled = !state.health?.capabilities.sensor_configuration || !sensor.supported && !checked;
+        control.setAttribute("aria-label", label + ": " + (sensor.usrtitle || sensor.title));
+        control.addEventListener("change", async () => {
+          control.disabled = true;
+          try {
+            await api(`/sensors/${sensor.type}/${sensor.address}`, {method:"PATCH", body:JSON.stringify({[field]:control.checked})});
+            notice("Auswahl gespeichert. Sie gilt ab dem nächsten Sammeldurchlauf.");
+          } catch (error) {notice(error.message, true);}
+          finally {loadValues();}
+        });
+        const wrapper = element("label", "", "sensor-option");
+        wrapper.append(control, document.createTextNode(label));
+        card.append(wrapper);
+      }
+      if (sensor.recording && !sensor.active) card.append(element("small", "Wird für die aktivierte Historie mit abgefragt."));
       container.append(card);
     }
+    if (!items.length) container.append(element("p", "Keine passenden Sensoren.", "empty"));
   } catch (error) {
     if (state.view === "values") notice(error.message, true);
   }
 }
+$("sensor-search").addEventListener("input", loadValues);
+$("sensor-filter").addEventListener("change", loadValues);
 async function loadCollector() {
   try {
     const data = await api("/collector");
@@ -536,7 +553,7 @@ async function loadCollector() {
         !data.enabled ? "Inaktiv" : data.running ? "Durchlauf läuft" : "Bereit",
       ],
       ["Intervall", data.interval_seconds + " s"],
-      ["Zuletzt gespeichert", data.stored],
+      ["Im Durchlauf gespeichert / zur Historie übergeben", data.stored],
       ["Erfolgreiche Durchläufe", data.successful_cycles || 0],
     ]) {
       const box = element("div", "", "stat");
@@ -548,6 +565,26 @@ async function loadCollector() {
       element("p", "Letzter Durchlauf: " + stamp(data.last_cycle)),
       element("p", "Letzte Speicherung: " + stamp(data.last_successful_store))
     );
+    const runtime = await api("/runtime");
+    if (state.view !== "collector") return;
+    if (runtime.phase !== "legacy-mode") {
+      container.append(element("h2", "Heizungsverbindung"), element("p", `Betrieb: ${runtime.phase} · ${runtime.connection.connected ? "Verbunden" : "Nicht verbunden"}`));
+      if (runtime.error) container.append(element("p", runtime.error, "stale"));
+      if (runtime.persistence_error) container.append(element("p", runtime.persistence_error, "stale"));
+      const history = runtime.history;
+      container.append(element("h2", "Historien-Datenbank"), element("p", history.configured ? (history.available ? "Erreichbar" : "Nicht bereit — Live-Abfragen laufen unabhängig weiter") : "Nicht konfiguriert"));
+      if (history.error) container.append(element("p", history.error, "stale"));
+      if (history.configured) {
+        container.append(element("p", `Tatsächlich gespeichert: ${history.stored} · Letzter DB-Erfolg: ${stamp(history.last_success)} · Ausstehende Einstellungen: ${history.pending_settings}`));
+        container.append(element("p", `Ausgelassene Aufzeichnungsdurchläufe: ${history.dropped_cycles || 0}`));
+      }
+      if (history.aggregation) {
+        const a = history.aggregation;
+        container.append(element("h2", "Verdichtung"), element("p", `${history.history_days} Tage Einzelwerte · ${history.aggregate_minutes} Minuten je Aggregat · Nächster Lauf: ${stamp(history.next_aggregation)}`),
+          element("p", `Letzter Erfolg: ${stamp(a.last_success)} · Verarbeitete Einzelwerte: ${a.processed} · Konflikte: ${a.conflicts}`));
+        if (a.error) container.append(element("p", a.error, "stale"));
+      }
+    }
     if (data.errors.length) {
       container.append(element("h2", "Fehler"));
       for (const error of data.errors)
@@ -640,15 +677,16 @@ function renderTimes() {
     const section = element("section", "", "time-program");
     section.append(element("h3", label.weekday));
     program.ranges.forEach((interval, index) => {
+      const canEdit = canWrite("write_time_range") && !interval.raw;
       const form = element("form", "", "interval-row");
       const prefix = `time-${program.address}-${index}`;
       const start = element("input");
-      start.type = state.health.capabilities.heating_write ? "time" : "text";
+      start.type = canEdit ? "time" : "text";
       start.step = "600";
       start.value = interval.start || "";
       start.id = prefix + "-start";
       const end = element("input");
-      end.type = state.health.capabilities.heating_write ? "time" : "text";
+      end.type = canEdit ? "time" : "text";
       end.step = "600";
       end.value = interval.end || "";
       end.id = prefix + "-end";
@@ -666,11 +704,11 @@ function renderTimes() {
       start.disabled =
         end.disabled =
         button.disabled =
-          !state.health.capabilities.heating_write;
+          !canEdit;
       form.append(startLabel, start, endLabel, end, button, output);
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        if (!state.health.capabilities.heating_write) return;
+        if (!canEdit) return;
         if (
           !window.confirm(
             `Intervall ${index + 1} auf ${start.value || "unbelegt"} – ${
@@ -706,7 +744,7 @@ function renderTimes() {
             (uncertain ? " Vor einer weiteren Änderung erneut auslesen." : "");
         } finally {
           button.disabled =
-            !state.health.capabilities.heating_write || uncertain;
+            !canEdit || uncertain;
         }
       });
       section.append(form);
@@ -750,21 +788,22 @@ async function healthLoop() {
     const first = !state.health;
     state.health = health;
     $("version").textContent = health.version || "";
+    const heatingDisconnected = health.controller_connection && !health.controller_connection.connected;
     $("connection").textContent = health.fatal_reason
       ? "Dienst wird beendet"
-      : "API verbunden";
+      : heatingDisconnected ? "API verbunden · Heizung getrennt" : "API verbunden";
     $("connection-dot").className =
-      "dot " + (health.fatal_reason ? "offline" : "online");
-    const hardware = ["hardware-read", "hardware-live"].includes(health.mode);
+      "dot " + (health.fatal_reason || heatingDisconnected ? "offline" : "online");
+    const hardware = ["hardware-read", "hardware-live", "standalone"].includes(health.mode);
     $("mode").textContent = hardware
-      ? "HEIZUNG · NUR LESEN"
+      ? (health.capabilities.heating_write ? "HEIZUNG · BEDIENUNG" : "HEIZUNG · NUR LESEN")
       : health.mode === "database"
       ? "BESTAND · NUR LESEN"
       : "DEMO · SIMULATOR";
     $("mode").classList.toggle("hardware", hardware);
     $("mode-note").classList.toggle("hardware", hardware);
     $("mode-note").textContent = hardware
-      ? (health.mode === "hardware-live" ? "Dauerbetrieb. Neue Messpunkte werden in der bestehenden p4d-Datenbank gespeichert. Heizungsparameter sind schreibgeschützt." : "Lesender Hardwaretest. Neue Messpunkte werden nur in der separaten Testdatenbank gespeichert.")
+      ? (health.mode === "standalone" ? "Eigenständiger Betrieb. Live-Abfragen und Menü funktionieren unabhängig von MariaDB. Lesezeitpunkte zeigen die Aktualität." : health.mode === "hardware-live" ? "Dauerbetrieb. Neue Messpunkte werden in der bestehenden p4d-Datenbank gespeichert. Heizungsparameter sind schreibgeschützt." : "Lesender Hardwaretest. Neue Messpunkte werden nur in der separaten Testdatenbank gespeichert.")
       : health.mode === "database"
       ? "Gespeicherte p4d-Daten. Keine direkte Heizungsabfrage und keine Änderungen."
       : "Du arbeitest mit fiktiven Heizungsdaten. Änderungen betreffen ausschließlich den Simulator.";

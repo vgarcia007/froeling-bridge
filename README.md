@@ -16,11 +16,11 @@ Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, 
 
 ## Projektstand
 
-Version 0.4.0 enthält das moderne Webmenü mit echten Menüpfaden, benannten Zeitprogrammen und gemeinsamem persistentem Cache, eine HTTP-API und kontinuierliche Messwertaufzeichnung. Der Modus `hardware-live` liest die reale Heizung und führt `samples` und `peaks` in der bestehenden p4d-Datenbank fort. Ein eigener systemd-Dienst übernimmt Dauerbetrieb und Autostart; bei Fehlern wird Original-p4d wiederhergestellt. Die [Dauerbetriebsanleitung](docs/production.md) beschreibt die Umschaltung auf einem bereits vorbereiteten Host.
+Version 0.5.0 ergänzt den **eigenständigen Betrieb ohne p4d und ohne MariaDB**: Discovery von Sensoren, Menü und Zeitprogrammen, lokaler persistenter Katalog, Status-/Messwertabfragen, vollständige Sensorübersicht und optional p4d-kompatible Historie mit automatischer Datenbankeinrichtung und Verdichtung. Ein natives Debian-/Ubuntu-Installationsskript richtet Dienst und USB-Zugriff ein. [Installation und Betrieb](docs/standalone.md).
 
-Ein vollständiger 15-Minuten-Lesetest an der realen Heizung war erfolgreich: 15 Sammeldurchläufe, 195 Testmesspunkte, komplette Zeitprogrammliste und automatische Rückkehr zu p4d. Die produktive Installation wird gesondert aktiviert und bestätigt; den tatsächlichen Betriebsstand dokumentiert [project-context.md](docs/project-context.md).
+Die neuen Abläufe sind gegen Simulator, Pseudo-TTY, separate MariaDB, Browser und systemd-Ersatzdienste geprüft. Die vollständige neue Discovery auf der echten Anlage, ein 24-Stunden-Lauf und echte Schreibtests sind **noch ausstehend**. Ein früherer 15-Minuten-Lesetest mit bestehendem p4d-Katalog war erfolgreich; er ersetzt diese neue Abnahme nicht.
 
-Heizungsparameter schreiben bleibt im Hardwarebetrieb gesperrt. Parameter- und Zeitprogrammänderungen sind bislang nur am Simulator durch Nachlesen geprüft. Simulator und begrenzter Hardwaretest mit separater Test-MariaDB bleiben verfügbar; `database` bleibt eine reine Bestandsansicht. Grundlage sind der dokumentierte [Schemaabgleich](docs/live-database.md) und [installierte p4d-Stand](docs/live-server.md).
+Heizungs-Schreiben bleibt standardmäßig gesperrt und benötigt einen gesonderten Hardware-Nachweis. Die alte Bestandsansicht, Simulator- und Testmodi bleiben erhalten. Grundlage sind der dokumentierte [Schemaabgleich](docs/live-database.md) und [installierte p4d-Stand](docs/live-server.md). MariaDB ist optional; die bisherige Historie kann weiterverwendet werden.
 
 ## Installieren und ausprobieren
 

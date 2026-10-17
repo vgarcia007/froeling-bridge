@@ -82,11 +82,41 @@ def create_app(service):
         return response(dict(mode=service.mode, version=__version__, hardware_verified=False,
                              read_connection_verified=service.read_connection_verified,
                              fatal_reason=service.fatal_reason,
-                             capabilities=dict(controller_read=service.worker is not None, heating_write=service.can_write),
+                             controller_connection=service.runtime.client.status() if getattr(service, "runtime", None) else None,
+                             startup_phase=service.runtime.phase if getattr(service, "runtime", None) else None,
+                             capabilities=dict(controller_read=service.worker is not None, heating_write=service.can_write,
+                                               sensor_configuration=getattr(service.repository, "configurable", False)),
                              worker="unavailable" if not service.worker else (
                                  "running" if service.worker.thread.is_alive() else "stopped"),
                              database_available=service.repository.available,
+                             write_operations=sorted(getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range"))) if service.can_write else [],
                              jobs_persistent=False, timezone="Europe/Berlin"))
+
+    @app.get(prefix + "/runtime")
+    def runtime_status():
+        runtime = getattr(service, 'runtime', None)
+        return response(runtime.status() if runtime else dict(phase='legacy-mode', history=None))
+
+    @app.patch(prefix + "/sensors/<sensor_type>/<int:address>")
+    def configure_sensor(sensor_type, address):
+        if not getattr(service.repository, 'configurable', False):
+            raise ReadOnlyViolation('sensor configuration is unavailable in this mode')
+        args_only()
+        row = service.repository.patch_sensor(sensor_type, address, request.get_json())
+        return response(dict(item=row))
+
+    def latest_values():
+        rows = service.cached_values()
+        failures = {(e.get('address'), e.get('type')) for e in service.collector_status()['errors']}
+        now = datetime.now(ZONE)
+        for row in rows:
+            row['age_seconds'] = max(0, (now - datetime.fromisoformat(row['observed_at'])).total_seconds())
+            row['origin'] = row.get('origin', 'controller')
+            interval = 10 if service.mode in ('standalone', 'standalone-demo') and row['type'] == 'UD' and row['address'] in (1,2) else service.interval
+            row['stale'] = row['age_seconds'] > interval * 2 or row['origin'] == 'local-persisted' or (row['address'], row['type']) in failures
+            if getattr(service, 'runtime', None) and not service.runtime.client.status()['connected']:
+                row['stale'] = True
+        return rows
 
     @app.get(prefix + "/collector")
     def collector():
@@ -100,7 +130,7 @@ def create_app(service):
             raise ValidationError("invalid menu parent")
         items = visible_menu(service.repository.menu(parent))
         for item in items:
-            item["editable"] = service.can_write and item["type"] in set(ParameterType)
+            item["editable"] = service.can_write and "write_parameter" in getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range")) and item["type"] in set(ParameterType)
         return response(dict(source=service.repository.source, parent=parent, items=items,
                              cached=True, timezone="Europe/Berlin"))
 
@@ -112,7 +142,7 @@ def create_app(service):
             raise ValidationError("search query must contain 1..100 characters")
         items = visible_menu(service.repository.search_menu(query))
         for item in items:
-            item["editable"] = service.can_write and item["type"] in set(ParameterType)
+            item["editable"] = service.can_write and "write_parameter" in getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range")) and item["type"] in set(ParameterType)
         return response(dict(source=service.repository.source, items=items))
 
     @app.get(prefix + "/time-programs")
@@ -127,20 +157,18 @@ def create_app(service):
     @app.get(prefix + "/sensors")
     def sensors():
         args_only()
-        return response(dict(source=service.repository.source, items=service.repository.sensors()))
+        from .local_store import supported
+        latest = {(row['type'],row['address']): row for row in latest_values()}
+        items = [dict(row, supported=supported(row), active=row['state']=='A', recording=row['record']=='A',
+                      latest=latest.get((row['type'],row['address']))) for row in service.repository.sensors()]
+        return response(dict(source=service.repository.source, items=items))
 
     @app.get(prefix + "/values")
     def values():
         args_only()
         if service.mode == "database":
             return response(dict(error=dict(code="controller_unavailable", message="use history for stored database values")), 409)
-        rows = service.cached_values()
-        state = service.collector_status()
-        failures = {(e.get("address"), e.get("type")) for e in state["errors"]}
-        now = datetime.now(ZONE)
-        for row in rows:
-            row["age_seconds"] = max(0, (now - datetime.fromisoformat(row["observed_at"])).total_seconds())
-            row["stale"] = row["age_seconds"] > service.interval * 2 or (row["address"], row["type"]) in failures
+        rows = latest_values()
         return response(dict(source=service.source, items=rows))
 
     @app.get(prefix + "/history")

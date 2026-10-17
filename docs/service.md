@@ -1,4 +1,6 @@
-# API und kontinuierlicher Datensammler (0.4.0)
+# API und kontinuierlicher Datensammler
+
+Ab 0.5.0 ist der [eigenständige Betrieb ohne p4d/MariaDB](standalone.md) der neue Hauptweg. `GET /sensors` liefert nun Metadaten zusammen mit letzten Werten; siehe dort auch Sensor-Konfiguration und Historienstatus. Die folgenden Abschnitte beschreiben zusätzlich die weiterhin verfügbaren älteren Modi.
 
 Der Dienst sammelt regelmäßig Werte vom Simulator oder der realen Heizung und bietet das Webmenü und die HTTP-API. `demo-db` zeichnet ausschließlich in separater Test-MariaDB auf, `database` zeigt den Bestand ausschließlich lesend. `hardware-read` nutzt den begrenzten Lesetest mit separater Aufzeichnung; `hardware-live` führt mit ausdrücklicher Freigabe die bestehende p4d-Datenbank fort. Siehe [Dauerbetrieb und Rückkehr](production.md). Heizungsparameter schreiben bleibt auf Simulator-Modi begrenzt.
 

@@ -1,0 +1,497 @@
+{
+  "config": [
+    {
+      "name": "owner",
+      "type": "varchar(40)",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "name",
+      "type": "varchar(40)",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "inssp",
+      "type": "int(11)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "updsp",
+      "type": "int(11)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "value",
+      "type": "text",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    }
+  ],
+  "valuefacts": [
+    {
+      "name": "address",
+      "type": "int(4) unsigned",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "type",
+      "type": "varchar(8)",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "inssp",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "updsp",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "groupid",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "state",
+      "type": "varchar(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "record",
+      "type": "varchar(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "unit",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "options",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "invert",
+      "type": "varchar(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "factor",
+      "type": "int(4)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "title",
+      "type": "varchar(100)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "usrtitle",
+      "type": "varchar(100)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "res1",
+      "type": "int(4)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "choices",
+      "type": "varchar(250)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "rights",
+      "type": "int(11)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "calibration",
+      "type": "text",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    }
+  ],
+  "menu": [
+    {
+      "name": "id",
+      "type": "int(4) unsigned",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": true
+    },
+    {
+      "name": "inssp",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "updsp",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "parent",
+      "type": "int(5) unsigned",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "child",
+      "type": "int(5) unsigned",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "type",
+      "type": "int(1) unsigned",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "address",
+      "type": "int(4) unsigned",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "title",
+      "type": "varchar(100)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "state",
+      "type": "varchar(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "unit",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "digits",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "min",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "max",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "def",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "factor",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "value",
+      "type": "varchar(100)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "pub1",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "pub2",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "pub3",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "puw1",
+      "type": "int(1)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "unknown1",
+      "type": "int(4)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "unknown2",
+      "type": "int(4)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    }
+  ],
+  "timeranges": [
+    {
+      "name": "address",
+      "type": "int(4) unsigned",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "from1",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "to1",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "from2",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "to2",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "from3",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "to3",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "from4",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "to4",
+      "type": "varchar(5)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    }
+  ],
+  "samples": [
+    {
+      "name": "address",
+      "type": "int(4) unsigned",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "type",
+      "type": "varchar(8)",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "aggregate",
+      "type": "varchar(1)",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "time",
+      "type": "datetime",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "inssp",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "updsp",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "value",
+      "type": "float(14,2)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "text",
+      "type": "varchar(50)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "samples",
+      "type": "int(3)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    }
+  ],
+  "peaks": [
+    {
+      "name": "address",
+      "type": "int(4) unsigned",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "type",
+      "type": "varchar(8)",
+      "nullable": false,
+      "primary": true,
+      "auto_increment": false
+    },
+    {
+      "name": "inssp",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "updsp",
+      "type": "int(10)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "minv",
+      "type": "float(14,2)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    },
+    {
+      "name": "maxv",
+      "type": "float(14,2)",
+      "nullable": true,
+      "primary": false,
+      "auto_increment": false
+    }
+  ]
+}

@@ -66,12 +66,15 @@ def main(argv=None):
     decoder = commands.add_parser("decode", help="validate and decode exactly one hex frame")
     decoder.add_argument("wire_hex")
     server = commands.add_parser("serve", help="run web API and selected collector")
-    server.add_argument("--mode", choices=("demo", "demo-db", "database", "hardware-read", "hardware-live"), default="demo")
+    server.add_argument("--mode", choices=("demo", "demo-db", "database", "hardware-read", "hardware-live", "standalone", "standalone-demo"), default="demo")
     server.add_argument("--config", help="local JSON database configuration")
     server.add_argument("--test-config", help="separate loopback test database (hardware-read only)")
     server.add_argument("--device", help="exclusive TTY device (hardware-read only)")
     server.add_argument("--trace-file", help="new private raw trace file (hardware-read only)")
     server.add_argument("--reply-profile", help="explicit JSON request-to-reply command mapping")
+    server.add_argument("--state-dir", help="private persistent state directory (standalone modes)")
+    server.add_argument("--history-config", help="optional MariaDB configuration; empty DB initialized automatically")
+    server.add_argument("--write-validation", help="explicit hardware validation record for enabling heating writes")
     server.add_argument("--time-cache-file", help="persistent controller time cache")
     server.add_argument("--host", default="0.0.0.0", help="listen address (default: all IPv4 interfaces)")
     server.add_argument("--port", type=int, default=8000)
@@ -81,6 +84,9 @@ def main(argv=None):
     setup.add_argument("--empty", action="store_true", help="create empty tables without simulator fixtures")
     args = parser.parse_args(argv)
     try:
+        if args.command == "serve" and args.mode in ("standalone", "standalone-demo"):
+            from .standalone import serve_standalone
+            return serve_standalone(args)
         if args.command in ("serve", "init-test-db"):
             return run_service(args)
         if args.command == "demo":

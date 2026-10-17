@@ -749,3 +749,5 @@ dialog::backdrop {
 .value-card {
   min-width: 0;
 }
+
+.sensor-option {display:flex;gap:.65rem;align-items:center;margin-top:.65rem;font-size:.9rem}.sensor-option input {width:auto}.toolbar select {max-width:100%;padding:.65rem;border:1px solid var(--border);border-radius:.5rem;background:white;color:inherit}

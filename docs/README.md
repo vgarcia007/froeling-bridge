@@ -59,3 +59,5 @@ Benötigt werden Python 3, Git und ein C++17-Compiler (`c++`). Das Prüfwerkzeug
 Ergebnis: acht [synthetische Telegrammvektoren](protocol-vectors.json) stimmen mit Encoder und Decoder überein; alle 65.536 16-Bit-Muster werden vorzeichenbehaftet und vorzeichenlos geprüft. Ungültige und abgeschnittene Escape-Folgen werden abgelehnt. Die Beispiele belegen die Bytecodierung, **nicht** die Antwortsemantik einer realen Heizung oder den kompletten Schreibablauf. Die extrahierten Originalfunktionen unterliegen der Lizenz des Referenzprojekts.
 
 - [Produktiver Dauerbetrieb und Rückkehr](production.md)
+
+- [Eigenständiger Betrieb, Neuinstallation, Discovery und optionale Historie ab 0.5.0](standalone.md)

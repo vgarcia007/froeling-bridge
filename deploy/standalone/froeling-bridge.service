@@ -1,0 +1,27 @@
+[Unit]
+Description=Froeling Bridge independent heating service
+After=network-online.target p4d.service
+Wants=network-online.target
+Conflicts=p4d.service froeling-bridge-preview.service froeling-bridge-hardware-test.service
+OnFailure=froeling-bridge-rescue.service
+
+[Service]
+Type=exec
+User=froeling-bridge
+Group=froeling-bridge
+SupplementaryGroups=dialout
+ExecStart=/opt/froeling-bridge/0.5.0/venv/bin/python -I -m froeling_bridge.run_config /etc/froeling-bridge/settings.json
+StateDirectory=froeling-bridge
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

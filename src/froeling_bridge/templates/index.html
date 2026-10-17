@@ -78,6 +78,16 @@
         </div>
       </section>
       <section id="values-view" class="view" hidden>
+        <div class="toolbar">
+          <input id="sensor-search" type="search" placeholder="Sensor nach Namen suchen …" aria-label="Sensor suchen" />
+          <select id="sensor-filter" aria-label="Sensorfilter">
+            <option value="all">Alle Sensoren</option>
+            <option value="active">Zur Abfrage ausgewählt</option>
+            <option value="current">Mit aktuellem Wert</option>
+            <option value="record">Historie aktiviert</option>
+          </select>
+        </div>
+        <p id="sensor-summary" class="muted"></p>
         <div id="values-grid" class="values-grid"></div>
       </section>
       <section id="times-view" class="view" hidden>

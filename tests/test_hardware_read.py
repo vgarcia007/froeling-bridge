@@ -105,7 +105,7 @@ class HardwareReadTests(unittest.TestCase):
         http = create_app(self.service).test_client()
         health = http.get("/api/v1/health").get_json()
         self.assertEqual(
-            health["capabilities"], {"controller_read": True, "heating_write": False}
+            health["capabilities"], {"controller_read": True, "heating_write": False, "sensor_configuration": False}
         )
         self.assertEqual(
             http.post(

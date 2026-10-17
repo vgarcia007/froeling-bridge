@@ -1,13 +1,14 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Fröling Bridge local prototype API",
-    "version": "0.4.0",
-    "description": "Local web menu, simulator, read-only p4d database and explicit hardware-read test and hardware-live recording. Heating writes are only enabled in simulator modes; jobs are never replayed."
+    "title": "Fröling Bridge API",
+    "version": "0.5.0",
+    "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation."
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:8000"
+      "url": "/",
+      "description": "Current Bridge host"
     }
   ],
   "paths": {
@@ -144,7 +145,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Items"
+                  "$ref": "#/components/schemas/Sensors"
                 }
               }
             }
@@ -169,7 +170,9 @@
               }
             }
           }
-        }
+        },
+        "summary": "Discover all sensors and their latest known values",
+        "description": "Includes inactive sensors and sensors absent from the service menu. Find a sensor by title/usrtitle; retain type+address. latest=null means no observation is available. This request does not contact the controller."
       }
     },
     "/api/v1/values": {
@@ -216,7 +219,9 @@
               }
             }
           }
-        }
+        },
+        "summary": "Read cached observations",
+        "description": "Reads process memory only. Use observed_at, age_seconds, origin and stale. Does not query the controller or historical MariaDB values."
       }
     },
     "/api/v1/history": {
@@ -530,6 +535,101 @@
           }
         },
         "operationId": "time_programs"
+      }
+    },
+    "/api/v1/sensors/{type}/{address}": {
+      "patch": {
+        "operationId": "configureSensor",
+        "summary": "Choose collection and history independently of heating writes",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": false,
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "record": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "record": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Selection saved locally; effective next cycle. Database synchronization may still be pending."
+          },
+          "400": {
+            "description": "Invalid selection, unknown or unsupported sensor"
+          },
+          "403": {
+            "description": "Sensor configuration unavailable in this mode"
+          }
+        }
+      }
+    },
+    "/api/v1/runtime": {
+      "get": {
+        "operationId": "runtime",
+        "summary": "Discovery, connection and optional history/aggregation state",
+        "responses": {
+          "200": {
+            "description": "Standalone readiness and independent historian status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "phase": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "catalogue_ready": {
+                      "type": "boolean"
+                    },
+                    "connection": {
+                      "type": "object"
+                    },
+                    "history": {
+                      "type": "object",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -850,7 +950,9 @@
               "demo-db",
               "database",
               "hardware-read",
-              "hardware-live"
+              "hardware-live",
+              "standalone",
+              "standalone-demo"
             ]
           },
           "hardware_verified": {
@@ -887,11 +989,15 @@
               },
               "heating_write": {
                 "type": "boolean"
+              },
+              "sensor_configuration": {
+                "type": "boolean"
               }
             },
             "required": [
               "controller_read",
-              "heating_write"
+              "heating_write",
+              "sensor_configuration"
             ]
           }
         },
@@ -1041,6 +1147,140 @@
                   "type": "boolean"
                 }
               }
+            }
+          }
+        }
+      },
+      "LatestValue": {
+        "type": "object",
+        "nullable": true,
+        "required": [
+          "value",
+          "observed_at",
+          "age_seconds",
+          "stale",
+          "origin"
+        ],
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Already scaled decimal value"
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Actual controller observation time, retained across restarts"
+          },
+          "age_seconds": {
+            "type": "number"
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "controller",
+              "local-persisted"
+            ]
+          },
+          "source": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "address": {
+            "type": "integer"
+          }
+        }
+      },
+      "Sensor": {
+        "type": "object",
+        "required": [
+          "type",
+          "address",
+          "title",
+          "unit",
+          "state",
+          "record",
+          "active",
+          "recording",
+          "supported",
+          "latest"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Combine with address to identify a sensor"
+          },
+          "address": {
+            "type": "integer",
+            "description": "Controller address; not a menu row ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Name supplied by the controller/catalogue"
+          },
+          "usrtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "description": "p4d selection flag: A=active"
+          },
+          "record": {
+            "type": "string",
+            "description": "p4d history flag: A=record"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "recording": {
+            "type": "boolean"
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "factor": {
+            "type": "integer"
+          },
+          "res1": {
+            "type": "integer"
+          },
+          "latest": {
+            "$ref": "#/components/schemas/LatestValue"
+          }
+        }
+      },
+      "Sensors": {
+        "type": "object",
+        "required": [
+          "source",
+          "items"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sensor"
             }
           }
         }

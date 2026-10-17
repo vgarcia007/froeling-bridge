@@ -126,12 +126,12 @@ class BridgeService:
                  queue_capacity=64, job_limit=1000, autostart=True, max_cycle_seconds=120, time_cache_file=None):
         if isinstance(interval, bool) or not isinstance(interval, (int, float)) or not math.isfinite(interval) or interval <= 0:
             raise ValidationError("interval must be a finite positive number of seconds")
-        if mode not in ("demo", "demo-db", "database", "hardware-read", "hardware-live"):
+        if mode not in ("demo", "demo-db", "database", "hardware-read", "hardware-live", "standalone", "standalone-demo"):
             raise ValidationError("unknown service mode")
-        if mode in ("hardware-read", "hardware-live") and client is None:
+        if mode in ("hardware-read", "hardware-live", "standalone", "standalone-demo") and client is None:
             raise ValidationError("hardware-read requires an explicit physical read-only client")
         self.mode = mode
-        self.source = "heating" if mode in ("hardware-read", "hardware-live") else ("p4d-database" if mode == "database" else "simulator")
+        self.source = "heating" if mode in ("hardware-read", "hardware-live", "standalone") else ("p4d-database" if mode == "database" else "simulator")
         self.can_write = mode in ("demo", "demo-db")
         self.fatal = Event()
         self.fatal_reason = None
@@ -199,7 +199,11 @@ class BridgeService:
 
     def collector_status(self):
         with self.lock:
-            return deepcopy(self.collector_state)
+            result = deepcopy(self.collector_state)
+        historian = getattr(self.repository, 'historian', None)
+        if historian:
+            result['last_successful_store'] = historian.status()['last_success']
+        return result
 
     def cached_values(self):
         with self.lock:
@@ -262,8 +266,11 @@ class BridgeService:
             # Drop removed entries; retain last success of selected but failing sensors.
             selected = {(s["address"], s["type"]) for s in sensors
                         if s["state"] == "A" or s["record"] == "A"}
+            if self.mode in ('standalone', 'standalone-demo'):
+                selected = {(s['address'], s['type']) for s in sensors}
             with self.lock:
                 self.values = {k: v for k, v in self.values.items() if k in selected}
+            consecutive_protocol_errors = 0
             for sensor in sensors:
                 if self.stop.is_set():
                     break
@@ -276,16 +283,22 @@ class BridgeService:
                     continue
                 try:
                     sample = self._wait(self.worker.submit(lambda s=sensor: self.read_sensor(s)))
+                    consecutive_protocol_errors = 0
                     observed_at = datetime.now(ZONE).isoformat()
                     with self.lock:
                         self.values[(sensor["address"], sensor["type"])] = public(dict(
-                            **sample, observed_at=observed_at, source=self.source, unit=sensor["unit"], title=sensor.get("usrtitle") or sensor.get("title")))
+                            **sample, observed_at=observed_at, source=self.source, origin="controller", unit=sensor["unit"], title=sensor.get("usrtitle") or sensor.get("title")))
                     if sensor["record"] == "A":
                         samples.append(sample)
                 except ServiceStopped:
                     break
                 except Exception as exc:
                     errors.append(dict(**identity, error=failure(exc)))
+                    if self.mode in ("standalone", "standalone-demo") and isinstance(exc, ProtocolError):
+                        consecutive_protocol_errors += 1
+                        if consecutive_protocol_errors >= 3:
+                            break
+                        continue  # The reconnecting client opens a clean session before the next read.
                     if self.mode in ("hardware-read", "hardware-live"):
                         if isinstance(exc, ProtocolError):
                             logging.getLogger(__name__).error("Heating read failed: %s", exc)
@@ -295,17 +308,23 @@ class BridgeService:
                 stamp = int(time.time())
                 when = datetime.fromtimestamp(stamp, ZONE).replace(tzinfo=None)
                 stored = self.repository.store_cycle(samples, when, stamp)
-                with self.lock:
-                    self.collector_state["last_successful_store"] = datetime.now(ZONE).isoformat()
+                if not hasattr(self.repository, "historian"):
+                    with self.lock:
+                        self.collector_state["last_successful_store"] = datetime.now(ZONE).isoformat()
         except Exception as exc:
             errors.append(dict(error=failure(exc)))
             if self.mode in ("hardware-read", "hardware-live"):
                 self.abort(type(exc).__name__)
         finally:
+            if hasattr(self.repository, 'remember_values'):
+                try:
+                    self.repository.remember_values(self.cached_values())
+                except DatabaseUnavailable:
+                    errors.append(dict(error=dict(code='local_storage_unavailable', message='latest values could not be persisted')))
             with self.lock:
                 self.collector_state.update(running=False, stored=stored, errors=errors, skipped=skipped)
                 self.cycle_started = None
-                if stored and not errors:
+                if (stored or self.mode in ("standalone", "standalone-demo")) and not errors:
                     self.collector_state["successful_cycles"] += 1
             self.cycle_lock.release()
 
@@ -335,7 +354,7 @@ class BridgeService:
         if not isinstance(data, dict) or not isinstance(data.get("operation"), str):
             raise ValidationError("job requires an operation")
         operation = data["operation"]
-        if not self.can_write and operation in ("write_parameter", "write_time_range"):
+        if operation in ("write_parameter", "write_time_range") and (not self.can_write or operation not in getattr(self, "allowed_write_operations", ("write_parameter", "write_time_range"))):
             raise ReadOnlyViolation("heating writes are disabled in hardware modes")
         simple = {"status": self.client.get_status, "firmware": self.client.get_firmware,
                   "discover_menu": lambda: self.client.get_menu(timeout=10),
@@ -440,6 +459,8 @@ class BridgeService:
         def execute():
             with self.lock:
                 self.jobs[identifier]["state"] = "running"
+            if data["operation"] in ("write_parameter", "write_time_range") and hasattr(self.repository, 'audit_write'):
+                self.repository.audit_write(identifier, dict(state='attempting', request=data))
             return action()
         try:
             future = self.worker.submit(execute)
@@ -454,6 +475,8 @@ class BridgeService:
                 raw_result = future.result()
                 result = public(raw_result)
                 update = dict(state="completed", result=result)
+                if data["operation"] in ("write_parameter", "write_time_range") and hasattr(self.repository, 'audit_write'):
+                    self.repository.audit_write(identifier, dict(state='completed', request=data, result=result))
                 if data["operation"] == "time_ranges":
                     self._store_time_cache(raw_result, datetime.now(ZONE).isoformat())
                 elif data["operation"] == "write_time_range":
@@ -465,6 +488,11 @@ class BridgeService:
                         self._store_time_cache(updated, stamp)
             except Exception as exc:
                 update = dict(state="failed", error=failure(exc))
+                if data["operation"] in ("write_parameter", "write_time_range") and hasattr(self.repository, 'audit_write'):
+                    try:
+                        self.repository.audit_write(identifier, dict(state='failed', request=data, error=failure(exc)))
+                    except DatabaseUnavailable:
+                        pass
                 if self.mode in ("hardware-read", "hardware-live") and isinstance(exc, (ProtocolError, DatabaseUnavailable)):
                     if isinstance(exc, ProtocolError):
                         logging.getLogger(__name__).error("Heating read job failed: %s", exc)

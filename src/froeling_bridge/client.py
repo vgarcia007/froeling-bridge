@@ -139,7 +139,13 @@ class HeatingClient:
         result = []
         command = first
         while True:
-            item = parser(self._request(tx, command).payload)
+            # p4d reads these First/Next lists without checking the header command.
+            # Accept the same-list First response on Next, without accepting unrelated replies.
+            if command == next_command and command not in self.reply_commands:
+                reply = tx.exchange(Frame(command), (frozenset((first, next_command)),))[0]
+            else:
+                reply = self._request(tx, command)
+            item = parser(reply.payload)
             if item is None:
                 return tuple(result)
             if len(result) == max_items:

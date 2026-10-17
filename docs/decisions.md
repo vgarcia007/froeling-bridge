@@ -113,3 +113,15 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Dauerbetrieb auf LAN-Port 8000 ersetzt dort die Simulator-Vorschau. Eigener Autostart statt p4d, keine RuntimeMaxSec. Originalinstallation und bisheriges Release erhalten.
 - Aktivierung mit unabhängigem Fünf-Minuten-Rückkehrtimer; nach zwei Sammelzyklen und nachgewiesenem neuen Originalmesspunkt abschalten. Laufzeitfehler lösen echte Rückkehr zu p4d samt Autostart aus. Keine konkurrierenden seriellen Dienste.
 - Die damalige Freigabe bezog sich ausschließlich auf Datenbank-Messwerte, nicht auf Heizungsparameter. Administrative Einrichtung getrennt vorbereiten; persönliche Berechtigungsdetails bleiben privat.
+
+
+## 17.10.2026 — Eigenständiger Ersatz statt Abhängigkeit vom Altbestand
+
+- Benutzer priorisiert aktuelle Werte und bedienbares Menü für die Versorgung zweier Gebäude. Eigenständiger Erststart auf neuem Rechner mit Discovery ist notwendig; Historie ist nachrangig. Linux-Installationsskript ohne Docker und Weiterbetrieb bei MariaDB-Ausfall sind ausdrücklich gewählt.
+- SQLite als private dauerhafte Arbeitsgrundlage, kein Ersatz für die MariaDB-Historie. Beschädigten Katalog erhalten und neu entdecken; unbekannte zukünftige Version nicht überschreiben. Alte Werte behalten ihren Lesezeitpunkt und gelten nach Neustart als gespeichert/veraltet.
+- Bestehende Sensor-/Menüadressen beibehalten. Erreichbare unterstützte Messwert-/IO-Zeilen und UD 1–3 sind Erstinstallations-Auswahl, zunächst keine Aufzeichnung; Bestandsauswahl/individuelle Namen übernehmen. Keine selbst gepflegten fachlichen Sensoraliases.
+- Optionale MariaDB: automatisch fehlende/leere DB und sechs benötigte kompatible Tabellen erstellen; fremde Teilbestände nicht reparieren, bestehenden Bestand nicht migrieren. Metadaten und Flag-Synchronisation getrennt vom seriellen Worker. DB-Ausfall erzeugt sichtbare Historienlücke, keine Unterbrechung der Live-Bedienung.
+- Record-/Abfrageflags lokal sofort gültig, in MariaDB nachholen; keine Änderung weiterer individueller Einstellungen. Verdichtung im Hintergrund um 01:00, begrenzte Tagestransaktionen und Fortschritt, vorhandene Aggregate nicht überschreiben. Angefangene Intervalle nicht verdichten, Text deterministisch vom letzten Wert.
+- Hardware-Schreiben nur nach unabhängigem Nachweis für Gerät/Firmware/Operation, Änderungs-/Rückstelltool ohne automatische Wiederholung nach unklarem Ausgang. Installation erzeugt keine Schreibfreigabe. Echte Werte/Testauswahl bleiben gesondert abzustimmen.
+- systemd auf neuem Host: Bridge neu starten. Auf bestehendem p4d-Host: Restart=no und unmittelbare OnFailure-Rückkehr, weil reale systemd-Prüfung gezeigt hat, dass automatische Restarts OnFailure verzögern können.
+- Noch keine neue Hardware-/24h-Abnahme oder Rootinstallation aus erfolgreichen lokalen Tests ableiten.

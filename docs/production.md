@@ -1,4 +1,6 @@
-# Dauerbetrieb mit bestehender p4d-Datenbank
+# Dauerbetrieb 0.4.0 mit bestehender p4d-Datenbank
+
+Für den neuen unabhängigen Betrieb ab 0.5.0 gilt [standalone.md](standalone.md). Diese Anleitung bleibt für die bisher vorbereitete 0.4.0-Installation erhalten.
 
 Ab 0.4.0 ist `hardware-live` der ausdrücklich freigegebene Aufzeichnungsbetrieb: echte Heizung lesen, `samples` und `peaks` in der vorhandenen Datenbank fortführen. Heizungsparameter bleiben schreibgeschützt. Keine Initialisierung, Migration, Löschung oder Veränderung von Menü, Sensorenauswahl und Konfiguration. Der Benutzer hat diesen Wechsel nach dem erfolgreichen Lesetest ausdrücklich beauftragt.
 

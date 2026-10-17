@@ -20,6 +20,17 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Neuer Auftrag: eigenständiger Ersatz ab 0.5.0
+
+Der Benutzer hat den Plan für unabhängigen Erststart, Discovery, lokale SQLite-Arbeitsdaten, optionale automatische MariaDB-Einrichtung, Sensor-Auswahl und Verdichtung ausdrücklich zur Implementierung freigegeben. Live-Werte und Menü haben Vorrang vor Historie. Dies erweitert die früheren Nur-Lesen-/Nur-samples-Grenzen im beschriebenen Umfang:
+
+- Eigenständige Installation und Discovery ohne p4d-Bestand, bestehende DB kompatibel weiterführen, neue/leere DB nach expliziter Konfiguration automatisch erstellen. Kein ungefragtes Migrieren bestehender DBs.
+- Sensor-Abfrage-/Recordflags dürfen über die neue Oberfläche/API geändert und mit valuefacts synchronisiert werden. Historienverdichtung nach vorhandener Konfiguration ist beauftragt; Einfügen/Löschen transaktional und zunächst separat testen. Agent darf keine Live-Flags nur zum Test umschalten.
+- MariaDB-Fehler dürfen Live-Abfragen und Menü nicht beenden. Lokale SQLite-Datei ist dauerhaft, keine Historienpflicht. Wiederherstellung ohne Katalog muss durch Discovery funktionieren.
+- Heizungsparameter bleiben bis zum separat vereinbarten Test mit ausgewähltem Parameter und Zielwert gesperrt. Implementierung der Schreibfreigabe ist autorisiert; tatsächliche Heizungs-Schreibtests sind dadurch nicht pauschal erlaubt.
+- Hardware-Abnahme verlangt vollständige Discovery, 24 Stunden echten Lesebetrieb und kontrollierten Hostneustart. Nicht aus Simulator-/Pseudo-TTY-Erfolg ableiten. Installation/Abnahme sind von implementiertem Code klar zu unterscheiden.
+- Neue Anleitung docs/standalone.md ist maßgeblich. Historische Angaben zu reiner DB-Aufzeichnung/15-Minuten-Grenzen weiter unten sind nur Kontext.
+
 ## Aktuelle Freigabe: produktive Aufzeichnung und Dauerbetrieb
 
 Der Benutzer hat nach dem erfolgreichen Lesefenster ausdrücklich bestätigt: „ja wir schreiben nun auch un lassen es laufen“. Dies erweitert die bisherigen Grenzen ausschließlich wie folgt:
