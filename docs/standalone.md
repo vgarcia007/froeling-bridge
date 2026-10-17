@@ -140,3 +140,15 @@ Die Bridge liest die vollständige First-/Next-Fehlerliste beim Start, danach im
 Bei konfigurierter MariaDB synchronisiert der getrennte Historienworker die bestehende p4d-Tabelle `errors`. Zuordnung und Zustandsübergänge folgen `P4d::updateErrors`: Schlüssel Fehlernummer und Auftretenszeit, „gekommen“/„gegangen“/„quittiert“, `time1`/`time4`/`time2`. Bestehende IDs, Quittierungen, Mailzähler und außerhalb des Steuerungsspeichers liegende Historie bleiben erhalten. Keine Fehlerquittierung wird an die Heizung gesendet. Ein fehlgeschlagener DB-Abgleich wird separat in `/api/v1/runtime.history.controller_errors` gemeldet und beeinträchtigt weder aktuelle Messungen noch die übrige Aufzeichnung. Der DB-Abgleich wird nach 30 Sekunden erneut versucht, ohne neue serielle Schreibbefehle. Bestehende Tabellen werden nicht migriert; eine neue/leere Datenbank erhält die kompatible Fehler-Tabelle automatisch.
 
 **Bestehende SQL-Clients:** Aktuelle Status-Messpunkte in `samples` benötigen auch beim Original-p4d das Record-Flag für den entsprechenden UD-Sensor. API-Livewerte sind davon unabhängig. Bestehende Status-Recordflags erhalten; nicht voraussetzen, dass ein SQL-Client die aktuelleren API-Werte liest. Seine letzte Messung kann beim Ausfall/Abschalten der Aufzeichnung veralten; Zeitstempel mit auswerten.
+
+Ein vorhandener Client liest `samples` für `address=1 AND type='UD'` nach `updsp DESC`. Das liefert bei aktiver Aufzeichnung aktuell den richtigen Status, ist aber gegenüber Verdichtung anfällig: `updsp` bezeichnet die Datenbankaktualisierung, nicht den Messzeitpunkt. Für den jüngsten Einzelmesspunkt verwenden:
+
+```sql
+SELECT text, time
+FROM samples
+WHERE address = 1 AND type = 'UD' AND aggregate = 'S'
+ORDER BY time DESC
+LIMIT 1;
+```
+
+Der Client sollte `time` auf ausreichende Aktualität prüfen. Ein erfolgreicher SELECT allein belegt keinen laufenden Heizungszugriff. Diese Empfehlung ändert weder die vorhandene Clientsoftware noch ihre Recordflags.
