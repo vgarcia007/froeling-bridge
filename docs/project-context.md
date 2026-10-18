@@ -10,7 +10,19 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
-## Anlagenübersicht 0.6.0 vorbereitet, Bestandsdienst unverändert
+## Aktueller Produktivstand: Anlagenübersicht 0.6.0 live
+
+Benutzer erklärt nach Rückfrage ausdrücklich „nun bitte live“; kurzer Bridge-Neustart, zusätzliche Abfragen und lesende Schwellwertinitialisierung damit beauftragt. Auf dem vorhandenen Host ist 0.6.0 unter dem bisherigen Port 8000 aktiv, neue Seite `/anlage`. Keine weitere Installation/Aktivierung durch den Benutzer nötig. Früherer reiner Vorschaustand unten ist historisch.
+
+Neues Release zunächst parallel zum weiterlaufenden Dienst vorbereitet, Wheel-/Manifest-/installierte Dateiinhalte abgeglichen. Privates SQLite-/Konfigurationsbackup und Sicherung der Unit, des Helfers, des Schreibnachweises und der Dauerpolitik vor Wechsel. Eigenständige begrenzte Upgrade-Wiederherstellung hätte die bisherige Bridge aktiviert, niemals p4d. Wechsel bis bereit/erstem Sammelzyklus ca. 12 Sekunden, keine Wiederherstellung nötig. Bridge active/enabled, p4d inactive/disabled, Gesundheits-Timer aktiv; Upgrade-/Starttimer danach inaktiv. Restart=always und automatic_p4d_fallback=false unverändert. Geschützte Konfiguration, Hardware-Schreibnachweis, Host-Drop-in und Installerzustand bytegleich erhalten.
+
+38 gezielt benötigte Messwerte über POST /plant/activate zur Abfrage ergänzt, keine Recordflags geändert. Nun 132/132 ausgewählte Messwerte frisch, neun Geräte-Menügruppen. Alle 112 zugeordneten Parameter-/Schwellwertbeobachtungen über neun lesende refresh_component-Jobs erfolgreich, ohne Fehler. Drei erfolgreiche Sammelzyklen, weiterhin 16 Messpunkte je Durchlauf, MariaDB verfügbar, ausstehende Flagübernahmen null und Fehlerabgleich gesund. MariaDB-Recordflags unabhängig gegen Vorzustand identisch geprüft, Fehlerhistorie weiterhin 84 Einträge, keine neuen Dienstwarnungen. Frischer Statusmesspunkt und fortlaufende Minutenabstände in SQL bestätigt. Keine echte Parameteränderung und kein Hostneustart.
+
+Privates Backup/Resultat `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert), neues Release `/opt/froeling-bridge/0.6.0`, finales Paket privat im SSH-Benutzerverzeichnis `froeling-bridge-independent-0.6.0-live`. Alte Versionen und Original-p4d erhalten. Lokale Rohberichte `.local/plant-060-live-preflight.json`, `plant-060-live-activation-check.json`, `plant-060-live-activated-sensors.json`, `plant-060-live-verification.json`; nicht committen. Neue Codeprüfungen waren bereits vor Rollout abgeschlossen; für Deployment gezielt Start, Erfassung, Historie, Flags und Schwellwerte kontrolliert.
+
+Benutzer kritisiert den langen manuellen Updateablauf. Bestätigt: eigentlicher Wechsel nur zwölf Sekunden, Paketvorbereitung und wiederholte Nachkontrollen waren zu aufwendig. Routineupdates künftig als wiederverwendbaren kurzen Ablauf bündeln; keine zusätzlichen Prüfrunden nach bestätigtem Ergebnis ohne Anlass. Diesen Rollout abschließen, keine zusätzliche Update-Infrastruktur in denselben Auftrag hineinziehen. Weiterer Dauerbetrieb wieder unverändert ohne neue Eingriffe.
+
+## Vorheriger Stand: Anlagenübersicht 0.6.0 vorbereitet, Bestandsdienst unverändert
 
 Benutzer möchte zusammengehörige Pumpen, Heizkreise, Boiler, Puffer, Kessel, Temperaturen und Schwellwerte grafisch sehen. Er erklärt das alte p4d-Schema ausdrücklich für falsch; kein verlässlicher Rohrleitungsplan vorhanden. Vereinbarter Ansatz: eigene Funktionsübersicht aus dem Heizungsmenü, kein erfundenes Hydraulikschema. Benutzer wählt zusätzliches gezieltes regelmäßiges Lesen benötigter Messwerte, bei unveränderten Historienflags. Plan ausdrücklich umgesetzt; produktiver Rollout war davon ausgenommen.
 

@@ -210,3 +210,10 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Benutzer wählt zusätzliche gezielte regelmäßige Messwertabfragen. Dafür ausdrückliche lokale Aktivierung über bestehenden Sensor-Konfigurationspfad; kein GET-Nebeneffekt und keine automatische Änderung von Recordflags. Ungeprüfte Katalogpräsenz bleibt sichtbar von tatsächlichem Einbau getrennt.
 - API um Komponenten-Snapshot, Aktivierung und lesenden Komponentenjob ergänzen. Persistenter Zeitstempelcache, pro Komponente geteilte Aktualisierung, begrenzte Parallelität und Einzelabfragen über bestehenden seriellen Worker. Seite zunächst ausschließlich zur Übersicht; Schreiben im bestehenden Servicemenü.
 - 0.6.0 im Checkout implementieren, isoliert testen und als getrennte strikt lesende API-Vorschau bereitstellen. Laufende 0.5.7 nicht für diese Umsetzung unterbrechen oder ausrollen; tatsächliche produktive Aktivierung bleibt eigener Auftrag. Zusatzfreigabe erweitert den bisherigen Ausschluss einer solchen fachlichen Übersicht, nicht den Umfang historischer Charts oder anderer p4d-Nebenfunktionen.
+
+
+## 18.10.2026 — Produktiver Rollout der Anlagenübersicht
+
+- Benutzer autorisiert nach Erklärung des kurzen Neustarts ausdrücklich das Live-Schalten. 0.6.0 kontrolliert nach Sicherung aktiviert, 38 zusätzliche Abfragesensoren ohne Änderung von Historienflags ergänzt und 112 Schwell-/Einstellungswerte rein lesend initialisiert. Neue Seite am bisherigen API-Host unter `/anlage` verfügbar.
+- Fehlgeschlagener Upgrade-Start hätte zur bisherigen Bridge-Version zurückgeführt; keine automatische p4d-Übernahme. Vorhandene Dauerbetriebspolitik und Schreibfreigaben erhalten. Kein Hostneustart oder Heizungs-Schreibtest.
+- Benutzer verlangt weniger Aufwand bei Routineupdates. Wiederverwendbare Paketvorbereitung und kurze gezielte Betriebsprüfung bevorzugen; neue Einzelskripte und wiederholte Vollabnahmen ohne Anlass vermeiden. Einen öffentlichen Updatehelfer als eigene Verbesserung behandeln, nicht ungefragt an diesen fertigen Rollout anhängen.

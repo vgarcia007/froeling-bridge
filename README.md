@@ -67,7 +67,7 @@ Bei einer bisherigen Bridge-Testeinrichtung kann der Einrichtungsdialog die Verb
 
 Ab 0.6.0 gibt es unter `/anlage` eine eigene Seite mit Messwerten, Pumpenansteuerungen und aufklappbaren Sollwerten/Schaltschwellen je Anlagenteil. Die Zuordnung folgt dem Heizungsmenü; ein Hydraulikplan ist dafür nicht erforderlich. Zusätzliche benötigte Messwerte lassen sich ausdrücklich zur Abfrage aktivieren, ohne ihre Historienauswahl zu verändern. Details und separate Demo: [Anlagenübersicht](docs/plant-overview.md).
 
-Der bereits laufende Bestandsdienst bleibt vorerst auf 0.5.7; für diese neue Seite wird er nicht automatisch aktualisiert oder neu gestartet. Sie ist zunächst separat als Vorschau verfügbar.
+Die Anlagenübersicht ist auf der Bestandsanlage inzwischen produktiv als 0.6.0 aktiviert. Zusätzliche Messwerte werden erfasst; die Historienauswahl bleibt erhalten. Eine separate lesende Vorschau ist weiterhin möglich. Updates laufender Installationen erfolgen bewusst und benötigen einen kurzen Dienstneustart.
 
 ## Wo konfiguriere ich die Datenbank?
 

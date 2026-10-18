@@ -20,7 +20,17 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
-## Anlagenübersicht 0.6.0: implementiert, separat als Vorschau
+## Aktueller Livebetrieb 0.6.0 seit 18.10.2026
+
+Benutzer beauftragt ausdrücklich „nun bitte live“, nachdem der nötige kurze Dienstneustart erklärt wurde. Dies autorisiert diesen Rollout einschließlich zusätzlicher Abfragen und lesender Schwellwertinitialisierung. Erledigt: 0.6.0 neben weiterlaufender 0.5.7 installiert und alle Paketdateien geprüft, privates Konfigurations-/SQLite-Backup, kurz kontrolliert gewechselt. Rückkehr bei fehlgeschlagenem Upgrade ausschließlich zur bisherigen Bridge, kein p4d-Start. Bereit nach ca. 12 Sekunden; keine Rückkehr nötig. Dauerpolitik Restart=always und automatic_p4d_fallback=false erhalten, Health-Timer aktiv, alle Upgrade-/Starttimer wieder inaktiv.
+
+Live `/anlage` auf dem vorhandenen API-Host Port 8000. Neun Gruppen, 38 zusätzliche Messwerte über ausdrücklich beauftragte Aktivierung ergänzt; nun 132/132 ausgewählte Werte frisch. Alle 112 zugeordneten Schwell-/Einstellungswerte der neun Gruppen rein lesend erfolgreich initialisiert. Drei bestätigte fehlerfreie Sammelzyklen, weiterhin 16 Messpunkte pro Zyklus, Datenbank-/Fehlerabgleich gesund, keine Warnungen. Alle lokalen und MariaDB-Recordflags unverändert; Konfiguration, Schreibnachweis und Wiederherstellungspolitik bytegleich erhalten. Kein Rechnerneustart oder Heizungs-Schreibtest. Frühere Vorschau-/Nicht-Ausrollangaben weiter unten sind historische Stände.
+
+Privates Backup und Upgradeprotokoll unter `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert); Rohbelege `.local/plant-060-live-*`. Alte Releases erhalten. Ab jetzt wieder ohne neuen Auftrag unverändert produktiv laufen lassen.
+
+Benutzer kritisiert zu viel manuelle Vorbereitung/Nachkontrolle und lange Updateabläufe. Künftige Routineupdates kurz und wiederverwendbar organisieren: vorbereitetes Paket, Sicherung, kurzer Wechsel und kompakte Funktionsprüfung; nicht jedes Mal neue Einzelskripte oder komplette Abnahmen. Eine dauerhafte öffentliche Updatefunktion ist damit als Verbesserungsbedarf festgehalten, in diesem Rollout nicht zusätzlich gebaut. Nach bestätigten Checks keine weiteren Prüfrunden ohne konkreten Anlass.
+
+## Vorheriger Stand: Anlagenübersicht 0.6.0 separat als Vorschau
 
 Benutzer beauftragt die eigene Funktionsübersicht nach gemeinsamem Plan und bestätigt zusätzliche gezielte Messwertabfragen. Das falsche p4d-Schema nicht verwenden; Gruppen und Beziehungen aus erreichbaren Geräte-Menüpfaden, keine erfundenen Rohrverbindungen. Implementierung 0.6.0: `/anlage`, Navigation, `GET /api/v1/plant`, ausdrückliches `POST /api/v1/plant/activate`, lesender Job `refresh_component`. Aktivierung nutzt vorhandenen Sensor-Konfigurationspfad, verändert keine Recordflags; niemals durch GET. Parametercache zehn Minuten, SQLite-Metadaten; Einzelabfragen über denselben Worker, maximal vier parallele Gruppen. Nicht zugeordnete Pumpen, veraltete Werte und Mehrdeutigkeiten ausdrücklich darstellen. Allgemeine Display-Bedienrechte sind keine zusätzlichen Kessel. Normale Sensor-/Menü-/API-Wege erhalten.
 
