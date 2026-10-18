@@ -22,7 +22,7 @@ Administrative Skripte auf dem Host als Wartungskorrektur zu 0.5.7 aktualisiert,
 
 Nachprüfung: 3 erfolgreiche Zyklen, 16 Messpunkte je Zyklus, 94/94 ausgewählte Werte frisch; Statusmesspunkt in MariaDB ca. 5 Sekunden alt, letzte Messpunkte 62 Sekunden Abstand. Fehlerhistorie 83 Zeilen, 0 bestätigt aktiv, Fehlerabgleich verfügbar. Keine neuen Dienstwarnungen. Health-Timer active/enabled, Starttimer inaktiv, keine verbleibenden p4d-Cronzeilen. Zehn gezielte Lifecycle-/Health-Tests erfolgreich einschließlich unterdrücktem Rescue während gesperrter Aktivierung und weiter funktionierender manueller Rückkehr; Installer-Shellsyntax und reale systemd-Unitprüfung erfolgreich. Private Nachweise `.local/cron-removal-20261018.json`, `.local/permanent-api-policy-20261018.json`, `.local/permanent-api-final-20261018.json`.
 
-Benutzer kündigt eigenen Aschebox-Fehlertest an. Lesender Beobachter prüft API-Cache und gespeicherte Historie, keine eigenen Heizungsänderungen. Ergebnis erst nach tatsächlichem Auftreten/Folgeereignissen ergänzen.
+Benutzer führt danach selbst einen Aschebox-Fehlertest durch. Rein lesend tatsächlich erkannt: neuer Fehler 179, Zustand gekommen, aktuell bestätigt aktiv, vollständige Übernahme in die MariaDB-Historie (84 statt 83 Einträge). Weitere Kontrolle: Bridge unverändert bereit, 94/94 Werte frisch, sechs erfolgreiche Zyklen, weiterhin keine Warnungen. Ende/Quittierung dieses Vorkommnisses zum Zeitpunkt dieser Dokumentation noch nicht bestätigt; diese zweite Hälfte des Tests nicht als bestanden ausgeben. Private zeitlich begrenzte API-Beobachtung unter `.local/ashbox-watch-20261018-*.json`, keine eigenen Heizungsänderungen.
 
 ## Vorheriger Befund am 18.10.2026: alter Cronjob startet p4d
 
