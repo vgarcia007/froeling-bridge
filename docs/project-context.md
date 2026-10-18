@@ -1,6 +1,6 @@
 # Aktueller Projektkontext
 
-Zuletzt aktualisiert: 17.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
+Zuletzt aktualisiert: 18.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
 
 ## Ziel und Zusammenarbeit
 
@@ -10,7 +10,19 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
-## Aktueller Betrieb: 0.5.7, Fehlerstatus-Abgleich und einmalige Altbereinigung
+## Aktueller Livezustand am 18.10.2026: alter Cronjob startet p4d
+
+**Wichtig für die nächste Session:** Benutzer bittet nach einigen Stunden Betrieb um Logprüfung. Ausschließlich lesend geprüft; keine Dienste gestartet/gestoppt, keine Konfiguration, Cronjobs, Heizungsparameter oder DB-Daten geändert. Bridge 0.5.7 ist seit 18.10.2026 **05:45 CEST inaktiv**, Original-p4d seitdem active/running. Die neue API auf Port 8000 ist deshalb nicht erreichbar. Datenbankmonitoring läuft durch p4d weiter. Bootzustand bei Prüfung weiterhin Bridge enabled und p4d disabled; es war keine automatische Fehler-Rückkehr über unseren Helfer.
+
+**Belegte Ursache:** Root-Crontab enthält `45 5 * * * systemctl restart p4d`. Journal zeigt diesen CRON-Aufruf um 05:45, unmittelbar danach reguläres Stoppen der Bridge und Start von p4d. Die gegenseitige systemd-Exklusivität verhindert parallelen seriellen Zugriff, beendet aber beim expliziten p4d-Start die Bridge. Ein deaktivierter regulärer p4d-Autostart blockiert solche ausdrücklichen Starts nicht. Vor erneutem Bridge-Dauerbetrieb diesen alten Zeitplan gezielt berücksichtigen/deaktivieren und kontrolliert umschalten; ursprünglichen Croninhalt sichern und andere Jobs erhalten. Bisher noch nicht korrigiert. Kein unbelegter Protokoll-/DB-Fehler und kein Bridge-Absturz daraus ableiten.
+
+**Laufzeitbefund:** Bridge lief seit 17.10.2026 22:12:07 bis 18.10.2026 05:45:01 CEST rund 7,5 Stunden, Exitstatus 0, keine automatischen Neustarts. Dienstjournal ohne Warnungen, Exceptions oder Protokollfehler im untersuchten Lauf. Unabhängiger Beobachter zuletzt um 05:44:51 CEST gesund mit 443 erfolgreichen Sammeldurchläufen und frischen Messungen. Danach HTTP-Fehler wegen bewusst von cron verdrängtem Dienst. Alter Beobachtungsbericht heißt weiterhin `soak-0.5.3.json`; er enthält geplante Updates und jetzt den Cron-Ausfall, ist nicht abgeschlossen und kein bestandener 24h-Nachweis.
+
+**Monitoringkontinuität bestätigt:** Eng begrenzte Read-only-Abfrage der UD/1-Messpunkte seit Bridge-Start liefert bei Prüfung 650 Punkte mit maximal 62 Sekunden Abstand. Rund um 05:45 gehen Bridge-Messpunkte ohne größere Historienlücke in p4d-Messpunkte über; jüngster Statuswert ca. 25 Sekunden alt. MariaDB active, Fehlerhistorie weiter 83 Zeilen. Keine Warnungen in MariaDB-/Gesundheits-/Rückkehrjournal, keine passenden USB-/OOM-/I/O-Kernelfehler im untersuchten Zeitraum. Freier Plattenplatz ca. 12,4 GiB. Die nächtliche Verdichtung ist durch diesen Logcheck nicht zusätzlich als tatsächlicher Verarbeitungslauf nachgewiesen (`aggregation_cursor` aktuell null); keinen solchen Nachweis behaupten.
+
+**Private Belege:** `.local/live-log-review-20261018.json`, `.local/log-start-cause-20261018.json`, `.local/nightly-history-review-20261018.json`; enthalten private Logs/Betriebsdaten/Croninhalt, nicht committen. Repository enthält ausschließlich diese bereinigte Zusammenfassung. Nächster Schwerpunkt ist der verbliebene tägliche p4d-Neustart, anschließend erneuter Bridge-Betrieb; kein Hostneustart benötigt oder beauftragt.
+
+## Vorheriger Betrieb: 0.5.7, Fehlerstatus-Abgleich und einmalige Altbereinigung
 
 **Benutzerauftrag:** Alte DB-Fehler erschienen weiterhin aktiv. Lesender Abgleich fand drei unvollständige Alt-Vorkommnisse aus 2025: letzter Status „gekommen“, keine End-/Quittierzeit, nicht mehr im aktuellen Steuerungsspeicher. Aktuelle Steuerungsvorkommnisse wurden korrekt übernommen. Benutzer betont zusätzlich, neue Zustandsmeldungen müssten vorhandene Einträge aktualisieren, und autorisiert ausdrücklich „die alten unvollständigen löschen wir jetzt einmalig“.
 
