@@ -28,7 +28,7 @@ Erledigt: einzigen aktiven p4d-Cronjob aus Root-Crontab nach privater Vollsicher
 
 Reale Kontrolle: 94/94 ausgewählte Werte frisch, Collector fehlerfrei mit 16 Messpunkten je Zyklus, frischer MariaDB-Status, Fehlerabgleich verfügbar, 83 Historieneinträge und 0 bestätigt aktive Fehler vor Benutzer-Ascheboxtest. Detaillierte Belege/Backuporte in docs/project-context.md. Vorheriger Cron-Ausfall ist historisch; nicht erneut als aktuellen Dienstzustand annehmen.
 
-Benutzer führt danach eigenen Aschebox-Fehlertest durch. Tatsächlich erkannt und in DB übernommen: neuer Fehler 179, gekommen/aktiv, 84 statt 83 Historieneinträge; API/Erfassung unverändert gesund. Ende/Quittierung zum Dokumentationszeitpunkt noch nicht bestätigt. API/DB rein lesend beobachten, Folgezustände desselben Vorkommnisses prüfen; keine Parameter ändern oder künstlichen Fehler selbst auslösen.
+Benutzer führt danach eigenen Aschebox-Fehlertest durch. Tatsächlich erkannt und in DB übernommen: neuer Fehler 179, gekommen/aktiv, 84 statt 83 Historieneinträge; API/Erfassung unverändert gesund. Danach Benutzer bestätigt gekommen/gegangen; unabhängig lesend in API und MariaDB bestätigt: derselbe Eintrag jetzt quittiert/inaktiv, End- und Quittierzeit gespeichert, genau ein Datensatz für dieses Vorkommnis. Bridge-PID unverändert, acht fehlerfreie Zyklen, Fehlerabgleich erfolgreich. Dieser reale Fehlerlebenszyklus ist damit geprüft; keine weiteren künstlichen Fehler auslösen. Privater Nachweis `.local/ashbox-closed-verified-20261018.json`.
 
 ## Neuer Auftrag: alte unvollständige Fehler und neue Zustandsmeldungen
 
