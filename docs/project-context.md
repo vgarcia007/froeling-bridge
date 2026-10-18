@@ -10,6 +10,12 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
+## README-Einstieg überarbeitet am 18.10.2026
+
+Benutzer beauftragt verständliche Start-/Konfigurationsanleitung und verlangt ausdrücklich Erhalt der Danksagung. README beschreibt jetzt nativen Installer, kontrollierte p4d-Übernahme/Cronjobs, Konfigurationsort und vollständiges JSON-Beispiel, Betrieb ohne MariaDB/neue DB/Bestands-DB, getrennte HTTP-/DB-Adressen, Speicher/Aktualität, Dienstprüfung, Simulator, manuellen Start, zusätzliche Modi, API-Einstieg und aktuelle Schreibfreigabe-/Abnahmegrenzen. Danksagung wortgleich erhalten und automatisiert gegen vorherigen Commit verglichen. Veraltete Nachweisaussagen entfernt; Dokumentationsindex auf aktuellen Einstieg ausgerichtet, Standalone-Titel/Tabellenzahl/Backup-Pfad korrigiert.
+
+Nur Dokumentation geändert. JSON mit und ohne Historie gegen echten Validator geprüft, lokale Linkziele/CLI-Optionen/Installerabläufe abgeglichen, sieben Tabellen im gepackten Schema bestätigt. Dokumentierter Simulator lokal auf freiem Loopback-Port erfolgreich gestartet: bereit, Webmenü, Sensoren und OpenAPI erreichbar; danach nur diesen lokalen Simulator beendet. Keine Verbindung zur echten Heizung oder MariaDB, keine Änderung/Unterbrechung des produktiven Dienstes.
+
 ## Aktueller Stand: verbindlicher API-Dauerbetrieb am 18.10.2026
 
 Benutzer verlangt Entfernung der p4d-Cronjobs und ausdrücklich fortgesetzten API-Dauerbetrieb. Einziger aktiver Treffer war Root-Zeile `45 5 * * * systemctl restart p4d`; nach kompletter privater Sicherung über `crontab` entfernt. Andere Root-Zeilen bytegleich erhalten; weitere Benutzer-Crontabs, `/etc/crontab`, anacron und cron.d/hourly/daily/weekly/monthly geprüft, keine weiteren aktiven p4d-Jobs gefunden. Logrotate bleibt erhalten, enthält keinen Dienststart. Original-Crontab/Hashes privat unter `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert).

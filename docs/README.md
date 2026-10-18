@@ -1,6 +1,8 @@
 # p4d: Bestandsaufnahme für einen Python-Nachbau
 
-Stand der Untersuchung: 16.10.2026. Ziel ist ein einfacher installierbarer Heizungsdienst mit API und modernem Servicemenü, der die vorhandene p4d-Datenbank weiterführen kann. Die Bestandsaufnahme ist inzwischen durch einen [Offline-Python-Kern mit Simulator](python-core.md) ergänzt. Inzwischen sind auch [API, Datenbankadapter und kontinuierliche Simulator-Aufzeichnung](service.md) implementiert. In Version 0.3.0 sind auch [Webmenü und lesender Hardwaretest mit Rückkehr](host-test.md) vorbereitet; der tatsächliche Hardwaretest steht noch aus.
+Für den Einstieg in die aktuelle Bridge: [README mit Schnellstart und Datenbank-Konfiguration](../README.md) und [eigenständige Installation und Betrieb](standalone.md). Der Hauptweg ist seit 0.5.0 `standalone`: direkte Heizungsverbindung, lokaler Katalog und optionale MariaDB-Historie. Webmenü, API, kontinuierliche Erfassung und Fehlerabgleich sind implementiert und auf der Bestandsanlage in Betrieb. Aktuelle Abnahmen und Grenzen stehen im [Projektkontext](project-context.md).
+
+Die folgenden Abschnitte dokumentieren die ursprüngliche p4d-Bestandsanalyse vom 16.10.2026. Angaben zum damaligen Hardwarezugriff sind historische Untersuchungsschritte, nicht der aktuelle Betriebsstand.
 
 ## Referenz und Aussagekraft
 
@@ -19,7 +21,7 @@ Der installierte Quellstand und die Versionskennung der Dienstpfad-Binärdatei w
 
 ## Lesereihenfolge
 
-Für Installation und API zur [Dienstanleitung](service.md), für Protokollschnittstellen zur [Anleitung des Offline-Kerns](python-core.md).
+Für Installation und Konfiguration zur [Standalone-Anleitung](standalone.md), für zusätzliche Betriebsarten zur [Dienstanleitung](service.md), für Protokollschnittstellen zur [Anleitung des Offline-Kerns](python-core.md).
 
 1. [Heizungsprotokoll](protocol.md): Transport, Telegramme, Befehle, Lesen und Fehlerfälle.
 2. [Parametermenü und Schreiben](parameter-menu.md): kompletter Bedien- und Schreibpfad, einschließlich Zeitprogrammen.

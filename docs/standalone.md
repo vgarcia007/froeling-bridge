@@ -1,4 +1,4 @@
-# Eigenständiger Betrieb ab 0.5.0 (Korrekturstand 0.5.3)
+# Eigenständiger Betrieb (Stand 0.5.7)
 
 Die Bridge kann ohne p4d und ohne MariaDB starten. Sie liest Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Steuerung. SQLite speichert den Arbeitskatalog und Einstellungen lokal; MariaDB ist ausschließlich die optionale p4d-kompatible Historie. Protokoll und Darstellung orientieren sich an linux-p4d von Jörg Wendel und Mitwirkenden.
 
@@ -83,7 +83,7 @@ OpenAPI: `/api/v1/openapi.json`. `/values`, `/history` und die vorhandenen Jobs 
 
 ## MariaDB ohne manuelle Tabellenarbeit
 
-Der Historien-Worker verbindet sich unabhängig vom Heizungsworker. Bei nicht vorhandener/leerer DB legt er sechs benötigte p4d-0.10.2-kompatible Tabellen und Indizes aus dem paketierten bereinigten Bestands-Snapshot an. Dies ist kein vollständiger Ersatz sämtlicher p4d-Nebenfunktionen. Erstellen erfordert entsprechende Datenbankberechtigungen; Fehler werden sichtbar, ohne Live-Betrieb zu beenden.
+Der Historien-Worker verbindet sich unabhängig vom Heizungsworker. Bei nicht vorhandener/leerer DB legt er sieben benötigte p4d-0.10.2-kompatible Tabellen und Indizes aus dem paketierten bereinigten Bestands-Snapshot an. Dies ist kein vollständiger Ersatz sämtlicher p4d-Nebenfunktionen. Erstellen erfordert entsprechende Datenbankberechtigungen; Fehler werden sichtbar, ohne Live-Betrieb zu beenden.
 
 Bestehende DBs werden geprüft und nicht migriert oder neu initialisiert. Bestehende Messreihen, Menüzeilen und individuelle Auswahl bleiben erhalten. Neue Sensordefinitionen können ergänzt werden; bestehende Auswahlflags ändern sich nur bei einer entsprechenden Benutzeränderung. Eine selbst begonnene leere Einrichtung kann anhand des lokalen Einrichtungsmarkers fortgesetzt werden; unbekannte Teilbestände werden erhalten und als unpassend gemeldet.
 
@@ -106,8 +106,8 @@ Erst nach vereinbartem echten Test wird dessen Nachweis über `write_validation`
 ## Sicherung und Wiederherstellung
 
 ```sh
-sudo /opt/froeling-bridge/0.5.0/venv/bin/python -I -m froeling_bridge.state_backup backup --archive /geschuetzt/bridge-backup.zip
-sudo /opt/froeling-bridge/0.5.0/venv/bin/python -I -m froeling_bridge.state_backup restore --archive /geschuetzt/bridge-backup.zip
+sudo /opt/froeling-bridge/0.5.7/venv/bin/python -I -m froeling_bridge.state_backup backup --archive /geschuetzt/bridge-backup.zip
+sudo /opt/froeling-bridge/0.5.7/venv/bin/python -I -m froeling_bridge.state_backup restore --archive /geschuetzt/bridge-backup.zip
 ```
 
 Backup verwendet die SQLite-Backupfunktion und enthält Katalog/Einstellungen, letzte Werte, Zeitcache und die geschützte Konfiguration einschließlich optionaler DB-Zugangsdaten. Datei 0600; privat aufbewahren. **MariaDB-Historie ist nicht enthalten.** Restore nur bei gestopptem Dienst in leere Zielpfade. Heizungs-Schreibfreigaben werden nicht automatisch auf einen anderen Rechner übertragen. Nach Root-Restore führt die erneute Installation die Besitzrechte für den Dienstbenutzer korrekt nach.
