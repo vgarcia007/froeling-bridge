@@ -87,7 +87,9 @@ atomic_json(path,state)
 # Some systemd versions defer OnFailure until automatic restarts are exhausted.
 dropin=Path('/etc/systemd/system/froeling-bridge.service.d')
 dropin.mkdir(parents=True,exist_ok=True)
-(dropin/'10-host-role.conf').write_text('[Service]\nRestart='+('no' if state['p4d_fallback'] else 'on-failure')+'\n')
+fallback=state.get('automatic_p4d_fallback',state['p4d_fallback'])
+policy='[Service]\nRestart=no\n' if fallback else '[Unit]\nStartLimitIntervalSec=0\n\n[Service]\nRestart=always\n'
+(dropin/'10-host-role.conf').write_text(policy)
 PY
 install -d -m 0700 -o froeling-bridge -g froeling-bridge /var/lib/froeling-bridge
 # Existing 0.4 state has a different service user; preserve private caches and transfer ownership.

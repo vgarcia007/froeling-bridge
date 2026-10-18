@@ -11,6 +11,49 @@ from froeling_bridge.host_test import TestControlError
 
 
 class LifecycleTests(unittest.TestCase):
+    def test_disabled_automatic_rescue_does_not_cancel_or_wait_for_activation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory)
+            (state / 'installation.json').write_text(json.dumps(dict(
+                p4d_fallback=True, automatic_p4d_fallback=False)))
+            with patch.object(lifecycle, 'STATE', state):
+                with open(state / 'control.lock', 'a') as lock:
+                    fcntl.flock(lock, fcntl.LOCK_EX)
+                    with patch.object(lifecycle, 'control', return_value={'running': True}):
+                        self.assertEqual(lifecycle.locked_control('rescue'), {'running': True})
+                    self.assertFalse((state / 'cancel-start').exists())
+
+    def test_permanent_api_keeps_manual_fallback_but_never_automatically_switches(self):
+        from io import BytesIO
+
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory)
+            (state / 'installation.json').write_text(json.dumps(dict(
+                p4d_fallback=True, automatic_p4d_fallback=False,
+                p4d_enabled=True, device='/dev/test', port=8000)))
+            system = Mock()
+            units = set()
+            system.active.side_effect = lambda unit: unit in units
+            system.start.side_effect = units.add
+            system.stop.side_effect = units.discard
+            opener = Mock()
+            opener.open.return_value = BytesIO(json.dumps(dict(last_failure=dict(
+                phase='discovery:sensors', error_type='RequestTimeout'))).encode())
+            with patch.object(lifecycle, 'STATE', state), patch.object(
+                lifecycle, 'build_opener', return_value=opener
+            ):
+                lifecycle.control('rescue', system)
+                system.stop.assert_not_called()
+                with self.assertRaisesRegex(TestControlError, 'discovery:sensors'):
+                    lifecycle.control('start', system)
+                self.assertIn(lifecycle.LIVE, units)
+                self.assertNotIn(lifecycle.GUARD, units)
+                self.assertNotIn(lifecycle.P4D, units)
+                system.stop.assert_not_called()
+                lifecycle.control('rollback', system)
+                self.assertNotIn(lifecycle.LIVE, units)
+                self.assertIn(lifecycle.P4D, units)
+
     def test_first_reported_startup_failure_restores_p4d_without_waiting_for_deadline(self):
         from io import BytesIO
 

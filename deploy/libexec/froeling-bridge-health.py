@@ -56,6 +56,7 @@ def main():
         return 0
     config = json.loads(Path('/etc/froeling-bridge/settings.json').read_text())
     state = json.loads((STATE / 'installation.json').read_text())
+    fallback = state.get('automatic_p4d_fallback', state['p4d_fallback'])
     maximum = max(180, 3 * float(config.get('interval', 60)))
     opener = build_opener(ProxyHandler({}))
     def get(path):
@@ -76,7 +77,7 @@ def main():
             pass
     # A new host has no p4d fallback; a complete catalogue rebuild may take
     # several minutes. Do not repeatedly kill healthy discovery before it ends.
-    rebuilding = (not state['p4d_fallback'] and runtime is not None
+    rebuilding = (not fallback and runtime is not None
                   and not runtime.get('catalogue_ready') and not runtime.get('last_failure')
                   and (runtime.get('phase') == 'starting'
                        or runtime.get('phase', '').startswith('discovery:')))
@@ -90,9 +91,9 @@ def main():
         json.dump(dict(since=since), stream)
     os.replace(temporary, incident)
     if recover:
-        print('No current heating readings: restoring p4d.' if state['p4d_fallback']
+        print('No current heating readings: restoring p4d.' if fallback
               else 'No current heating readings: restarting Bridge.', flush=True)
-        command = [HELPER, 'rollback'] if state['p4d_fallback'] else [
+        command = [HELPER, 'rollback'] if fallback else [
             '/usr/bin/systemctl', 'restart', 'froeling-bridge.service']
         subprocess.run(command, check=True, timeout=80)
         incident.unlink(missing_ok=True)

@@ -52,6 +52,7 @@ class NativeSystem(System):
 def control(action, system=None):
     system = system or NativeSystem()
     state = json.loads((STATE / "installation.json").read_text())
+    automatic_fallback = state.get("automatic_p4d_fallback", state["p4d_fallback"])
     if action == "status":
         return dict(
             bridge_active=system.active(LIVE),
@@ -60,7 +61,7 @@ def control(action, system=None):
             startup_guard=system.active(GUARD),
         )
     if action == "rescue":
-        if not state["p4d_fallback"]:
+        if not automatic_fallback:
             return control("status", system)
         action = "rollback"
     if action == "rollback":
@@ -84,7 +85,7 @@ def control(action, system=None):
     system.port_free(state["port"])
     system.free(state["device"])  # Validate fuser while the original is still running.
     # Only an original installation needs an independent restoration deadline.
-    if state["p4d_fallback"]:
+    if automatic_fallback:
         system.stop(GUARD)
         system.start(GUARD)
         if not system.active(GUARD):
@@ -140,7 +141,7 @@ def control(action, system=None):
             time.sleep(1)
         raise TestControlError("discovery/connection startup deadline exceeded")
     except BaseException:
-        if state["p4d_fallback"]:
+        if automatic_fallback:
             control("rollback", system)
         raise
 
@@ -151,6 +152,10 @@ def locked_control(action):
 
     if action == "status":
         return control(action)
+    if action == "rescue":
+        state = json.loads((STATE / "installation.json").read_text())
+        if not state.get("automatic_p4d_fallback", state["p4d_fallback"]):
+            return control(action)
     cancellation = STATE / "cancel-start"
     if action in ("rollback", "rescue"):
         cancellation.touch(mode=0o600)

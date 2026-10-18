@@ -10,7 +10,21 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
-## Aktueller Livezustand am 18.10.2026: alter Cronjob startet p4d
+## Aktueller Stand: verbindlicher API-Dauerbetrieb am 18.10.2026
+
+Benutzer verlangt Entfernung der p4d-Cronjobs und ausdrücklich fortgesetzten API-Dauerbetrieb. Einziger aktiver Treffer war Root-Zeile `45 5 * * * systemctl restart p4d`; nach kompletter privater Sicherung über `crontab` entfernt. Andere Root-Zeilen bytegleich erhalten; weitere Benutzer-Crontabs, `/etc/crontab`, anacron und cron.d/hourly/daily/weekly/monthly geprüft, keine weiteren aktiven p4d-Jobs gefunden. Logrotate bleibt erhalten, enthält keinen Dienststart. Original-Crontab/Hashes privat unter `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert).
+
+Danach um 09:19 CEST regulärer exklusiver Helferstart: p4d gestoppt, Bridge 0.5.7 gestartet, bereit und erster erfolgreicher Zyklus bestätigt, Starttimer beendet. Bridge active/enabled, p4d inactive/disabled. **Ab jetzt keine geplanten Stopps/Updates/Rückkehr ohne neuen Auftrag.** p4d bleibt manuell verwendbare Rückfalloption, wird nicht mehr automatisch aktiviert.
+
+Dafür eigene Richtlinie im privaten Installerzustand: `automatic_p4d_fallback=false`, vorhandenes `p4d_fallback=true` bleibt erhalten. Health-Guard startet bei anhaltend fehlenden Live-Werten Bridge neu; Lifecycle-Rescue ist bei dieser Richtlinie eine reine Statusabfrage, auch während laufender Aktivierung ohne Abbruchsignal. Startfehler lösen keine automatische p4d-Rückkehr mehr aus. systemd Restart=always/RestartSec=10, StartLimitIntervalSec=0 verhindern dauerhafte Abschaltung nach Prozessfehlern. Vorhandene OnFailure-Abhängigkeit bleibt bestehen, Rescue bewirkt mit dieser Richtlinie keinen Dienstwechsel. Keine Garantie unterbrechungsfreien Betriebs bei Hardware-/Prozessausfällen; notwendige Wiederherstellungsneustarts bleiben möglich.
+
+Administrative Skripte auf dem Host als Wartungskorrektur zu 0.5.7 aktualisiert, bytegleich mit den neuen Quellen; kein erneutes App-Deployment. `daemon-reload` und Anpassung der Richtlinie bei **identischem laufendem API-PID**, kein API-Neustart dafür. Geschützte Einstellungen, Schreibnachweis, Sensorflags und Katalog unverändert. Vollständige vorherige Verwaltungsdateien privat in den `permanent-api-*`-Ordnern unter Installerzustand gesichert (erster vor Änderung, letzte Kontrolle `permanent-api-20261018T072127Z`). Kein Hostneustart und keine Parameteränderung durch Agenten.
+
+Nachprüfung: 3 erfolgreiche Zyklen, 16 Messpunkte je Zyklus, 94/94 ausgewählte Werte frisch; Statusmesspunkt in MariaDB ca. 5 Sekunden alt, letzte Messpunkte 62 Sekunden Abstand. Fehlerhistorie 83 Zeilen, 0 bestätigt aktiv, Fehlerabgleich verfügbar. Keine neuen Dienstwarnungen. Health-Timer active/enabled, Starttimer inaktiv, keine verbleibenden p4d-Cronzeilen. Zehn gezielte Lifecycle-/Health-Tests erfolgreich einschließlich unterdrücktem Rescue während gesperrter Aktivierung und weiter funktionierender manueller Rückkehr; Installer-Shellsyntax und reale systemd-Unitprüfung erfolgreich. Private Nachweise `.local/cron-removal-20261018.json`, `.local/permanent-api-policy-20261018.json`, `.local/permanent-api-final-20261018.json`.
+
+Benutzer kündigt eigenen Aschebox-Fehlertest an. Lesender Beobachter prüft API-Cache und gespeicherte Historie, keine eigenen Heizungsänderungen. Ergebnis erst nach tatsächlichem Auftreten/Folgeereignissen ergänzen.
+
+## Vorheriger Befund am 18.10.2026: alter Cronjob startet p4d
 
 **Wichtig für die nächste Session:** Benutzer bittet nach einigen Stunden Betrieb um Logprüfung. Ausschließlich lesend geprüft; keine Dienste gestartet/gestoppt, keine Konfiguration, Cronjobs, Heizungsparameter oder DB-Daten geändert. Bridge 0.5.7 ist seit 18.10.2026 **05:45 CEST inaktiv**, Original-p4d seitdem active/running. Die neue API auf Port 8000 ist deshalb nicht erreichbar. Datenbankmonitoring läuft durch p4d weiter. Bootzustand bei Prüfung weiterhin Bridge enabled und p4d disabled; es war keine automatische Fehler-Rückkehr über unseren Helfer.
 

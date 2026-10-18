@@ -40,10 +40,13 @@ class HealthGuardTests(unittest.TestCase):
             self.assertFalse(guard.fresh(stamp, now, 180))
 
     def test_recovery_is_role_specific_and_never_replays_heating_operations(self):
-        for fallback in (True, False):
-            with self.subTest(fallback=fallback), tempfile.TemporaryDirectory() as directory:
+        for fallback, automatic in ((True, None), (False, None), (True, False)):
+            with self.subTest(fallback=fallback, automatic=automatic), tempfile.TemporaryDirectory() as directory:
                 state = Path(directory)
-                (state / 'installation.json').write_text(json.dumps(dict(p4d_fallback=fallback)))
+                installation = dict(p4d_fallback=fallback)
+                if automatic is not None:
+                    installation['automatic_p4d_fallback'] = automatic
+                (state / 'installation.json').write_text(json.dumps(installation))
                 (state / 'health-failure.json').write_text(json.dumps(dict(since=100)))
                 original_read = Path.read_text
                 def read(path, *args, **kwargs):
@@ -53,7 +56,7 @@ class HealthGuardTests(unittest.TestCase):
                     opener.open.side_effect = OSError('private-details')
                     with patch.object(guard, 'build_opener', return_value=opener), patch.object(guard.subprocess, 'run') as run:
                         guard.main()
-                        expected = [guard.HELPER, 'rollback'] if fallback else ['/usr/bin/systemctl', 'restart', 'froeling-bridge.service']
+                        expected = [guard.HELPER, 'rollback'] if fallback and automatic is not False else ['/usr/bin/systemctl', 'restart', 'froeling-bridge.service']
                         run.assert_called_once_with(expected, check=True, timeout=80)
                         self.assertFalse((state / 'health-failure.json').exists())
 

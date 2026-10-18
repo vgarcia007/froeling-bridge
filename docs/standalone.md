@@ -28,7 +28,7 @@ Das auf dem konkreten Zielhost beobachtete Zeitprogramm-Antwortprofil `43 -> 42`
 
 `/api/v1/runtime.last_failure` und das Dienstjournal nennen Phase, Fehlerklasse und bei Listenfehlern Anfragebefehl sowie Eintragsnummer. Beliebige Betriebssystem-/Datenbankfehlermeldungen und rohe Betriebswerte werden nicht ausgegeben. Der letzte Fehler bleibt nach einer Erholung als Diagnose erhalten.
 
-Ein alter p4d-Host kehrt beim ersten vom Worker gemeldeten Startfehler sofort zu p4d zurück. `status` bleibt auch während Aktivierung erreichbar; `rollback` signalisiert einen Abbruch, bevor es begrenzt auf die Dienstsperre wartet. Der unabhängige Starttimer bleibt zusätzliche Absicherung. Ein 24-Stunden-Test beobachtet erst funktionierenden Lesebetrieb; er ist keine Wartezeit ohne Monitoring.
+Bei aktivierter automatischer Rückfallpolitik kehrt ein alter p4d-Host beim ersten vom Worker gemeldeten Startfehler sofort zu p4d zurück. `status` bleibt auch während Aktivierung erreichbar; `rollback` signalisiert einen Abbruch, bevor es begrenzt auf die Dienstsperre wartet. Der unabhängige Starttimer bleibt zusätzliche Absicherung. Ein 24-Stunden-Test beobachtet erst funktionierenden Lesebetrieb; er ist keine Wartezeit ohne Monitoring.
 
 0.5.2 behandelt wiederholte Sensordefinitionen wie Original-`initValueFacts`/`addValueFact`: pro Typ und Adresse ein Sensor, spätere Definition aktualisiert die Metadaten; individuelle Auswahl und Aufzeichnungsflags bleiben erhalten. Die echte Steuerung hat beim Erststart 161 wiederholte Definitionen geliefert. Die frühere pauschale Ablehnung war ein Fehler der Bridge.
 
@@ -51,7 +51,7 @@ Webmenü/API: `http://SERVER-IP:8000`. Beim ersten Start kann der Aufbau großer
 - SQLite: `catalogue.sqlite3` speichert Katalog, Einstellungen, letzte Werte, ausstehende DB-Einstellungen und Schreibjournal. `time-programs-cache.json` hält vollständige Zeitprogramme. Nach Neustart werden alte Werte als gespeichert/veraltet angezeigt, bis neue Heizungsantworten vorliegen.
 - Bei beschädigter SQLite-Datei wird die Datei samt zugehörigen Nebenfiles unter `.damaged-*` erhalten und ein neuer Katalog aus der Heizung aufgebaut. Individuelle Einstellungen benötigen ein Backup; sie lassen sich nicht aus der Heizung rekonstruieren. Unbekannte zukünftige SQLite-Schemaversionen werden ausdrücklich abgewiesen.
 - Verbindungsfehler schließen die defekte serielle Sitzung. Spätere Leseversuche öffnen eine neue exklusive Sitzung, mit begrenztem Wiederanlaufabstand bis 30 Sekunden. Der fehlgeschlagene Auftrag selbst wird nicht wiederholt. UI/API bleiben erreichbar und kennzeichnen die Verbindung getrennt von ihrer eigenen HTTP-Erreichbarkeit.
-- Auf einem neuen Host startet systemd einen abgestürzten Prozess neu. Auf dem ursprünglichen p4d-Host gibt es stattdessen unmittelbare OnFailure-Rückkehr zu p4d; automatische Prozessneustarts werden dort deaktiviert, damit sie den Rückfall nicht verzögern. Ein normaler serieller Wiederverbindungsversuch läuft im Prozess und löst keine konkurrierende p4d-Instanz aus.
+- Auf einem neuen Host startet systemd einen beendeten Prozess neu. Bei aktivierter automatischer Rückfallpolitik gibt es auf einem ursprünglichen p4d-Host stattdessen unmittelbare OnFailure-Rückkehr zu p4d; automatische Prozessneustarts werden dort deaktiviert, damit sie den Rückfall nicht verzögern. Ein normaler serieller Wiederverbindungsversuch läuft im Prozess und löst keine konkurrierende p4d-Instanz aus.
 
 ```sh
 sudo /usr/local/sbin/froeling-bridge-control status
@@ -176,3 +176,12 @@ Ab 0.5.5 verwenden Fehlermeldungen eigene Einträge mit voller Textbreite, Zusta
 Clients sollen für aktuelle Störungen `active === true` verwenden und null als unbekannt behandeln. Die GUI markiert Unbestätigtes neutral statt als aktive Störung. Historische Rohzustände und vorhandene Zeitpunkte bleiben erhalten; kein Quittierbefehl und keine erfundene Endzeit.
 
 Der DB-Abgleich aktualisiert dasselbe Vorkommnis bei neuen bestätigten Zuständen (gekommen → gegangen → quittiert), ohne eine neue ID anzulegen. Nachgelieferte oder korrigierte Steuerungszeitpunkte werden auch dann übernommen, wenn der gespeicherte Zustandsname bereits passt. Wiederholte vollständige Listen bleiben idempotent; frühere Quittierung wird nicht durch wiederholtes Lesen älterer Anfangsmeldungen zurückgenommen. Ein neuer Auftretenszeitpunkt derselben Fehlernummer ist dagegen ein neues historisches Vorkommnis.
+
+
+## Verbindlicher API-Dauerbetrieb
+
+Auf dem abgenommenen Host ist seit 18.10.2026 die automatische Rückkehr zu p4d abgeschaltet. Der rootgeschützte Installerzustand `/var/lib/froeling-bridge-installer/installation.json` enthält `automatic_p4d_fallback: false`; `p4d_fallback: true` bezeichnet weiterhin die vorhandene manuelle Rückfalloption. Ohne neues Feld gilt für bestehende Installationen die bisherige Rückfallpolitik.
+
+Installer, Lifecycle-Helfer und Health-Guard berücksichtigen dieses Feld gemeinsam. Bei ausgeschalteter automatischer Rückkehr startet systemd die Bridge nach Prozessende erneut (`Restart=always`, zehn Sekunden Pause, kein Startlimit); der Health-Guard startet bei anhaltend fehlenden Live-Daten ebenfalls die Bridge neu. Rescue schaltet nicht um, ein Startfehler lässt die Bridge zur Wiederherstellung bestehen, und der p4d-Starttimer wird nicht aktiviert. Explizites `rollback` bleibt eine bewusste administrative Abschaltung mit p4d-Rückkehr und ist kein normaler Betriebsablauf. Installer-Neuausführung erhält den gespeicherten Richtlinienwert.
+
+Alte p4d-Cronjobs müssen nach Sicherung gezielt entfernt werden, andere Jobs erhalten. Nur `systemctl disable p4d` verhindert keine ausdrücklich geplanten Starts. Kein zweiter serieller Dienst parallel. Keine geplanten Stopps oder Updates am laufenden Host ohne neuen Auftrag; notwendige automatische Wiederherstellung kann kurze Unterbrechungen verursachen.

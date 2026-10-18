@@ -20,9 +20,15 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
-## Aktueller Livezustand nach Logprüfung am 18.10.2026
+## Verbindlicher Dauerbetrieb seit 18.10.2026
 
-Bridge 0.5.7 ist seit 05:45 CEST inaktiv, p4d aktiv; neue API Port 8000 nicht erreichbar. Ursache anhand CRON-/systemd-Journal belegt: alter Root-Cronjob `45 5 * * * systemctl restart p4d` startet den Originaldienst ausdrücklich und verdrängt wegen Exklusivität die Bridge. Kein Absturz/keine automatische Fehler-Rückkehr: Bridge Exit 0, keine Warnungen/Exceptions, davor ca. 7,5 Stunden und 443 erfolgreiche Zyklen. SQL-Messpunkte werden ohne größere Lücke von p4d fortgeführt, frisch bestätigt, 83 Fehlerzeilen erhalten. Logauftrag nur lesend erledigt, Cronjob und Dienste noch nicht geändert. Vor weiterem Bridge-Dauerbetrieb diesen Zeitplan gezielt berücksichtigen und kontrolliert umschalten, andere Cronjobs erhalten. Aktuellen Detailkontext lesen; nicht annehmen, die Bridge laufe noch. Keine serielle Öffnung parallel zu p4d, kein Hostneustart.
+Benutzer: „p4d crons müssen weg!“ und „unsere API ist nun reif für den Dauerbetrieb und darf auch nicht mehr beendet werden“. Keine geplanten Bridge-Stopps, Deployments oder Rückkehr zu p4d ohne neuen konkreten Auftrag. Automatische Wiederherstellung bleibt notwendig: Bridge statt p4d wiederherstellen. Keine hundertprozentige Verfügbarkeit aus der Freigabe ableiten.
+
+Erledigt: einzigen aktiven p4d-Cronjob aus Root-Crontab nach privater Vollsicherung entfernt, andere Jobs bytegleich erhalten; Benutzer-/System-Cronquellen geprüft. Anschließend bislang inaktive Bridge über regulären Helfer wieder aktiviert. Bridge 0.5.7 active/enabled, p4d inactive/disabled, Health-Timer aktiv, Starttimer inaktiv. Installerzustand `automatic_p4d_fallback=false`, `p4d_fallback=true` erhält ausschließlich manuelle Rückfallmöglichkeit. Wirksames Drop-in: Restart=always, StartLimitIntervalSec=0; Health-Guard startet bei anhaltender Störung Bridge neu, Rescue beendet Bridge nicht und aktiviert kein p4d. Verwaltungshelfer/Health-Skript aktualisiert, API-Prozess dabei unverändert. Installer erhält diese Politik bei Neuinstallation. Kein Hostneustart, kein künstlicher Ausfalltest und keine zusätzliche Heizungsänderung durch Agenten.
+
+Reale Kontrolle: 94/94 ausgewählte Werte frisch, Collector fehlerfrei mit 16 Messpunkten je Zyklus, frischer MariaDB-Status, Fehlerabgleich verfügbar, 83 Historieneinträge und 0 bestätigt aktive Fehler vor Benutzer-Ascheboxtest. Detaillierte Belege/Backuporte in docs/project-context.md. Vorheriger Cron-Ausfall ist historisch; nicht erneut als aktuellen Dienstzustand annehmen.
+
+Benutzer kündigt danach eigenen Aschebox-Fehlertest an. API/DB rein lesend beobachten; keine Parameter ändern oder künstlichen Fehler selbst auslösen. Auftreten und Folgezustände desselben Vorkommnisses prüfen; Ergebnis nach tatsächlicher Beobachtung ergänzen.
 
 ## Neuer Auftrag: alte unvollständige Fehler und neue Zustandsmeldungen
 
