@@ -4,7 +4,7 @@ const state = {
   health: null,
   parent: 1,
   crumbs: [{ parent: 1, title: "Heizung" }],
-  view: "menu",
+  view: location.pathname === "/anlage" ? "plant" : "menu",
   generation: 0,
   editorGeneration: 0,
   parameter: null,
@@ -17,6 +17,7 @@ const state = {
 };
 const editableTypes = new Set([7, 8, 10, 50, 57, 64]);
 const views = {
+  plant: ["Anlagenübersicht", "Temperaturen, Pumpen und Schwellwerte je Anlagenteil zusammen sehen."],
   menu: [
     "Servicemenü",
     "Parameter finden, Werte prüfen und Änderungen nachvollziehen.",
@@ -797,7 +798,7 @@ function renderTimes() {
   if (!container.children.length)
     container.append(element("p", "Keine Zeitprogramme gefunden.", "empty"));
 }
-function switchView(view, timeGroupFilter = null) {
+function switchView(view, timeGroupFilter = null, navigate = true) {
   state.view = view;
   if (view === "times") state.timeGroupFilter = timeGroupFilter;
   state.generation++;
@@ -808,6 +809,9 @@ function switchView(view, timeGroupFilter = null) {
   }
   [$("view-title").textContent, $("view-description").textContent] =
     views[view];
+  const path = view === "plant" ? "/anlage" : "/";
+  if (navigate && location.pathname !== path) history.pushState({}, "", path);
+  if (view === "plant") loadPlant();
   if (view === "menu") loadMenu();
   if (view === "values") loadValues();
   if (view === "collector") loadCollector();
@@ -819,6 +823,7 @@ function switchView(view, timeGroupFilter = null) {
 }
 for (const button of document.querySelectorAll("[data-view]"))
   button.addEventListener("click", () => switchView(button.dataset.view));
+window.addEventListener("popstate", () => switchView(location.pathname === "/anlage" ? "plant" : "menu", null, false));
 $("search-form").addEventListener("submit", (event) => {
   event.preventDefault();
   loadMenu(state.parent, $("search").value.trim());
@@ -846,18 +851,22 @@ async function healthLoop() {
       : "DEMO · SIMULATOR";
     $("mode").classList.toggle("hardware", hardware);
     $("mode-note").classList.toggle("hardware", hardware);
-    $("mode-note").textContent = hardware
+    $("mode-note").textContent = health.preview
+      ? "Lesende Anlagenvorschau · Daten aus der bestehenden API. Änderungen und Heizungsaufträge sind in dieser Vorschau gesperrt."
+      : hardware
       ? (health.mode === "standalone" ? "Eigenständiger Betrieb. Live-Abfragen und Menü funktionieren unabhängig von MariaDB. Lesezeitpunkte zeigen die Aktualität." : health.mode === "hardware-live" ? "Dauerbetrieb. Neue Messpunkte werden in der bestehenden p4d-Datenbank gespeichert. Heizungsparameter sind schreibgeschützt." : "Lesender Hardwaretest. Neue Messpunkte werden nur in der separaten Testdatenbank gespeichert.")
       : health.mode === "database"
       ? "Gespeicherte p4d-Daten. Keine direkte Heizungsabfrage und keine Änderungen."
       : "Du arbeitest mit fiktiven Heizungsdaten. Änderungen betreffen ausschließlich den Simulator.";
-    if (first) loadMenu();
+    if (first) switchView(state.view);
+    if (!first && state.view === "plant") loadPlant();
     if (state.view === "values") loadValues();
     if (state.view === "collector") loadCollector();
     if (state.view === "errors") loadErrors();
   } catch (error) {
     $("connection").textContent = "Verbindung unterbrochen";
     $("connection-dot").className = "dot offline";
+    if (state.view === "plant" && typeof plantOffline === "function") plantOffline();
     delay = 5000;
   } finally {
     setTimeout(healthLoop, delay);

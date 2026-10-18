@@ -184,6 +184,6 @@ class APITests(unittest.TestCase):
     def test_openapi_matches_routes(self):
         spec = self.http.get('/api/v1/openapi.json').get_json()
         self.assertEqual(spec['openapi'], '3.0.3')
-        self.assertEqual(len(spec['components']['schemas']['JobRequest']['oneOf']), 9)
+        self.assertEqual(len(spec['components']['schemas']['JobRequest']['oneOf']), 10)
         rules = {r.rule.replace('<identifier>', '{id}').replace('<sensor_type>', '{type}').replace('<int:address>', '{address}') for r in self.http.application.url_map.iter_rules() if r.rule.startswith('/api/v1')}
         self.assertEqual(rules, set(spec['paths']))

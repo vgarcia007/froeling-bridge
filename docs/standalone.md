@@ -1,4 +1,4 @@
-# Eigenständiger Betrieb (Stand 0.5.7)
+# Eigenständiger Betrieb (Quellstand 0.6.0)
 
 Die Bridge kann ohne p4d und ohne MariaDB starten. Sie liest Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Steuerung. SQLite speichert den Arbeitskatalog und Einstellungen lokal; MariaDB ist ausschließlich die optionale p4d-kompatible Historie. Protokoll und Darstellung orientieren sich an linux-p4d von Jörg Wendel und Mitwirkenden.
 
@@ -106,8 +106,8 @@ Erst nach vereinbartem echten Test wird dessen Nachweis über `write_validation`
 ## Sicherung und Wiederherstellung
 
 ```sh
-sudo /opt/froeling-bridge/0.5.7/venv/bin/python -I -m froeling_bridge.state_backup backup --archive /geschuetzt/bridge-backup.zip
-sudo /opt/froeling-bridge/0.5.7/venv/bin/python -I -m froeling_bridge.state_backup restore --archive /geschuetzt/bridge-backup.zip
+sudo /opt/froeling-bridge/0.6.0/venv/bin/python -I -m froeling_bridge.state_backup backup --archive /geschuetzt/bridge-backup.zip
+sudo /opt/froeling-bridge/0.6.0/venv/bin/python -I -m froeling_bridge.state_backup restore --archive /geschuetzt/bridge-backup.zip
 ```
 
 Backup verwendet die SQLite-Backupfunktion und enthält Katalog/Einstellungen, letzte Werte, Zeitcache und die geschützte Konfiguration einschließlich optionaler DB-Zugangsdaten. Datei 0600; privat aufbewahren. **MariaDB-Historie ist nicht enthalten.** Restore nur bei gestopptem Dienst in leere Zielpfade. Heizungs-Schreibfreigaben werden nicht automatisch auf einen anderen Rechner übertragen. Nach Root-Restore führt die erneute Installation die Besitzrechte für den Dienstbenutzer korrekt nach.
@@ -185,3 +185,8 @@ Auf dem abgenommenen Host ist seit 18.10.2026 die automatische Rückkehr zu p4d 
 Installer, Lifecycle-Helfer und Health-Guard berücksichtigen dieses Feld gemeinsam. Bei ausgeschalteter automatischer Rückkehr startet systemd die Bridge nach Prozessende erneut (`Restart=always`, zehn Sekunden Pause, kein Startlimit); der Health-Guard startet bei anhaltend fehlenden Live-Daten ebenfalls die Bridge neu. Rescue schaltet nicht um, ein Startfehler lässt die Bridge zur Wiederherstellung bestehen, und der p4d-Starttimer wird nicht aktiviert. Explizites `rollback` bleibt eine bewusste administrative Abschaltung mit p4d-Rückkehr und ist kein normaler Betriebsablauf. Installer-Neuausführung erhält den gespeicherten Richtlinienwert.
 
 Alte p4d-Cronjobs müssen nach Sicherung gezielt entfernt werden, andere Jobs erhalten. Nur `systemctl disable p4d` verhindert keine ausdrücklich geplanten Starts. Kein zweiter serieller Dienst parallel. Keine geplanten Stopps oder Updates am laufenden Host ohne neuen Auftrag; notwendige automatische Wiederherstellung kann kurze Unterbrechungen verursachen.
+
+
+## Anlagenübersicht ab 0.6.0
+
+Die eigene Seite `/anlage` gruppiert Messwerte, Pumpenansteuerungen und Parameter nach den Geräteinstanzen im Heizungsmenü. Sie benötigt kein passendes p4d-Schemabild und behauptet keine Rohrverbindungen. Zusätzliche Messwerte werden nur über ausdrückliche Aktivierung zur Abfrage ausgewählt; Historienflags bleiben erhalten. Cache, API, separate Vorschau und Prüfungen: [Anlagenübersicht](plant-overview.md). Der laufende Bestandsdienst bleibt bis zu einem gesonderten Rollout unverändert.

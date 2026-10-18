@@ -112,6 +112,9 @@ class MemoryRepository:
     def menu(self, parent):
         return [m for m in demo_menu() if m["parent"] == parent]
 
+    def menu_catalog(self):
+        return demo_menu()
+
     def search_menu(self, query):
         from .menu import menu_paths, named_search
         rows = demo_menu()

@@ -20,6 +20,16 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Anlagenübersicht 0.6.0: implementiert, separat als Vorschau
+
+Benutzer beauftragt die eigene Funktionsübersicht nach gemeinsamem Plan und bestätigt zusätzliche gezielte Messwertabfragen. Das falsche p4d-Schema nicht verwenden; Gruppen und Beziehungen aus erreichbaren Geräte-Menüpfaden, keine erfundenen Rohrverbindungen. Implementierung 0.6.0: `/anlage`, Navigation, `GET /api/v1/plant`, ausdrückliches `POST /api/v1/plant/activate`, lesender Job `refresh_component`. Aktivierung nutzt vorhandenen Sensor-Konfigurationspfad, verändert keine Recordflags; niemals durch GET. Parametercache zehn Minuten, SQLite-Metadaten; Einzelabfragen über denselben Worker, maximal vier parallele Gruppen. Nicht zugeordnete Pumpen, veraltete Werte und Mehrdeutigkeiten ausdrücklich darstellen. Allgemeine Display-Bedienrechte sind keine zusätzlichen Kessel. Normale Sensor-/Menü-/API-Wege erhalten.
+
+**Nicht produktiv ausgerollt.** Vorhandener 0.5.7-Dienst, PID und alle Sensor-/Recordflags vor/nachher lesend identisch; Erfassung/History gesund. Keine Änderung am Produktionshost, keine Heizungs-Schreibtests und kein serieller Zugriff durch Agenten. Zusätzliche 38 Abfragewerte aus dem Katalog erst bei beauftragtem produktiven Rollout ausdrücklich aktivieren. Neuer Code/Installer 0.6.0, laufende Installation nicht ungefragt ersetzen.
+
+Getrennte Vorschau auf dem Arbeitsrechner Port 8001, direkter Pfad `/anlage`. Hintergrundprozess und private Quelle unter `.local/plant-preview.pid`, `.local/plant-readonly-source.json`, `.local/plant-live-preview.log`. Vorschau liest nur GET /sensors der bestehenden API, alle Mutationen/Heizungsjobs gesperrt; kein serieller Adapter, keine Verbindung zur MariaDB. Sollwerte sind dort mangels neuem produktivem Cache noch unbekannt. Nur diesen eindeutig identifizierten Vorschauprozess bei Bedarf beenden/aktualisieren; niemals Produktionsdienst dafür stoppen. Öffentliche Anleitung docs/plant-overview.md; keine privaten IPs/Rohberichte committen.
+
+255 Tests mit separater wegwerfbarer MariaDB erfolgreich, vier Chromium-Breiten sowie echte API-Vorschau mobil/Desktop geprüft; native Installation isoliert und PTY-Wiederanlauf erfolgreich. Produktive Aktivierung bleibt gesonderter Auftrag. Danksagung im README weiter wortgleich erhalten.
+
 ## Verbindlicher Dauerbetrieb seit 18.10.2026
 
 Benutzer: „p4d crons müssen weg!“ und „unsere API ist nun reif für den Dauerbetrieb und darf auch nicht mehr beendet werden“. Keine geplanten Bridge-Stopps, Deployments oder Rückkehr zu p4d ohne neuen konkreten Auftrag. Automatische Wiederherstellung bleibt notwendig: Bridge statt p4d wiederherstellen. Keine hundertprozentige Verfügbarkeit aus der Freigabe ableiten.

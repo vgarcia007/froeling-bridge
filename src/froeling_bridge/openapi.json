@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fröling Bridge API",
-    "version": "0.5.7",
+    "version": "0.6.0",
     "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation."
   },
   "servers": [
@@ -830,6 +830,95 @@
           }
         ]
       }
+    },
+    "/api/v1/plant": {
+      "get": {
+        "operationId": "plantOverview",
+        "summary": "Functional component groups inferred from reachable controller menu instances",
+        "description": "Read-only snapshot. Never changes flags or queries the heater. Menu presence does not prove physical installation. Ambiguous bindings do not establish a pump state or hydraulic connection. Parameter observations retain their own timestamps; stale after 600 seconds or failed refresh.",
+        "responses": {
+          "200": {
+            "description": "Component groups and cached observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plant"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Catalogue unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plant/activate": {
+      "post": {
+        "operationId": "activatePlantOverview",
+        "summary": "Explicitly enable collection of additional supported and unambiguous component measurements",
+        "description": "Local standalone catalogue only. Uses existing sensor configuration and preserves all recording flags. Idempotent; a failed partial activation may be retried. Does not write heater parameters.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Additional sensor selection saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlantActivation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body or catalogue not discovered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Catalogue is not configurable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Local storage unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1061,6 +1150,26 @@
             "required": [
               "operation",
               "menu_id"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "type": "string",
+                "enum": [
+                  "refresh_component"
+                ]
+              },
+              "component_id": {
+                "type": "string",
+                "description": "Component id from GET /api/v1/plant. Reads only that component’s matching menu parameters; requests share an in-flight job per component. At most four concurrent component refreshes. Per-parameter reads yield the serial worker to regular collection; 90-second batch deadline. Individual failures appear in result.errors and preserve old cache observations."
+              }
+            },
+            "required": [
+              "operation",
+              "component_id"
             ],
             "additionalProperties": false
           }
@@ -1483,6 +1592,237 @@
             }
           }
         }
+      },
+      "PlantSetting": {
+        "type": "object",
+        "properties": {
+          "menu_id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "age_seconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "menu_id",
+          "title",
+          "value",
+          "observed_at",
+          "stale",
+          "error"
+        ]
+      },
+      "PlantMetric": {
+        "type": "object",
+        "properties": {
+          "menu_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "title": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ambient",
+              "pump",
+              "mixer",
+              "temperature",
+              "charge",
+              "state"
+            ]
+          },
+          "sensor": {
+            "$ref": "#/components/schemas/Sensor"
+          },
+          "association": {
+            "type": "string"
+          },
+          "ambiguous": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "role",
+          "sensor",
+          "association",
+          "ambiguous"
+        ]
+      },
+      "PlantComponent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "kessel",
+              "puffer",
+              "boiler",
+              "heizkreis"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "parent": {
+            "type": "integer"
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "presence": {
+            "type": "string",
+            "enum": [
+              "menu-catalogue"
+            ]
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlantMetric"
+            }
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlantSetting"
+            }
+          },
+          "refresh_job_id": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "path",
+          "presence",
+          "metrics",
+          "settings",
+          "refresh_job_id"
+        ]
+      },
+      "PlantSensorIdentity": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "address": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "type",
+          "address"
+        ]
+      },
+      "Plant": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlantComponent"
+            }
+          },
+          "unassigned": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sensor"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "activation_available": {
+            "type": "boolean"
+          },
+          "additional_sensors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlantSensorIdentity"
+            }
+          },
+          "parameter_max_age_seconds": {
+            "type": "integer"
+          },
+          "topology": {
+            "type": "string"
+          },
+          "cached": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "source",
+          "components",
+          "unassigned",
+          "enabled",
+          "activation_available",
+          "additional_sensors",
+          "parameter_max_age_seconds",
+          "topology",
+          "cached"
+        ]
+      },
+      "PlantActivation": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "activated": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlantSensorIdentity"
+            }
+          },
+          "history_selection_changed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled",
+          "activated",
+          "history_selection_changed"
+        ]
       }
     }
   }

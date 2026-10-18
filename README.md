@@ -2,8 +2,9 @@
 
 Heizungsüberwachung und Parameterbedienung für Fröling-Steuerungen der **Lambdatronic-S3200-Familie**: ein Python-Dienst mit Webmenü und HTTP-API, der direkt über den seriellen Adapter mit der Heizung kommuniziert.
 
-Die Bridge kann eigenständig starten, ohne vorhandene p4d-Installation und ohne MariaDB. Wer bereits eine p4d-Datenbank hat, kann deren Historie und Einstellungen weiterverwenden. Aktueller Stand: **0.5.7**.
+Die Bridge kann eigenständig starten, ohne vorhandene p4d-Installation und ohne MariaDB. Wer bereits eine p4d-Datenbank hat, kann deren Historie und Einstellungen weiterverwenden. Aktueller Quellstand: **0.6.0**.
 
+- Eigene [Anlagenübersicht](docs/plant-overview.md) mit zusammengehörigen Temperaturen, Pumpen und Schaltbedingungen.
 - Live-Status und ausgewählte Messwerte automatisch abfragen.
 - Heizungsmenü mit den Namen aus der Steuerung durchsuchen und Parameter bedienen.
 - Benannte Zeitprogramme anzeigen und zwischenspeichern.
@@ -42,6 +43,7 @@ Im Browser öffnen; `SERVER-IP` durch die Adresse des Heizungsrechners ersetzen:
 
 | Adresse | Inhalt |
 | --- | --- |
+| `http://SERVER-IP:8000/anlage` | Funktionsübersicht für Kessel, Puffer, Boiler und Heizkreise |
 | `http://SERVER-IP:8000/` | Webmenü mit Sensoren, Parametern, Zeitprogrammen und Fehlerspeicher |
 | `http://SERVER-IP:8000/api/v1/health` | Betriebsart und verfügbare Funktionen |
 | `http://SERVER-IP:8000/api/v1/runtime` | Startfortschritt, Heizungsverbindung, Erfassung und Datenbankstatus |
@@ -60,6 +62,12 @@ sudo bash deploy/install-standalone.sh --take-over-p4d
 Eine private Konfigurationsdatei lässt sich zusätzlich mit `--config /geschuetzt/bridge-settings.json` übergeben. Der Installer stoppt p4d vor dem exklusiven seriellen Zugriff und erhält die Originalinstallation als Rückfalloption. **Bridge und p4d dürfen nicht gleichzeitig auf denselben Adapter zugreifen.** Alte Cronjobs, die p4d starten oder neu starten, müssen nach Sicherung gezielt entfernt werden; allein dessen Autostart zu deaktivieren reicht dafür nicht. Der Installer entfernt keine fremden Cronjobs.
 
 Bei einer bisherigen Bridge-Testeinrichtung kann der Einrichtungsdialog die Verbindung aus `/etc/froeling-bridge-test/source-db.json` übernehmen. Ansonsten die vorhandene p4d-Datenbank im Dialog oder im Feld `history` der folgenden Konfiguration angeben.
+
+### Neue Anlagenübersicht
+
+Ab 0.6.0 gibt es unter `/anlage` eine eigene Seite mit Messwerten, Pumpenansteuerungen und aufklappbaren Sollwerten/Schaltschwellen je Anlagenteil. Die Zuordnung folgt dem Heizungsmenü; ein Hydraulikplan ist dafür nicht erforderlich. Zusätzliche benötigte Messwerte lassen sich ausdrücklich zur Abfrage aktivieren, ohne ihre Historienauswahl zu verändern. Details und separate Demo: [Anlagenübersicht](docs/plant-overview.md).
+
+Der bereits laufende Bestandsdienst bleibt vorerst auf 0.5.7; für diese neue Seite wird er nicht automatisch aktualisiert oder neu gestartet. Sie ist zunächst separat als Vorschau verfügbar.
 
 ## Wo konfiguriere ich die Datenbank?
 
@@ -202,6 +210,7 @@ Auf der Bestandsanlage sind Discovery, laufende Erfassung, MariaDB-Aufzeichnung,
 
 ## Weiterführende Dokumentation und Entwicklung
 
+- [Anlagenübersicht, Komponenten-API und separate Vorschau](docs/plant-overview.md)
 - [Installation, Konfiguration, Sensoren, Historie und Wiederherstellung](docs/standalone.md)
 - [Dokumentationsübersicht und p4d-Bestandsanalyse](docs/README.md)
 - [API, ältere Betriebsarten und separate Testdatenbank](docs/service.md)

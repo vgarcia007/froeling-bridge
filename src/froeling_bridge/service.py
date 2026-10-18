@@ -162,6 +162,8 @@ class BridgeService:
             self.time_groups = items
             self.time_observed_at = stamp.isoformat()
         self.stop = Event()
+        from .plant import PlantOverview
+        self.plant = PlantOverview(self)
         self.collector = None
         self.collector_state = dict(enabled=mode != "database", interval_seconds=interval,
                                     running=False, last_cycle=None, last_successful_store=None,
@@ -189,6 +191,7 @@ class BridgeService:
 
     def close(self):
         self.stop.set()
+        self.plant.close()
         if self.watchdog:
             self.watchdog.join(timeout=1)
         if self.collector:
@@ -444,6 +447,8 @@ class BridgeService:
     def submit_job(self, data):
         if self.fatal.is_set() or self.stop.is_set():
             raise ServiceStopped()
+        if isinstance(data, dict) and data.get('operation') == 'refresh_component':
+            return self.plant.submit(data)
         action = self._job_action(data)
         identifier = uuid.uuid4().hex
         with self.lock:
@@ -477,6 +482,11 @@ class BridgeService:
                 raw_result = future.result()
                 result = public(raw_result)
                 update = dict(state="completed", result=result)
+                if data['operation'] in ('read_parameter', 'write_parameter'):
+                    try:
+                        self.plant.remember_parameter(data['menu_id'], raw_result if data['operation'] == 'read_parameter' else raw_result.current)
+                    except DatabaseUnavailable:
+                        logging.getLogger(__name__).warning('Plant parameter cache unavailable')
                 if data["operation"] in ("write_parameter", "write_time_range") and hasattr(self.repository, 'audit_write'):
                     self.repository.audit_write(identifier, dict(state='completed', request=data, result=result))
                 if data["operation"] == "time_ranges":

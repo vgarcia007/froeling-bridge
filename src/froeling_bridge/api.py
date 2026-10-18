@@ -47,6 +47,7 @@ def create_app(service):
         return result
 
     @app.get("/")
+    @app.get("/anlage")
     def index():
         return render_template("index.html")
 
@@ -164,15 +165,31 @@ def create_app(service):
         return response(dict(source=service.repository.source, programs=programs,
                              cache=service.time_program_cache()))
 
-    @app.get(prefix + "/sensors")
-    def sensors():
-        args_only()
+    def sensor_items():
         from .local_store import supported
         latest = {(row['type'],row['address']): row for row in latest_values()}
         items = [dict(row, supported=supported(row), active=row['state']=='A', recording=row['record']=='A' or automatic_recording(row, service.mode),
                       configured_recording=row['record']=='A', recording_required=automatic_recording(row, service.mode),
                       latest=latest.get((row['type'],row['address']))) for row in service.repository.sensors()]
+        return items
+
+    @app.get(prefix + "/sensors")
+    def sensors():
+        args_only()
+        items = sensor_items()
         return response(dict(source=service.repository.source, items=items))
+
+    @app.get(prefix + "/plant")
+    def plant():
+        args_only()
+        return response(service.plant.snapshot(sensor_items()))
+
+    @app.post(prefix + "/plant/activate")
+    def activate_plant():
+        args_only()
+        if request.get_json() != {}:
+            raise ValidationError('activation requires an empty JSON object')
+        return response(service.plant.activate(sensor_items()))
 
     @app.get(prefix + "/values")
     def values():

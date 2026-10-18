@@ -6,6 +6,7 @@
     <title>Fröling Bridge · Heizungsmenü</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}" />
     <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='plant.js') }}" defer></script>
   </head>
   <body>
     <aside class="sidebar">
@@ -15,6 +16,7 @@
       >
       <p class="section-label">HEIZUNGSSTEUERUNG</p>
       <nav class="main-nav" aria-label="Hauptnavigation">
+        <button id="nav-plant" data-view="plant"><span>♧</span> Anlagenübersicht</button>
         <button id="nav-menu" class="active" data-view="menu">
           <span>☷</span> Servicemenü
         </button>
@@ -56,6 +58,20 @@
       </section>
       <div id="mode-note" class="mode-note" role="status"></div>
       <div id="notice" role="status" aria-live="polite" hidden></div>
+      <section id="plant-view" class="view" hidden>
+        <div class="plant-banner">
+          <div><h2>Anlagenteile</h2>
+            <p>Funktionsgruppen aus dem Heizungsmenü.</p>
+            <p id="plant-status" class="muted" role="status"></p></div>
+          <button id="plant-activate" class="button secondary" hidden>Zusätzliche Messwerte abfragen</button>
+        </div>
+        <div id="plant-grid" class="plant-grid"></div>
+        <details id="plant-unassigned" class="panel plant-unassigned" hidden>
+          <summary>Pumpen und Mischer ohne eindeutige Zuordnung</summary>
+          <p>Diese Ausgänge sind im Katalog vorhanden. Ihre Zuordnung und der tatsächliche Einbau sind noch nicht bestätigt.</p>
+          <div id="plant-unassigned-values" class="plant-metrics"></div>
+        </details>
+      </section>
       <section id="menu-view" class="view">
         <div class="toolbar">
           <nav id="breadcrumbs" aria-label="Menüpfad"></nav>
