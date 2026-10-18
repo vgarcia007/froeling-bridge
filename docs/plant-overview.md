@@ -5,9 +5,9 @@ Die eigene Seite `/anlage` stellt zusammengehörige Temperaturen, Betriebszustä
 ## Was die Seite zeigt
 
 - Gruppen für Kessel, Puffer, Boiler und Heizkreise mit den Namen und Menüpfaden der Steuerung.
-- Ist-/Solltemperaturen, Ladezustände und andere zugeordnete Messwerte mit Lesezeitpunkt.
+- Isttemperaturen mit passendem Sollwert in kleiner Schrift direkt darunter, außerdem Ladezustände und andere zugeordnete Messwerte mit Lesezeitpunkt. Die Paarung bleibt innerhalb derselben Geräteinstanz: Vorlauf Ist/Soll, Abgas Ist/Soll, Boiler oben/gewünschte Boilertemperatur. Beim Kessel hat der berechnete Sollwert Vorrang vor der festen Kessel-Solltemperatur. Ohne eindeutiges Gegenstück wird kein Sollwert erfunden; Mindest-/Maximalwerte, Frostschutz und Pufferschwellen dienen nicht als Ersatz. Veraltete Sollwerte werden gekennzeichnet.
 - Pumpen- und Mischerausgänge als angesteuert/nicht angesteuert; bei Prozentwerten zusätzlich eine Anzeige der Ansteuerung. Das ist keine gemessene Fördermenge oder bestätigte mechanische Drehzahl.
-- Aufklappbare Sollwerte und Schaltbedingungen. Beim Öffnen werden fehlende oder mehr als zehn Minuten alte Parameter automatisch lesend aktualisiert. Ein eigener Knopf erlaubt bewusstes erneutes Lesen.
+- Aufklappbare Sollwerte und Schaltbedingungen. Beim Öffnen werden fehlende oder mehr als zehn Minuten alte Parameter automatisch lesend aktualisiert. Ein eigener Knopf erlaubt bewusstes erneutes Lesen. Fehlende/veraltete Einstellungen, die als kleiner Sollwert direkt am Messwert gebraucht werden, werden auch ohne Öffnen des Detailbereichs über denselben geteilten Leseauftrag aktualisiert.
 - Nicht eindeutig zugeordnete Pumpen und Mischer in einem separaten Abschnitt. Fehlende/veraltete Werte und mehrdeutige Zuordnungen zeigen einen unbekannten Zustand statt einer laufenden Pumpe.
 
 Die Seite aktualisiert ihren API-Stand alle vier Sekunden. Bei einem Verbindungsabbruch bleiben die letzten Werte sichtbar, Animationen enden und Pumpenzustände werden unbekannt. Die Animation steht für eine frische positive Ansteuerung. Sie bildet keinen Wasserstrom ab. Schwellen allein erklären die Regelung nicht vollständig; Betriebsart, Zeitprogramme und weitere Freigaben können ebenfalls wirken. Die erste Version führt keine Parameteränderungen aus; dafür bleibt das Servicemenü zuständig.

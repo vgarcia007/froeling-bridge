@@ -838,6 +838,7 @@ dialog::backdrop {
 .plant-metric-title { color: var(--muted); font-size: 12px; }
 .plant-metric strong { font-size: 21px; line-height: 1.35; margin: 6px 0; }
 .plant-metric small { color: var(--muted); font-size: 11px; }
+.plant-target { color: var(--muted); font-size: 13px; margin: 0 0 7px; }
 .plant-unknown { background: #f3f4f6; }
 .plant-output { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
 .plant-output meter { flex-basis: 100%; width: 100%; accent-color: var(--accent); }

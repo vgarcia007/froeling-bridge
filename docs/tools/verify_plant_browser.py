@@ -34,11 +34,22 @@ def main():
                 browser.js("document.querySelector('[data-component-id=\"boiler-301\"] details').open=true")
                 browser.wait("document.querySelector('[data-component-id=\"boiler-301\"] .plant-setting strong').textContent.includes('60')")
                 assert browser.js("document.querySelectorAll('[data-component-id=\"boiler-301\"] .plant-setting').length") == 2
+                browser.wait("document.querySelector('[data-component-id=\"boiler-301\"] .plant-target').textContent.includes('60')")
+                browser.wait("document.querySelector('[data-component-id=\"boiler-302\"] .plant-target').textContent.includes('55')")
+                assert browser.js("document.querySelector('[data-component-id=\"heizkreis-501\"] .plant-target').textContent.includes('41')")
+                assert browser.js("document.querySelector('[data-component-id=\"kessel-100\"] .plant-target').textContent.includes('80')")
+                assert browser.js("document.querySelectorAll('[data-component-id=\"puffer-200\"] .plant-target').length===0")
+
                 assert not browser.js("document.querySelector('#plant-view').textContent.includes('0x')")
                 browser.js("document.querySelector('#nav-menu').click()")
                 assert browser.js("location.pathname==='/'")
                 browser.js("document.querySelector('#nav-plant').click()")
                 browser.wait("location.pathname==='/anlage' && !document.querySelector('#plant-view').hidden")
+            assert browser.js("""(()=>{
+                const c={metrics:[{title:'Kesseltemperatur'}, {title:'Errechnete Kesselsolltemperatur',sensor:{latest:{value:'73',unit:'°C',stale:false}}}],settings:[{title:'Kessel-Solltemperatur',value:'80',stale:false}]};
+                return plantTarget(c.metrics[0],c).value==='73' && plantTarget(c.metrics[0],c).label.includes('berechnet') &&
+                  plantTarget({title:'Puffertemperatur oben'},{metrics:[],settings:[{title:'Heizkreisfreigabe ab folgender Puffertemperatur',value:'40'}]})===null;
+            })()""")
             browser.js("window.realPlantFetch=window.fetch; window.fetch=(...a)=>String(a[0]).endsWith('/plant')?Promise.reject(new Error('test offline')):window.realPlantFetch(...a); loadPlant()")
             browser.wait("document.querySelector('#plant-status').textContent.includes('nicht erreichbar') && document.querySelectorAll('.plant-running').length===0")
             browser.js("window.fetch=window.realPlantFetch;loadPlant()")

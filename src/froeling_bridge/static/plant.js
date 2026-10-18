@@ -9,9 +9,48 @@ function plantOffline() {
   for (const output of $("plant-view").querySelectorAll(".plant-output")) {
     output.querySelector("span:not(.plant-rotor)").textContent = "Zustand unbekannt";
   }
+  for (const target of $("plant-view").querySelectorAll(".plant-target")) {
+    if (!target.textContent.includes("veraltet")) target.textContent += " · veraltet";
+  }
 }
 
-function plantMetric(metric) {
+function plantName(title) {
+  return title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/ß/g, "ss").replace(/[^a-z0-9]/g, "");
+}
+
+function plantTarget(metric, component) {
+  if (!component || metric.ambiguous) return null;
+  const pairs = {
+    kesseltemperatur: { metrics: ["errechnetekesselsolltemperatur", "kesselsolltemperatur"], settings: ["kesselsolltemperatur"] },
+    abgastemperatur: { metrics: ["abgassolltemperatur"], settings: [] },
+    vorlaufisttemperatur: { metrics: ["vorlaufsolltemperatur"], settings: [] },
+    boilertemperaturoben: { metrics: ["boilersolltemperatur"], settings: ["gewunschteboilertemperatur"] },
+    boilertemperatur: { metrics: ["boilersolltemperatur"], settings: ["gewunschteboilertemperatur"] },
+  };
+  const pair = pairs[plantName(metric.title)];
+  if (!pair) return null;
+  for (const name of pair.metrics) {
+    const matches = component.metrics.filter(m => plantName(m.title) === name);
+    if (matches.length > 1) return null;
+    if (matches.length === 1) {
+      const target = matches[0], latest = target.sensor.latest;
+      return { value: target.ambiguous ? null : latest?.value, unit: latest?.unit || target.sensor.unit,
+        stale: target.ambiguous || !latest || latest.stale, title: target.title, observed_at: latest?.observed_at,
+        label: name.startsWith("errechnete") ? "Soll (berechnet)" : "Soll", refresh: false };
+    }
+  }
+  for (const name of pair.settings) {
+    const matches = component.settings.filter(s => plantName(s.title) === name);
+    if (matches.length > 1) return null;
+    if (matches.length === 1) {
+      const setting = matches[0];
+      return { ...setting, label: "Soll", refresh: setting.stale || Boolean(setting.error) };
+    }
+  }
+  return null;
+}
+
+function plantMetric(metric, component = null) {
   const sensor = metric.sensor;
   const latest = sensor.latest;
   const unknown = metric.ambiguous || !latest || latest.stale;
@@ -19,6 +58,14 @@ function plantMetric(metric) {
   item.append(element("span", metric.title, "plant-metric-title"));
   const text = latest ? latest.text || format(latest.value, latest.unit || sensor.unit) : "Noch nicht gelesen";
   item.append(element("strong", text));
+  const target = plantTarget(metric, component);
+  if (target) {
+    const known = target.value !== null && target.value !== undefined;
+    const line = element("span", target.label + ": " + (known ? format(target.value, target.unit) : "Noch nicht gelesen") +
+      (known && (target.stale || target.error) ? " · veraltet" : ""), "plant-target");
+    line.title = target.title + (target.observed_at ? " · Gelesen: " + stamp(target.observed_at) : "");
+    item.append(line);
+  }
   if (["pump", "mixer"].includes(metric.role)) {
     const numeric = latest ? Number(latest.value) : NaN;
     const running = !unknown && Number.isFinite(numeric) && numeric > 0;
@@ -65,7 +112,7 @@ function plantCard(component) {
   heading.append(title);
   card.append(heading, element("p", component.path.join(" › "), "plant-path"));
   const metrics = element("div", "", "plant-metrics");
-  for (const metric of component.metrics) metrics.append(plantMetric(metric));
+  for (const metric of component.metrics) metrics.append(plantMetric(metric, component));
   if (!component.metrics.length) metrics.append(element("p", "Keine eindeutigen Messwerte zugeordnet.", "muted"));
   card.append(metrics);
   const details = document.createElement("details");
@@ -114,6 +161,11 @@ async function loadPlant() {
     $("plant-grid").replaceChildren(...data.components.map(plantCard));
     $("plant-unassigned").hidden = !data.unassigned.length;
     $("plant-unassigned-values").replaceChildren(...data.unassigned.map(s => plantMetric({sensor: s, title: s.usrtitle || s.title, role: /mischer/i.test(s.title) ? "mixer" : "pump"})));
+    if (state.health?.capabilities.controller_read) {
+      for (const component of data.components) {
+        if (component.metrics.some(m => plantTarget(m, component)?.refresh)) refreshPlantComponent(component);
+      }
+    }
   } catch (error) { plantOffline(); notice(explain(error), true); }
   finally { plantState.loading = false; }
 }

@@ -51,7 +51,7 @@ def fictional_runtime(directory):
         group(1,parent,'Boiler 0'+str(index))
         reading(parent,420+index,'Boilertemperatur oben',48.1+index*3)
         reading(parent,430+index,'Boilerpumpe Ansteuerung',55 if index==1 else 0,'%')
-        setting(parent,910+index,'Gewünschte Boilertemperatur',60)
+        setting(parent,910+index,'Gewünschte Boilertemperatur',60 if index==1 else 55)
         setting(parent,920+index,'Nachladen, wenn Boilertemperatur unter',45)
     for index in (1,2):
         parent=500+index

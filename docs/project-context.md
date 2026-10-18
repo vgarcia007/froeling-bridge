@@ -10,6 +10,14 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
+## Aktueller UI-Nachtrag: kleine Sollwerte direkt beim Istwert
+
+Benutzer wünscht passende Sollwerte direkt klein bei den gemessenen Werten und beauftragt Live-Schaltung. Frontend paart eindeutig innerhalb derselben Komponente: Heizkreis-Vorlauf Ist/Soll, Abgas/Soll, Kesseltemperatur mit berechnetem Soll (Vorrang) beziehungsweise fester Kessel-Solltemperatur und Boiler oben mit dessen gewünschter Temperatur. Keine erfundenen Puffersollwerte oder Grenzwerte als Ersatz. Veraltete Werte sichtbar kennzeichnen; benötigte fehlende/alte Soll-Einstellungen werden über vorhandene geteilte Komponentenjobs gelesen, ohne Details erst öffnen zu müssen. API-Vertrag, Backend und Flags unverändert.
+
+Nur plant.js und app.css auf dem Produktionshost atomisch ersetzt, vorhandenen Quellenhash fortgeführt und Sicherung unter `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert) angelegt. Der erste Austausch übernahm Dateimodi unter umask 077 unvollständig und verursachte kurz HTTP 500 beim Laden der beiden Assets; ursprüngliche Leserechte sofort wiederhergestellt und Auslieferung bestätigt. API/Erfassung liefen weiter, PID vor/nachher identisch; keinen Neustart ausgeführt. Wiederholbare lokale Austauschfunktion um ausdrückliches fchmod ergänzt. Laufender Backendstand bleibt 0.6.0 mit UI-Nachtrag.
+
+Gezielte Chromiumprüfung erweitert: zwei Boiler mit unterschiedlichen Sollwerten, Vorlaufpaarung, berechneter Kessel-Soll vor fester Einstellung, kein Pufferschwellen-Ersatz, vier Displaybreiten und weiterhin keine simulierten Heizungs-Schreibbefehle. Produktive Browseransicht zeigt acht kleine Sollwertzeilen; private Belege `.local/plant-inline-targets-live-repaired.json` und `.local/plant-inline-target-browser.log`. Keine erneute komplette Abnahme oder Änderung der Erfassung nötig.
+
 ## Aktueller Produktivstand: Anlagenübersicht 0.6.0 live
 
 Benutzer erklärt nach Rückfrage ausdrücklich „nun bitte live“; kurzer Bridge-Neustart, zusätzliche Abfragen und lesende Schwellwertinitialisierung damit beauftragt. Auf dem vorhandenen Host ist 0.6.0 unter dem bisherigen Port 8000 aktiv, neue Seite `/anlage`. Keine weitere Installation/Aktivierung durch den Benutzer nötig. Früherer reiner Vorschaustand unten ist historisch.

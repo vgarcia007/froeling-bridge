@@ -217,3 +217,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Benutzer autorisiert nach Erklärung des kurzen Neustarts ausdrücklich das Live-Schalten. 0.6.0 kontrolliert nach Sicherung aktiviert, 38 zusätzliche Abfragesensoren ohne Änderung von Historienflags ergänzt und 112 Schwell-/Einstellungswerte rein lesend initialisiert. Neue Seite am bisherigen API-Host unter `/anlage` verfügbar.
 - Fehlgeschlagener Upgrade-Start hätte zur bisherigen Bridge-Version zurückgeführt; keine automatische p4d-Übernahme. Vorhandene Dauerbetriebspolitik und Schreibfreigaben erhalten. Kein Hostneustart oder Heizungs-Schreibtest.
 - Benutzer verlangt weniger Aufwand bei Routineupdates. Wiederverwendbare Paketvorbereitung und kurze gezielte Betriebsprüfung bevorzugen; neue Einzelskripte und wiederholte Vollabnahmen ohne Anlass vermeiden. Einen öffentlichen Updatehelfer als eigene Verbesserung behandeln, nicht ungefragt an diesen fertigen Rollout anhängen.
+
+
+## 18.10.2026 — Sollwerte direkt an gemessenen Werten
+
+- Benutzer möchte Sollwerte klein bei den Istwerten und beauftragt direktes Live-Schalten. Reine Frontend-Zuordnung innerhalb derselben Geräteinstanz; dynamischer/berechneter Sollwert vor festem Einsteller. Keine Min/Max-/Frostschutz-/Pufferschwellen als vermeintliche Sollwerte.
+- Vorhandene API und Lesejobs verwenden; veraltete Werte kennzeichnen und benötigte Soll-Einstellungen auch bei geschlossenen Details nachladen. Zwei statische Assets ohne Dienstneustart ausrollen, keine neue Backendversion oder Vollabnahme für diese Darstellungsänderung.
