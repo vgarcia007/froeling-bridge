@@ -20,6 +20,12 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Aktuelle Heizkreis-Einordnung in der GUI
+
+Benutzer möchte die Bedeutung von Vorlauf Ist/Soll, Pumpenansteuerung und Mischerfahrbefehlen in der GUI sehen. Reiner Frontend-Nachtrag: Heizkreiskarten zeigen Vorlauf im Sollbereich (±2 °C), unter/über Soll oder Pumpe nicht angesteuert; fehlende/veraltete/mehrdeutige notwendige Werte ergeben unbekannt. Temperaturbewertung nur bei frisch angesteuerter Heizkreispumpe und eindeutigen Ist-/Sollwerten in °C. Keine Störungsdiagnose, Wärmeleistung, Fördermenge oder Mischerstellung errechnen. Motorbefehle ausdrücklich wärmer/kühler/kein Fahrbefehl; Offline nimmt alte Einordnung zurück.
+
+Live ohne Dienstneustart: zwei statische Dateien atomisch mit erhaltenen Modi/Eigentümern ausgetauscht, Quellenhash aktualisiert, private Sicherung `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert). API-PID unverändert, Erfassung bereit/fehlerfrei und weiterhin 59 Punkte je Zyklus. Bestehenden Browsercheck um Temperaturgrenzen, Pumpenauswahl, fehlende/veraltete/mehrdeutige Werte, widersprüchliche Mischerbefehle und Offline ergänzt; vier Breiten erfolgreich. Produktive Ansicht zusätzlich streng lesend bei 390/1440 Pixel geprüft, keine Heizungsjobs/Mutationen, keine JS-Fehler/Überläufe. Rohbelege `.local/plant-circuit-*`. Backendversion weiter 0.6.0; Sensorflags unverändert.
+
 ## Aktuelle Pumpenaufzeichnung und Ursachenanalyse
 
 Benutzer bestätigt je Haus einen gemeinsamen isolierten Zylinder für Puffer und Warmwasserteil. Eine historische Vergleichsreihe zeigt wiederholte enge Abkühlung von Speicher 1 mit dem Kessel, zeitweise deutlich langsamere Abkühlung von Speicher 2. Nahezu identische Boiler-/Puffer-oben-Anzeigen stammen bereits aus p4d; keine falsche Zuordnung oder bestimmte hydraulische Ursache behaupten. Fühlereingänge bisher ungeprüft, historische Pumpenwerte fehlen.

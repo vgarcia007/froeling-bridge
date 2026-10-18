@@ -12,6 +12,12 @@ function plantOffline() {
   for (const target of $("plant-view").querySelectorAll(".plant-target")) {
     if (!target.textContent.includes("veraltet")) target.textContent += " · veraltet";
   }
+  for (const summary of $("plant-view").querySelectorAll(".plant-circuit")) {
+    summary.dataset.state = "unknown";
+    summary.querySelector(".plant-circuit-title").textContent = "Einordnung unbekannt";
+    summary.querySelector(".plant-circuit-detail").textContent = "API nicht erreichbar · keine aktuelle Einordnung möglich.";
+    summary.querySelector(".plant-circuit-controls").textContent = "Pumpen- und Mischeransteuerung unbekannt.";
+  }
 }
 
 function plantName(title) {
@@ -48,6 +54,57 @@ function plantTarget(metric, component) {
     }
   }
   return null;
+}
+
+function plantCircuitReading(component, name) {
+  const matches = component.metrics.filter(m => plantName(m.title) === name);
+  if (matches.length !== 1 || matches[0].ambiguous) return null;
+  const sensor = matches[0].sensor, latest = sensor.latest;
+  if (!latest || latest.stale || latest.value === null || latest.value === undefined || String(latest.value).trim() === "") return null;
+  const value = Number(latest.value);
+  return Number.isFinite(value) ? { value, unit: latest.unit || sensor.unit } : null;
+}
+
+function plantCircuitState(component) {
+  const pump = plantCircuitReading(component, "heizkreispumpe");
+  const actual = plantCircuitReading(component, "vorlaufisttemperatur");
+  const target = plantCircuitReading(component, "vorlaufsolltemperatur");
+  const open = plantCircuitReading(component, "hkmischerauf");
+  const close = plantCircuitReading(component, "hkmischerzu");
+  let status = "unknown", title = "Einordnung unbekannt";
+  let detail = "Für den Temperaturvergleich fehlen aktuelle, eindeutig zugeordnete Vorlaufwerte in °C.";
+  if (actual && target && actual.unit === "°C" && target.unit === "°C") {
+    const difference = actual.value - target.value;
+    detail = `Vorlauf ${format(actual.value, actual.unit)} · Soll ${format(target.value, target.unit)}`;
+    if (pump && pump.value === 1) {
+      if (difference < -2) { status = "under"; title = "Vorlauf unter Soll"; }
+      else if (difference > 2) { status = "over"; title = "Vorlauf über Soll"; }
+      else { status = "ready"; title = "Vorlauf im Sollbereich"; }
+    }
+  }
+  let pumpText = "Pumpenansteuerung unbekannt";
+  if (pump && pump.value === 0) {
+    status = "idle"; title = "Pumpe nicht angesteuert"; pumpText = "Pumpe nicht angesteuert";
+  } else if (pump && pump.value === 1) pumpText = "Pumpe angesteuert";
+  let mixerText = "Mischeransteuerung unbekannt";
+  if (open && close) {
+    if (open.value === 1 && close.value === 0) mixerText = "Mischer: Fahrbefehl wärmer";
+    else if (close.value === 1 && open.value === 0) mixerText = "Mischer: Fahrbefehl kühler";
+    else if (open.value === 0 && close.value === 0) mixerText = "Mischer: kein Fahrbefehl";
+    else mixerText = "Mischer: widersprüchliche Fahrbefehle";
+  }
+  return { status, title, detail, controls: pumpText + " · " + mixerText };
+}
+
+function plantCircuitSummary(component) {
+  const reading = plantCircuitState(component);
+  const summary = element("div", "", "plant-circuit");
+  summary.dataset.state = reading.status;
+  summary.append(element("strong", reading.title, "plant-circuit-title"),
+    element("p", reading.detail, "plant-circuit-detail"),
+    element("p", reading.controls, "plant-circuit-controls"),
+    element("small", "Sollbereich der Anzeige: ±2 °C. Wärmeabgabe an Räume und Mischerstellung sind nicht gemessen."));
+  return summary;
 }
 
 function plantMetric(metric, component = null) {
@@ -111,6 +168,7 @@ function plantCard(component) {
   title.append(element("small", kind), element("h2", component.title));
   heading.append(title);
   card.append(heading, element("p", component.path.join(" › "), "plant-path"));
+  if (component.kind === "heizkreis") card.append(plantCircuitSummary(component));
   const metrics = element("div", "", "plant-metrics");
   for (const metric of component.metrics) metrics.append(plantMetric(metric, component));
   if (!component.metrics.length) metrics.append(element("p", "Keine eindeutigen Messwerte zugeordnet.", "muted"));

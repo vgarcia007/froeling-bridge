@@ -39,6 +39,9 @@ def main():
                 assert browser.js("document.querySelector('[data-component-id=\"heizkreis-501\"] .plant-target').textContent.includes('41')")
                 assert browser.js("document.querySelector('[data-component-id=\"kessel-100\"] .plant-target').textContent.includes('80')")
                 assert browser.js("document.querySelectorAll('[data-component-id=\"puffer-200\"] .plant-target').length===0")
+                assert browser.js("document.querySelectorAll('.plant-circuit').length===2")
+                assert browser.js("document.querySelector('[data-component-id=\"heizkreis-501\"] .plant-circuit-title').textContent==='Vorlauf unter Soll'")
+                assert browser.js("document.querySelector('.plant-circuit').textContent.includes('nicht gemessen')")
 
                 assert not browser.js("document.querySelector('#plant-view').textContent.includes('0x')")
                 browser.js("document.querySelector('#nav-menu').click()")
@@ -50,8 +53,37 @@ def main():
                 return plantTarget(c.metrics[0],c).value==='73' && plantTarget(c.metrics[0],c).label.includes('berechnet') &&
                   plantTarget({title:'Puffertemperatur oben'},{metrics:[],settings:[{title:'Heizkreisfreigabe ab folgender Puffertemperatur',value:'40'}]})===null;
             })()""")
+            # Circuit interpretation must distinguish commanded output from heat delivery,
+            # including missing/stale/ambiguous readings and both tolerance boundaries.
+            assert browser.js("""(()=>{
+                const make=(actual=45,target=45,pump=1)=>({metrics:[
+                  ['Vorlauf-Isttemperatur',actual,'°C'],['Vorlauf-Solltemperatur',target,'°C'],
+                  ['Heizkreispumpe',pump,''],['HK Mischer AUF',0,''],['HK Mischer ZU',0,'']
+                ].map(([title,value,unit])=>({title,ambiguous:false,sensor:{unit,latest:{value,unit,stale:false}}}))});
+                for(const [actual,target,pump,status] of [
+                  [45,45,1,'ready'],[43,45,1,'ready'],[47,45,1,'ready'],
+                  [42,45,1,'under'],[48,45,1,'over'],[30,45,0,'idle'],
+                  [null,45,1,'unknown'],['',45,1,'unknown'],['invalid',45,1,'unknown']
+                ]) if(plantCircuitState(make(actual,target,pump)).status!==status) return false;
+                for(const index of [0,1,2]) {
+                  const c=make();c.metrics[index].sensor.latest.stale=true;
+                  if(plantCircuitState(c).status!=='unknown') return false;
+                }
+                const ambiguous=make();ambiguous.metrics[0].ambiguous=true;
+                if(plantCircuitState(ambiguous).status!=='unknown') return false;
+                const duplicate=make();duplicate.metrics.push(duplicate.metrics[0]);
+                if(plantCircuitState(duplicate).status!=='unknown') return false;
+                const fahrenheit=make();fahrenheit.metrics[0].sensor.latest.unit='°F';
+                if(plantCircuitState(fahrenheit).status!=='unknown') return false;
+                const opening=make();opening.metrics[3].sensor.latest.value=1;
+                if(!plantCircuitState(opening).controls.includes('Fahrbefehl wärmer')) return false;
+                opening.metrics[4].sensor.latest.value=1;
+                return plantCircuitState(opening).controls.includes('widersprüchliche') &&
+                  plantCircuitState(make()).controls.includes('kein Fahrbefehl');
+            })()""")
             browser.js("window.realPlantFetch=window.fetch; window.fetch=(...a)=>String(a[0]).endsWith('/plant')?Promise.reject(new Error('test offline')):window.realPlantFetch(...a); loadPlant()")
             browser.wait("document.querySelector('#plant-status').textContent.includes('nicht erreichbar') && document.querySelectorAll('.plant-running').length===0")
+            assert browser.js("[...document.querySelectorAll('.plant-circuit')].every(s=>s.dataset.state==='unknown' && s.querySelector('.plant-circuit-title').textContent==='Einordnung unbekannt')")
             browser.js("window.fetch=window.realPlantFetch;loadPlant()")
             browser.wait("document.querySelectorAll('.plant-running').length>=3")
             # Snapshot preview can consume GET /sensors, but must reject every mutation.
@@ -75,6 +107,7 @@ def main():
             browser.js('loadPlant()')
             browser.wait("document.querySelectorAll('.plant-running').length===0")
             assert browser.js("document.querySelector('#plant-grid').textContent.includes('Zustand unbekannt')")
+            assert browser.js("[...document.querySelectorAll('.plant-circuit')].every(s=>s.dataset.state==='unknown')")
             # Controller text must be rendered as text, never executable markup.
             with runtime.repository.transaction() as db:
                 row=db.execute('SELECT id,data FROM menu WHERE id=4').fetchone()
@@ -86,7 +119,7 @@ def main():
             assert transport.heater.parameter_write_count==0
             assert transport.heater.time_write_count==0
             assert not browser.errors,browser.errors
-            print('Plant browser: four viewport widths, direct route/navigation, fresh/stale pumps, automatic threshold reads; no heater writes.')
+            print('Plant browser: four viewport widths, circuit temperature/pump/mixer interpretation, missing/stale/offline states, direct route/navigation, automatic threshold reads; no heater writes.')
         finally:
             browser.close();server.close();runtime.close()
 

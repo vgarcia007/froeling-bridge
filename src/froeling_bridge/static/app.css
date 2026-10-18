@@ -839,6 +839,12 @@ dialog::backdrop {
 .plant-metric strong { font-size: 21px; line-height: 1.35; margin: 6px 0; }
 .plant-metric small { color: var(--muted); font-size: 11px; }
 .plant-target { color: var(--muted); font-size: 13px; margin: 0 0 7px; }
+.plant-circuit { margin: 14px 0; padding: 12px 14px; border-left: 4px solid #89939b; border-radius: 8px; background: #f3f4f6; overflow-wrap: anywhere; }
+.plant-circuit[data-state="ready"] { border-color: var(--accent); background: var(--accent-soft); }
+.plant-circuit[data-state="under"], .plant-circuit[data-state="over"] { border-color: #b17a24; background: #fff7e9; }
+.plant-circuit-title { display: block; font-size: 15px; }
+.plant-circuit p { margin: 6px 0; font-size: 13px; }
+.plant-circuit small { display: block; margin-top: 8px; color: var(--muted); font-size: 11px; }
 .plant-unknown { background: #f3f4f6; }
 .plant-output { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
 .plant-output meter { flex-basis: 100%; width: 100%; accent-color: var(--accent); }
