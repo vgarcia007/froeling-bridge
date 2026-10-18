@@ -77,6 +77,10 @@ Content-Type: application/json
 
 Adresse 43 ist nur ein Beispiel; aus dem eigenen Katalog übernehmen. Ausschalten löscht keine Historie. `record=true` sorgt auch bei `active=false` für die notwendige Abfrage. Änderungen werden lokal gespeichert und nach MariaDB gespiegelt; während eines DB-Ausfalls bleiben sie als ausstehend sichtbar. Späte Übernahme alter DB-Einstellungen überschreibt keine bereits lokal geänderten Sensoren.
 
+Für die Suche nach unerwarteter Speicherabkühlung auch die Pumpensignale zur Aufzeichnung auswählen: Heizkreispumpen, Puffer-/Boilerpumpen und allgemeine Pumpenausgänge können unterschiedliche Sensortypen haben (`DO`, `VA`, `AO`). Dieselbe PATCH-Route mit `{"active": true, "record": true}` genügt; ein Dienstneustart ist nicht erforderlich. Die Auswahl muss aus dem eigenen Katalog kommen. Ein Pumpenname oder ein Nullwert beweist keinen tatsächlichen Einbau; beispielsweise bezeichnet „Breitbandsonde Pump Strom“ einen Wert der Abgassonde, keine Heizwasserpumpe. Ungeklärte allgemeine Ausgänge behalten ihre Originalbezeichnung.
+
+Bei 60 Sekunden Sammelintervall entsteht je ausgewähltem Signal normalerweise ein Messpunkt pro Minute, auch bei unverändertem Wert. Kurze Schaltvorgänge zwischen den Abfragen können fehlen. Ein/Aus und prozentuale Ansteuerung sind keine Messung des Wasserflusses. Für den Vergleich mit Temperaturen die historischen Zeitpunkte verwenden; nach der Verdichtung sind analoge Werte Mittelwerte und digitale Werte Anteile der eingeschalteten Messpunkte, keine vollständige Schaltchronik.
+
 `/api/v1/runtime` zeigt Discovery, Heizungsverbindung, lokale Speicherprobleme, Historienverbindung, tatsächlich gespeicherte Punkte, ausgelassene Zyklen, ausstehende Einstellungen und Verdichtung. Der im Sammlerstatus akzeptierte Historien-Auftrag ist noch keine Commit-Bestätigung; die tatsächliche Speicherung steht im Historienstatus.
 
 OpenAPI: `/api/v1/openapi.json`. `/values`, `/history` und die vorhandenen Jobs bleiben kompatibel. Bestandsansicht und alte Hardwaretests erlauben keine Sensoränderungen.

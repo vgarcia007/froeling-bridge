@@ -20,6 +20,14 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung, endgültige Installation und neue Projektlizenz sind noch offen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Aktuelle Pumpenaufzeichnung und Ursachenanalyse
+
+Benutzer bestätigt je Haus einen gemeinsamen isolierten Zylinder für Puffer und Warmwasserteil. Eine historische Vergleichsreihe zeigt wiederholte enge Abkühlung von Speicher 1 mit dem Kessel, zeitweise deutlich langsamere Abkühlung von Speicher 2. Nahezu identische Boiler-/Puffer-oben-Anzeigen stammen bereits aus p4d; keine falsche Zuordnung oder bestimmte hydraulische Ursache behaupten. Fühlereingänge bisher ungeprüft, historische Pumpenwerte fehlen.
+
+Auf ausdrücklichen Auftrag alle 43 unterstützten pumpenbezogenen Katalogsignale per bestehender Sensor-PATCH-Route lesend aktiviert und zur Historie ausgewählt. 17 zusätzliche Abfragen; 149/149 ausgewählte Werte frisch, 59 Punkte je Sammelzyklus statt 16. Zwei vollständige neue MariaDB-Zyklen unabhängig bestätigt; bisherige 16 Werte weiter aufgezeichnet, andere Flags unverändert, keine Fehler/ausstehenden Einstellungen. API-PID, Neustartzähler und geschützte Konfiguration unverändert; keine Heizungsparameteränderung oder Softwarebereitstellung. Vorzustand/Verifikation privat unter `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert), lokale Belege `.local/pump-recording-*`.
+
+43 Signale sind keine 43 eingebauten Pumpen: darunter mögliche ungenutzte Ausgänge und der Pumpstrom der Breitbandsonde, der keine Heizwasserpumpe ist. Minutentakt und bestehende Verdichtung erhalten. Keine nachträgliche September-Pumpenhistorie, keine tatsächliche Fördermenge aus Ansteuerungen ableiten. Nach mehreren Lade-/Abkühlphasen gemeinsam mit Temperaturen auswerten. Aktuelle Auswahl überschreibt ältere Angaben zu unveränderten Recordflags ausschließlich für diese 43 Signale; kein neuer Default für andere Installationen.
+
 ## UI-Nachtrag: Sollwerte direkt an Messwerten
 
 Benutzer beauftragt kleine passende Sollwerte an gemessenen Werten und ausdrücklich direkt live. Nur Frontend geändert: Ist/Soll innerhalb derselben Komponente, berechneter Kesselsollwert vor fester Einstellung, Heizkreis-Vorlauf und Abgas über dynamische Soll-Messwerte, Boiler über gewünschte Temperatur. Keine Grenzwerte/Pufferschwellen als Sollwert darstellen; mehrdeutige Paarungen auslassen. Fehlende/veraltete verwendete Soll-Einstellungen über vorhandenen lesenden Komponentenjob laden, auch bei geschlossenen Details; kein Backend-/Schema-/Flagwechsel.
