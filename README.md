@@ -98,6 +98,32 @@ Nach dem Ändern ist das ursprüngliche Passwort in `initial-login.json` ungült
 
 Der Dienst startet nach einem Rechnerneustart automatisch und erfasst die Heizungsdaten laufend. Benutzer mit Schreibrechten können bearbeitbare Heizungsparameter direkt im Servicemenü ändern. Eine zusätzliche Freischaltung ist nicht nötig.
 
+## Screenshots
+
+Aufnahmen aus einer laufenden Heizungsinstallation vom 19.10.2026.
+
+**Anlagenübersicht mit Temperaturen, Sollwerten und Pumpenansteuerungen:**
+
+![Anlagenübersicht auf dem Desktop mit aktuellen Werten für Kessel und Puffer](docs/images/anlage-desktop.png)
+
+<details>
+<summary>Servicemenü, Parameterdialog und mobile Bedienung ansehen</summary>
+
+**Servicemenü mit den Bezeichnungen aus der Heizungssteuerung:**
+
+![Servicemenü mit Kesseltemperaturen und bearbeitbaren Einstellungen](docs/images/servicemenue-desktop.png)
+
+**Parameter bearbeiten, mit aktuellem Wert und zulässigen Grenzen:**
+
+![Parameterdialog für die Kessel-Solltemperatur](docs/images/parameter-desktop.png)
+
+**Auf dem Handy: Anlagenübersicht und aufklappbares Menü.** Die Bilder lassen sich für die volle Größe öffnen.
+
+<a href="docs/images/anlage-mobil.png"><img src="docs/images/anlage-mobil.png" alt="Mobile Anlagenübersicht mit Kesselstatus und Temperaturen" width="280" /></a>
+<a href="docs/images/navigation-mobil.png"><img src="docs/images/navigation-mobil.png" alt="Aufgeklapptes Mobilmenü mit allen Ansichten und separater Abmeldung" width="280" /></a>
+
+</details>
+
 ## Wenn etwas nicht funktioniert
 
 Auf dem Heizungsrechner:
