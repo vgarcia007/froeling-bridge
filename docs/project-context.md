@@ -1,6 +1,6 @@
 # Aktueller Projektkontext
 
-Zuletzt aktualisiert: 18.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
+Zuletzt aktualisiert: 19.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
 
 ## Ziel und Zusammenarbeit
 
@@ -9,6 +9,14 @@ Der Benutzer betreibt Original-p4d bereits auf einem anderen Rechner. Er möchte
 Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich hat der Benutzer die autonome Umsetzung des Offline-Python-Protokollkerns mit Simulator freigegeben; Rückfragen nur bei tatsächlich blockierenden Entscheidungen. Die weitere Implementierung erfolgt schrittweise. Der Originalautor und seine Arbeit sollen respektvoll gewürdigt werden.
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
+
+## Aktuelle Vorlaufaufzeichnung aller vier Heizkreise
+
+Nach zeitweiser Vorlaufüberschreitung an Heizkreis 2 fragt der Benutzer nach der zusätzlichen Speicherung. Am 19.10.2026 je Heizkreis die eindeutig zugeordneten Vorlauf-Ist-/Sollwerte über bestehendes Sensor-PATCH ausschließlich auf `record=true` gesetzt; alle acht waren bereits aktiv. Keine zusätzlichen Heizungsabfragen, Änderung der Solltemperaturen oder Mischeransteuerung. Historie beginnt ab dieser Auswahl, keine rückwirkenden Werte erfinden. Auswahl gilt für diese Anlage, keine neuen automatischen Softwaredefaults.
+
+Tatsächlich geprüft: zwei vollständige MariaDB-Zyklen enthalten alle acht neuen und bisherigen 59 Werte, jetzt 67 Punkte pro Durchlauf. 149/149 ausgewählte Werte frisch, keine Sammler-/Historienfehler oder ausstehenden Auswahlübernahmen. Alle anderen API-/MariaDB-Flags unverändert, API-PID/Neustartzähler und geschützte Konfiguration unverändert; kein Neustart, Deployment oder Heizungsparameter-Schreiben. Bestehende 60 Sekunden sowie Verdichtung 91 Tage/30 Minuten erhalten. Zusätzlich maximal 11.520 Messpunkte pro Tag, insgesamt etwa 96.480 bei durchgängigem Minutentakt.
+
+Vorzustand/Verifikation privat `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert) mit `before.json`, `activated.json`, `verified.json`; lokale Belege `.local/flow-temperature-recording-activation.json` und `.local/flow-temperature-recording-verification.json`. Allgemeine Auswahlhinweise in `docs/standalone.md` ergänzt. Weiterhin fehlen historische Mischerfahrbefehle und Puffer-unten-Temperaturen; aus Temperaturvergleich und Pumpenansteuerung keine vollständige Mischerposition, Fördermenge oder Ursache ableiten. Frühere Zahlen 59/16 weiter unten sind historische Stände.
 
 ## Aktueller GUI-Nachtrag: Heizkreis verständlich einordnen
 
