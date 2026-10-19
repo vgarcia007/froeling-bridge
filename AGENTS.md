@@ -29,6 +29,10 @@ Bildinhalt: Haus 1 mit Kessel, Rücklaufmischer/Pumpe 0.1, zwei gemischten Heizk
 
 Abweichung zur beschriebenen realen Anlage: Benutzer nennt je Haus einen gemeinsamen isolierten Zylinder für Puffer und Warmwasserteil. Haus-1-Warmwasserteil im Bild nicht gesondert dargestellt, Haus-2-Warmwasserbehälter dort separat. Reale Zuordnung weiterhin Kessel/Puffer1/Boiler1/HK1+2 in Haus1; Puffer2/Boiler2/HK3+4 in Haus2. Tatsächliche Pumpenzuordnung zu API-Signalen, interne Speicherbauart, Rückflussverhinderer und genaue Verrohrung ungeprüft. Das Bild beweist keine Ursache der früheren Abkühlung. Datei unverändert am bereitgestellten Ort belassen, in dieser Runde nicht ins Repository aufgenommen; keine Software-/Live-/Heizungsänderung.
 
+## Wärmeverlust-Untersuchung: gemeinsame Temperaturfühler bestätigt
+
+Am 19.10.2026 frisch gelesen: Boiler1 oben und Puffer1 oben sind beide auf Fühlereingang 1 konfiguriert; Boiler2 und Puffer2 oben beide auf Eingang 17. Pro Haus keine unabhängige Warmwassertemperatur aus diesen beiden Anzeigen ableiten. Physische Fühlerlage weiterhin ungeprüft. Aktuelle Pumpenhistorie ab 18.10. beweist keine Pumpenzustände während des früheren Vergleichszeitraums. Details, Ausgangsrohcodes und Verlaufsevidenz in `docs/project-context.md`, Abschnitt Wärmeverlust. Die zuvor ungeprüfte Sensorzuordnung ist hiermit teilweise geklärt; Rohrleitung/Pumpenposition und Fehlerursache bleiben offen. Untersuchung rein lesend, Dauerbetrieb unverändert.
+
 ## Aktuelle Lizenz: GPLv2
 
 Benutzer hat die vorherige MIT-Aufteilung ausdrücklich durch „mach gpl“ ersetzt. Aktueller Projektstand einheitlich GNU GPL Version 2, ausschließlich diese Version (`GPL-2.0-only`): LICENSE enthält den unveränderten GPLv2-Text, README/NOTICE.md und Paketmetadaten stimmen überein. Fremde Copyright-/Lizenzhinweise und die Danksagung direkt nach dem Intro bleiben erhalten. Doppelte GPL-Datei unter LICENSES entfernt; Paket enthält LICENSE und NOTICE.md. Frühere bereits erteilte MIT-Rechte an damaligen eigenen Beiträgen werden nicht rückwirkend widerrufen; dies steht in NOTICE.md. Keine Änderung am laufenden Dienst.
