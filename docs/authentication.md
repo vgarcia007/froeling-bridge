@@ -39,7 +39,7 @@ Passwörter werden verdeckt eingegeben und bestätigt, nicht als Kommandozeilena
 | `read` – Nur Lesen | Messwerte, Historie, Fehler, Menü und Zeitprogramme ansehen; vorhandene lesende Aktualisierungen auslösen |
 | `write` – Lesen + Schreiben | Zusätzlich freigegebene Heizungsparameter und Abfrage-/Historienauswahl ändern sowie Anlagenabfrage aktivieren |
 
-Die Rolle hebt keine Hardware-Sperre auf. Zeitprogramme bleiben sichtbar, aber deaktiviert, solange `write_time_range` auf der Anlage nicht freigegeben ist. Das gilt auch für Schreibbenutzer und deren API-Schlüssel. Benutzerverwaltung bleibt bei beiden Rollen auf der Konsole.
+Parameterschreiben funktioniert bei einer neuen Installation direkt mit der Rolle `write`, ohne zusätzliche Freischaltung. Eine ausdrücklich konfigurierte Beschränkung bleibt wirksam. Zeitprogramme bleiben sichtbar, aber deaktiviert, solange `write_time_range` auf der Anlage nicht freigegeben ist. Das gilt auch für Schreibbenutzer und deren API-Schlüssel. Benutzerverwaltung bleibt bei beiden Rollen auf der Konsole.
 
 Passwortsetzen beendet alle Browser-Sitzungen. Eine Kontosperre beendet Sitzungen und widerruft die Schlüssel; nach erneuter Aktivierung sind neue Schlüssel erforderlich. Rollenänderungen gelten bei der nächsten Anfrage und werden bei wartenden Heizungs-Schreibjobs nochmals unmittelbar vor Ausführung geprüft.
 
@@ -86,7 +86,7 @@ Sitzungen liegen serverseitig. Beide Zugangsvarianten verwenden HttpOnly-/SameSi
 
 Anmeldeversuche sind je Benutzer/IP und IP begrenzt; höchstens zwei Passwortprüfungen laufen gleichzeitig. Authentifizierte Anfragen: 300 pro Minute und Zugang; zusätzliche Heizungsjobs: 120 pro Minute und Benutzer. Sicherheitsereignisse bleiben 30 Tage erhalten. Diese Maßnahmen ersetzen keinen gepflegten Host. Ein Internetzugang benötigt passend eingerichtetes HTTPS.
 
-Die native Überwachung verwendet `bridge-monitor` und `/etc/froeling-bridge/monitor-api-key` (root, 0600). Diesen Benutzer nicht für gewöhnliche Clients verwenden. Abgelehnte Monitor-Anmeldungen und ein ausgefallener Authentifizierungsspeicher lösen keinen Bridge-Neustart aus. Zur Wiederherstellung des Monitorzugangs: `sudo /opt/froeling-bridge/0.7.1/venv/bin/python -I -m froeling_bridge.auth_setup`. Demo-Modi bleiben fiktiv und ohne Anmeldung; sie dürfen keinen produktiven Zugang ersetzen.
+Die native Überwachung verwendet `bridge-monitor` und `/etc/froeling-bridge/monitor-api-key` (root, 0600). Diesen Benutzer nicht für gewöhnliche Clients verwenden. Abgelehnte Monitor-Anmeldungen und ein ausgefallener Authentifizierungsspeicher lösen keinen Bridge-Neustart aus. Zur Wiederherstellung des Monitorzugangs: `sudo /opt/froeling-bridge/0.7.2/venv/bin/python -I -m froeling_bridge.auth_setup`. Demo-Modi bleiben fiktiv und ohne Anmeldung; sie dürfen keinen produktiven Zugang ersetzen.
 
 ## Optional: HTTPS und Reverse Proxy
 

@@ -43,7 +43,7 @@ if a=='start':
  state.setdefault(u,{})['active']=True
  if u=='froeling-bridge.service':
   log=open('/tmp/native-service.log','a')
-  proc=subprocess.Popen(['runuser','-u','froeling-bridge','--','/opt/froeling-bridge/0.7.1/venv/bin/python','-I','-m','froeling_bridge.run_config','/etc/froeling-bridge/settings.json'],stdout=log,stderr=log,start_new_session=True)
+  proc=subprocess.Popen(['runuser','-u','froeling-bridge','--','/opt/froeling-bridge/0.7.2/venv/bin/python','-I','-m','froeling_bridge.run_config','/etc/froeling-bridge/settings.json'],stdout=log,stderr=log,start_new_session=True)
   state[u]['pid']=proc.pid
 if a=='stop':
  unit=state.setdefault(u,{})
@@ -136,9 +136,40 @@ try:
             assert response.status==200
         with browser.open('http://127.0.0.1:8000/api/v1/auth/me') as response:
             return json.load(response)
-    assert login(initial['username'],initial['password'])['role']=='write'
+    writer=login(initial['username'],initial['password'])
+    assert writer['role']=='write' and 'write_validation' not in installed
+    assert heater.parameter_write_count==0  # Installation itself must not change settings.
+    with browser.open('http://127.0.0.1:8000/api/v1/health') as response:
+        assert json.load(response)['write_operations']==['write_parameter']
+    with browser.open('http://127.0.0.1:8000/api/v1/menu?parent=10') as response:
+        parameter=next(x for x in json.load(response)['items'] if x['address']==0x1234)
+    assert parameter['editable']
+    def parameter_job(value,actor):
+        request=Request('http://127.0.0.1:8000/api/v1/jobs',
+                        data=json.dumps(dict(operation='write_parameter',menu_id=parameter['id'],value=value)).encode(),
+                        headers={'Content-Type':'application/json','Origin':'http://127.0.0.1:8000','X-CSRF-Token':actor['csrf']})
+        with browser.open(request) as response:
+            assert response.status==202
+            job_url='http://127.0.0.1:8000'+json.load(response)['url']
+        deadline=time.monotonic()+10
+        while time.monotonic()<deadline:
+            with browser.open(job_url) as response:job=json.load(response)
+            if job['state'] in ('completed','failed'):return job
+            time.sleep(.05)
+        raise AssertionError('Fictional parameter job timed out')
+    assert parameter_job('67.5',writer)['result']['status']=='confirmed'
+    assert heater.parameter_write_count==1 and str(heater.parameters[0x1234].value)=='67.5'
+    invalid=parameter_job('999',writer)
+    assert invalid['state']=='failed' and invalid['error']['code']=='validation_error'
+    assert heater.parameter_write_count==1
     added=subprocess.run(['/usr/local/sbin/froeling-bridge-users','add','personal-user','--role','read','--generate-password'],check=True,capture_output=True,text=True)
-    assert login('personal-user',added.stdout.strip())['role']=='read'
+    reader=login('personal-user',added.stdout.strip())
+    assert reader['role']=='read'
+    from urllib.error import HTTPError
+    try:parameter_job('69.5',reader)
+    except HTTPError as exc:assert exc.code==403
+    else:raise AssertionError('Read-only account could write a parameter')
+    assert heater.parameter_write_count==1
     headers={'Authorization':'Bearer '+Path('/etc/froeling-bridge/monitor-api-key').read_text().strip()}
     with urlopen(Request("http://127.0.0.1:8000/api/v1/runtime",headers=headers)) as r:
         runtime = json.load(r)
@@ -170,7 +201,7 @@ try:
         print((result.stdout + result.stderr)[-2500:])
         raise AssertionError("repeat installer failed")
     print(
-        "PASS isolated Debian native installation: real package, service user/permissions, TTY discovery/HTTP, no MariaDB/p4d, repeat installation. systemd activation shimmed; real systemd separately tested."
+        "PASS isolated Debian native installation: real package, service user/permissions, TTY discovery/HTTP, default parameter writing and read-only denial, no MariaDB/p4d, repeat installation. systemd activation shimmed; real systemd separately tested."
     )
 finally:
     subprocess.run(

@@ -1,6 +1,6 @@
 # Fröling Bridge
 
-Heizung überwachen und bedienen – auf einem Raspberry Pi oder einem anderen Linux-Rechner, mit Weboberfläche und API. Für Fröling-Steuerungen der **Lambdatronic-S3200-Familie**. Aktuelle Version: **0.7.1**.
+Heizung überwachen und bedienen – auf einem Raspberry Pi oder einem anderen Linux-Rechner, mit Weboberfläche und API. Für Fröling-Steuerungen der **Lambdatronic-S3200-Familie**. Aktuelle Version: **0.7.2**.
 
 Der Rechner wird über einen seriellen USB-Adapter mit der Heizung verbunden. Nach der Installation öffnest du im Heimnetz die IP-Adresse des Rechners und meldest dich an. **Eine Domain, ein Reverse Proxy und MariaDB sind dafür nicht nötig.**
 
@@ -18,13 +18,11 @@ Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, 
 
 Du brauchst Raspberry Pi OS, Debian oder Ubuntu mit systemd, Python ab 3.9, Internetzugang für die Installation und den angeschlossenen Heizungsadapter. Die Befehle im Terminal **auf dem Heizungsrechner** ausführen.
 
-Das Repository ist derzeit privat. Für den folgenden Download muss dein GitHub-Zugang per SSH eingerichtet sein.
-
 ```sh
 sudo apt-get update
 sudo apt-get install -y git python3 python3-venv
 
-git clone git@github.com:vgarcia007/froeling-bridge.git
+git clone https://github.com/vgarcia007/froeling-bridge.git
 cd froeling-bridge
 sudo bash deploy/install-standalone.sh
 ```
@@ -81,7 +79,7 @@ sudo froeling-bridge-users add max --role write
 
 Das gewünschte Passwort zweimal eingeben, mindestens **15 Zeichen**. Die Eingabe bleibt unsichtbar. Anschließend kannst du dich im Browser mit diesem Benutzer anmelden.
 
-Für jemanden, der ausschließlich lesen darf, stattdessen `--role read` verwenden. Beide Rollen dürfen nur die Funktionen nutzen, die für die Anlage freigegeben sind.
+Für jemanden, der ausschließlich lesen darf, stattdessen `--role read` verwenden. Mit `write` darf der Benutzer auch Heizungsparameter ändern; `read` erlaubt ausschließlich Lesen.
 
 Das Passwort des ursprünglichen Kontos ändern:
 
@@ -98,7 +96,7 @@ Nach dem Ändern ist das ursprüngliche Passwort in `initial-login.json` ungült
 - **Messwerte:** Sensoren ansehen und auswählen, was abgefragt und gegebenenfalls aufgezeichnet wird.
 - **Zeitprogramme und Fehlerspeicher:** Zeiten und Heizungsmeldungen ansehen.
 
-Der Dienst startet nach einem Rechnerneustart automatisch. Status und ausgewählte Messwerte werden laufend erfasst. Eine neue Anlage startet mit gesperrtem Heizungs-Schreiben; die Benutzerrolle allein schaltet es nicht frei. [Schreibfreigabe](docs/standalone.md#heizungs-schreiben-und-abnahme).
+Der Dienst startet nach einem Rechnerneustart automatisch und erfasst die Heizungsdaten laufend. Benutzer mit Schreibrechten können bearbeitbare Heizungsparameter direkt im Servicemenü ändern. Eine zusätzliche Freischaltung ist nicht nötig.
 
 ## Wenn etwas nicht funktioniert
 
@@ -111,7 +109,6 @@ journalctl -u froeling-bridge.service -n 60
 
 | Problem | Prüfen |
 | --- | --- |
-| Git meldet `Permission denied (publickey)` | GitHub-Zugriff und SSH-Schlüssel für das private Repository. |
 | Browser erreicht die Login-Seite nicht | Richtige Rechner-IP, `http://` und Port `8000`, gleiches Heimnetz, laufender Dienst. |
 | Login funktioniert nicht | Benutzername und Passwort prüfen; der Serverbetreiber kann das Passwort per Konsole neu setzen. |
 | Menü oder Werte fehlen | Startfortschritt im Dienststatus, Adapterverbindung und exklusiven Zugriff prüfen. |

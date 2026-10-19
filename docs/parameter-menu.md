@@ -2,6 +2,8 @@
 
 Bezug: [untersuchter Referenzstand](README.md#referenz-und-aussagekraft). Die Schreibabläufe sind aus dem Quellcode rekonstruiert. Normales Parameterschreiben wurde am 17.10.2026 durch Änderung und Rückstellung der LED-Helligkeit auf der echten Anlage bestätigt; Zeitprogramm-Schreiben bleibt unbestätigt. Auch der Lesebetrieb ist auf der echten Anlage bestätigt.
 
+Aktueller Installationsstandard ab 0.7.2: Normale bearbeitbare Menüparameter können Benutzer mit Schreibrechten direkt ändern, ohne eigenen Hardware-Abnahmelauf. Die weiter unten dokumentierten ersten Nachweise erklären die Entwicklung, sind keine Pflichtschritte für neue Benutzer. Vorhandene ausdrücklich konfigurierte Geräte-/Firmware-Beschränkungen bleiben wirksam.
+
 ## Wie das Menü entsteht
 
 `initMenu` prüft die Verbindung, leert die Tabelle `menu` per `TRUNCATE` und ruft `getFirstMenuItem` / `getNextMenuItem` (`37` / `38`) bis zum Listenende auf. Gespeichert werden Typ, Adresse, Parent, Child, Titel sowie zwei unbekannte Felder. Parameterwerte werden optional nachgeladen, ansonsten beim späteren Öffnen einer Menüebene. Quellen: [specific.c:894](https://github.com/vgarcia007/linux-p4d/blob/4d1176c4a9081893e4c2cc27a535bb2bc4737d0a/specific.c#L894) [p4io.c:1157](https://github.com/vgarcia007/linux-p4d/blob/4d1176c4a9081893e4c2cc27a535bb2bc4737d0a/p4io.c#L1157) [specific.c:970](https://github.com/vgarcia007/linux-p4d/blob/4d1176c4a9081893e4c2cc27a535bb2bc4737d0a/specific.c#L970).

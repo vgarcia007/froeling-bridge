@@ -1,4 +1,4 @@
-# Eigenständiger Betrieb (Quellstand 0.7.1)
+# Eigenständiger Betrieb (Quellstand 0.7.2)
 
 Die Bridge kann ohne p4d und ohne MariaDB starten. Sie liest Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Steuerung. SQLite speichert den Arbeitskatalog und Einstellungen lokal; MariaDB ist ausschließlich die optionale p4d-kompatible Historie. Protokoll und Darstellung orientieren sich an linux-p4d von Jörg Wendel und Mitwirkenden.
 
@@ -160,21 +160,23 @@ Verdichtung übernimmt `p4d.aggregateHistory` und `p4d.aggregateInterval` (aktue
 
 ## Heizungs-Schreiben und Abnahme
 
-Im neuen Hardwarebetrieb bleibt Schreiben standardmäßig gesperrt. Die Parameter-/Zeit-Schreibpfade sind implementiert. Auf der Bestandsanlage wurde normales Parameterschreiben am 17.10.2026 mit Änderung und Rückstellung der LED-Helligkeit bestätigt und anschließend freigeschaltet; Zeitprogramm-Schreiben bleibt gesperrt. Simulator-Modus dient zur Prüfung der Abläufe:
+Normales Parameterschreiben steht ab 0.7.2 nach einer neuen Installation direkt bereit. Erforderlich ist ein Benutzer beziehungsweise API-Schlüssel mit Schreibrechten; ein zusätzlicher Abnahmelauf oder eine Freischaltdatei gehört nicht zur Einrichtung. Bearbeitbare Parametertypen folgen dem p4d-Menü. Vor dem Schreiben werden der aktuelle Wert, Grenzen und Skalierung aus der Steuerung gelesen; anschließend wird das Ergebnis nachgelesen. Unklare Übertragungen werden nicht automatisch wiederholt.
+
+Auf der Bestandsanlage wurde normales Parameterschreiben am 17.10.2026 durch Änderung und Rückstellung der LED-Helligkeit bestätigt. Zeitprogramm-Schreiben behält seine bisherige getrennte Behandlung; ohne entsprechenden Nachweis bleiben die Zeitfelder sichtbar deaktiviert. Simulator-Modus dient zur Prüfung der Abläufe:
 
 ```sh
 .venv/bin/python -m froeling_bridge serve --mode standalone-demo --state-dir .local/demo-independent
 ```
 
-Für den vereinbarten Hardwaretest steht `python -m froeling_bridge.validate_write` bereit. Es verlangt ausdrücklich Gerätepfad, genau ausgewählten Parameter/Wert beziehungsweise Zeitadresse/Intervall und einen privaten Zustands-/Nachweispfad. Nur bei vollständig bestätigter Änderung wird automatisch der vorherige Wert zurückgestellt und nachgelesen. Bei unklarem Ausgang erfolgt keine automatische Wiederholung oder vermutete Rückstellung; dann ist manuelles Nachlesen erforderlich. `--simulate` erzeugt ausdrücklich **keinen** gültigen Hardware-Nachweis.
+Für gezielte Entwicklungs-/Gerätetests steht weiterhin `python -m froeling_bridge.validate_write` bereit. Es verlangt ausdrücklich Gerätepfad, genau ausgewählten Parameter/Wert beziehungsweise Zeitadresse/Intervall und einen privaten Zustands-/Nachweispfad. Nur bei vollständig bestätigter Änderung wird automatisch der vorherige Wert zurückgestellt und nachgelesen. Bei unklarem Ausgang erfolgt keine automatische Wiederholung oder vermutete Rückstellung; dann ist manuelles Nachlesen erforderlich. `--simulate` erzeugt ausdrücklich **keinen** gültigen Hardware-Nachweis.
 
-Erst nach vereinbartem echten Test wird dessen Nachweis über `write_validation` in der geschützten Dienstkonfiguration ausgewählt. Gerät, beobachtete Firmware und die tatsächlich geprüften Operationen müssen passen. Parameter- und Zeit-Schreiben werden getrennt freigegeben; die API liefert `write_operations`. Vor einem Hardwaretest den seriellen Dienst kontrolliert stoppen; niemals parallel öffnen. Dieser Test wird nicht durch Installation, Discovery oder Browseraufruf ausgelöst.
+Eine bereits vorhandene ausdrückliche `write_validation`-Konfiguration bleibt erhalten: Sie beschränkt die Operationen weiterhin auf den gewählten Nachweis und verlangt passenden Gerätepfad/Firmware. Für eine neue Installation ist diese Datei nicht nötig. Die API liefert die tatsächlich erlaubten Operationen unter `write_operations`. Vor einem Hardwaretest den seriellen Dienst kontrolliert stoppen; niemals parallel öffnen. Dieser Test wird nicht durch Installation, Discovery oder Browseraufruf ausgelöst.
 
 ## Sicherung und Wiederherstellung
 
 ```sh
-sudo /opt/froeling-bridge/0.7.1/venv/bin/python -I -m froeling_bridge.state_backup backup --archive /geschuetzt/bridge-backup.zip
-sudo /opt/froeling-bridge/0.7.1/venv/bin/python -I -m froeling_bridge.state_backup restore --archive /geschuetzt/bridge-backup.zip
+sudo /opt/froeling-bridge/0.7.2/venv/bin/python -I -m froeling_bridge.state_backup backup --archive /geschuetzt/bridge-backup.zip
+sudo /opt/froeling-bridge/0.7.2/venv/bin/python -I -m froeling_bridge.state_backup restore --archive /geschuetzt/bridge-backup.zip
 ```
 
 Backup verwendet die SQLite-Backupfunktion und enthält Katalog/Einstellungen, letzte Werte, Zeitcache und die geschützte Konfiguration einschließlich optionaler DB-Zugangsdaten. Datei 0600; privat aufbewahren. **MariaDB-Historie ist nicht enthalten.** Restore nur bei gestopptem Dienst in leere Zielpfade. Heizungs-Schreibfreigaben werden nicht automatisch auf einen anderen Rechner übertragen. Nach Root-Restore führt die erneute Installation die Besitzrechte für den Dienstbenutzer korrekt nach.

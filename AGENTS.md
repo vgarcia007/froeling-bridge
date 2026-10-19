@@ -21,6 +21,14 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Die vollständige Danksagung im README steht direkt nach dem Intro vor der Installation. Bei Vereinfachungen nicht ans Ende verschieben oder kürzen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Sofort nutzbares Parameterschreiben / öffentliches README 0.7.2
+
+Benutzer verlangt, dass eine Neuinstallation unmittelbar alle bereits angebotenen Funktionen bereitstellt, insbesondere normales Parameterschreiben ohne erneute eigene Abnahme/Freischaltung. Zudem soll das README von einem öffentlichen Repository ausgehen: HTTPS-Clone-URL, kein GitHub-/SSH-Zugang als Voraussetzung. Danksagung unverändert direkt nach dem Intro erhalten.
+
+Quellstand 0.7.2: `serve_standalone` erlaubt ohne `write_validation` standardmäßig `write_parameter` und verwendet dafür den normalen schreibfähigen Client. Benutzer-/API-Schlüsselrechte, bearbeitbare p4d-Menütypen, frische Grenzen/Skalierung, Nachlesen und keine automatische Wiederholung unklarer Änderungen bleiben erhalten. Bereits ausdrücklich konfigurierte Geräte-/Firmware-/Operationsnachweise wirken weiterhin als Begrenzung. Zeitprogramm-Intervalle behalten die zuvor vereinbarte gesonderte Behandlung; nicht ungeprüft weitere Funktionen oder echte Tests ableiten. Neue Benutzer müssen keine Freischaltdatei erzeugen und keinen LED-Abnahmelauf machen.
+
+README und aktuelle Fachanleitungen korrigiert; historische Abnahmeberichte als solche gekennzeichnet. Isolierter nativer Installer ohne Nachweis geprüft: keine automatischen Heizungsänderungen beim Start, Schreibbenutzer kann Menüparameter über echte HTTP-/Pseudo-Serial-Strecke ändern und bestätigen, ungültiger Bereich wird ohne Schreibtelegramm abgelehnt, Lesebenutzer erhält 403 ohne Übertragung. Neu-/Wiederholungsinstallation erfolgreich. Vollsuite mit separater MariaDB: 281 Tests grün. Produktivhost bleibt unverändert 0.7.0/HTTPS, keine realen Heizungs-Schreibtests, keine Veröffentlichung/Änderung der GitHub-Sichtbarkeit. Private Belege `.local/default-writing-*`.
+
 ## Einfacher Erststart und Dokumentation 0.7.1 (noch nicht produktiv ausgerollt)
 
 Benutzer verlangt Raspberry installieren → im Heimnetz direkt `http://RECHNER-IP:8000` → Login. Reverse Proxy ist ausdrücklich eine selten benötigte optionale eigene Einrichtung, keine Voraussetzung und keine Domainfrage im normalen Installer. README als vollständigen einfachen Hauptweg gestalten: Installation, p4d-Übernahme falls nötig, Browseradresse, rootgeschütztes Erstpasswort für operator und eigene Konsolenbenutzer. Danksagung unverändert; Datenbank, API, HTTPS und Entwicklung passend verlinken statt im README vermischen. Technische/historische Details sind keine zusätzlichen Pflichtschritte.

@@ -383,10 +383,12 @@ def serve_standalone(args):
     if not args.state_dir or not 1 <= args.port <= 65535:
         raise ValidationError("standalone requires --state-dir and port 1..65535")
     simulator = args.mode == "standalone-demo"
-    allow_writes = simulator
-    allowed_operations = (
-        set(("write_parameter", "write_time_range")) if simulator else set()
-    )
+    # Normal parameter editing is a supported feature, not a per-installation test.
+    # Time-program writes retain their existing separate release policy.
+    allow_writes = True
+    allowed_operations = {"write_parameter"}
+    if simulator:
+        allowed_operations.add("write_time_range")
     validated_firmware = None
     if args.write_validation:
         if simulator:
