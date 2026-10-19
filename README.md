@@ -148,4 +148,8 @@ journalctl -u froeling-bridge.service -n 60
 - [Entwicklung, Demo und ältere Betriebsarten](docs/service.md)
 - [Technische Dokumentation und p4d-Bestandsanalyse](docs/README.md)
 
-Für den Referenzcode gelten dessen Copyright-Hinweise und die [GPLv2-Lizenz](reference/linux-p4d/LICENSE). Eine separate Lizenz für neue Projektteile ist bislang nicht festgelegt. Zugangsdaten und Datenbankdumps gehören nicht ins Repository.
+## Lizenz
+
+Unsere eigenen Beiträge stehen unter der [MIT-Lizenz](LICENSE): Du darfst sie nutzen, verändern, weitergeben und verkaufen – auch kommerziell. Copyright- und Lizenzhinweis müssen erhalten bleiben.
+
+Für p4d und daraus übernommene oder abgeleitete Bestandteile gelten weiterhin deren ursprüngliche Lizenzen. Einzelheiten: [Lizenzumfang und Herkunft](NOTICE.md).

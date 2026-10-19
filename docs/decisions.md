@@ -268,3 +268,8 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Benutzer lehnt einen erneuten Abnahme-/Freischaltprozess pro neuer Installation ab. Ab 0.7.2 ist normales Parameterschreiben im eigenständigen Betrieb standardmäßig verfügbar; Benutzerrechte und bestehende Prüf-/Nachlesepfade bleiben maßgeblich. Bereits ausdrücklich konfigurierte Nachweise weiterhin beachten. Diese Entscheidung ersetzt die frühere pauschale Pflicht eines Geräte-/Firmware-Nachweises für Parameterschreiben.
 - Installer führt keine automatischen Änderungsversuche aus. Reale Heizungsänderungen für Entwicklung weiterhin nur nach konkretem Auftrag; der neue Default ist keine Erlaubnis für autonome Live-Tests. Zeitprogramm-Intervalle bleiben beim bisherigen gesonderten Stand.
 - README nimmt auf Benutzerwunsch ein öffentliches Repository an und verwendet HTTPS-Clone ohne SSH-Voraussetzung. Dies beauftragt keine tatsächliche Veröffentlichung des derzeit privaten Repositorys.
+
+## 19.10.2026 — Freizügige Lizenz für eigene Beiträge
+
+- Benutzer möchte weitgehende Nutzungsfreiheit. MIT für eigene, eigenständig geschaffene Beiträge, einschließlich kommerzieller Nutzung; Copyright-/Lizenzhinweis beibehalten.
+- Fremde Rechte werden nicht aufgehoben: p4d bleibt GPLv2, übernommene oder urheberrechtlich abgeleitete Teile und gegebenenfalls Gesamtwerke bleiben deren Anforderungen unterworfen. Root-NOTICE beschreibt die Abgrenzung; keine pauschale MIT-Umlizenzierung des gesamten p4d-basierten Projekts behaupten. Danksagung bleibt am Anfang.

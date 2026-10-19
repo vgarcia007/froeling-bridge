@@ -17,9 +17,13 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Bestehende MariaDB und historische Messreihen weiterführen; p4d als Rückfalloption erhalten.
 - Kein dauerhafter Parallelbetrieb zweier unabhängiger serieller Heizungsdienste als Default.
 - Charts, Dashboards, Pelletverwaltung und weitere Integrationen zunächst außerhalb des Kernumfangs.
-- Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung und native Installation sind umgesetzt; neue Projektlizenz bleibt offen. Siehe docs/authentication.md.
+- Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung und native Installation sind umgesetzt; eigene Beiträge sind unter MIT freigegeben; fremde GPL-/Copyright-Rechte bleiben erhalten (LICENSE/NOTICE.md). Siehe docs/authentication.md.
 - Die vollständige Danksagung im README steht direkt nach dem Intro vor der Installation. Bei Vereinfachungen nicht ans Ende verschieben oder kürzen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
+
+## Lizenzentscheidung vom 19.10.2026
+
+Benutzer möchte möglichst freie Nutzung. Eigene, eigenständig geschaffene Beiträge unter MIT freigegeben: Nutzen, Ändern, Weitergeben, kommerzielle Nutzung/Verkauf mit erhaltenem Copyright-/Lizenzhinweis. Root-LICENSE enthält MIT-Text; NOTICE.md beschreibt den begrenzten Rechteumfang. p4d-Referenz und übernommene/urheberrechtlich abgeleitete GPL-Bestandteile werden nicht umlizenziert; GPL-Pflichten eines abgeleiteten Gesamtwerks bleiben ausdrücklich unberührt. Keine pauschale Zusicherung einer ausschließlich MIT-lizenzierten Gesamtanwendung. Unveränderte GPLv2-Kopie in LICENSES/GPL-2.0.txt, Herkunft/Danksagung erhalten. Paketmetadaten erklären diese Aufteilung und enthalten Lizenz-/Hinweisdateien. Keine technische oder produktive Änderung; die offene Lizenzformulierung im README ersetzt.
 
 ## Sofort nutzbares Parameterschreiben / öffentliches README 0.7.2
 
