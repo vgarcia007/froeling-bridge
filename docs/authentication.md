@@ -52,6 +52,8 @@ Passwortsetzen beendet alle Browser-Sitzungen. Eine Kontosperre beendet Sitzunge
 
 ## API-Schlüssel für Programme
 
+Für die praktische Nutzung: [Einfache curl-Anleitung mit Heizungsstatus und allen Sensoren](api-einstieg.md).
+
 Pro Client einen eigenen benannten Schlüssel erzeugen:
 
 ```sh

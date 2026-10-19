@@ -20,6 +20,10 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung und native Installation sind umgesetzt; neue Projektlizenz bleibt offen. Siehe docs/authentication.md.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Einfacher API-Einstieg
+
+`docs/api-einstieg.md` erklärt für Nichtentwickler den Nur-Lesen-Zugang per curl: Schlüssel einlesen, Heizungsstatus UD/1 aus `/values` auswählen, gesamten Sensorkatalog mit letzten Werten abrufen/speichern und geschützte OpenAPI-Datei ansehen/herunterladen. Arbeitsspeicher/Aktualität/Neustartstand und Fehlerseiten ausdrücklich erklärt, keine pauschale Vollabfrage der Hardware oder vollständiges DB-Backup behaupten. Aus README, Dokumentationsübersicht und Anmeldeanleitung verlinkt. Vier kopierte curl-Beispiele und sieben zusätzliche GET-Routen an echter HTTPS-API mit Nur-Lesen-Schlüssel erfolgreich geprüft; keine Heizungs-/Konfigurationsänderung. Privates Prüfwerkzeug `.local/verify_api_guide.py`.
+
 ## Home-Verzeichnis des Heizungsrechners bereinigt (19.10.2026)
 
 Unbenutzte Release-/Testverzeichnisse wurden bei erhaltener Erfassung entfernt. Bestandsaufnahme des Benutzerverzeichnisses und konkrete Sicherungsorte bleiben ausschließlich im privaten Betreiberkontext. Künftig keine Releasekopien oder Einmalhelfer im Benutzer-Home ansammeln; aktive Installation und bestehende Sicherungen erhalten.

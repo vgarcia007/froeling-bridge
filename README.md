@@ -197,6 +197,8 @@ Weitere Modi für bestehende Installationen und Entwicklung:
 
 ## API für eigene Clients
 
+**Zum Einstieg:** [API Schritt für Schritt mit curl: Heizungsstatus, alle Sensoren und Dokumentation](docs/api-einstieg.md).
+
 Einstieg für einen Client oder Entwicklungsagenten: `https://heizung.example.org/api/v1/openapi.json` mit einem benutzergebundenen API-Schlüssel. Der maschinenlesbare Vertrag liegt auch im Repository unter [openapi.json](src/froeling_bridge/openapi.json).
 
 ```bash

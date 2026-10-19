@@ -19,6 +19,10 @@ Die folgenden Abschnitte dokumentieren die ursprüngliche p4d-Bestandsanalyse vo
 
 Der installierte Quellstand und die Versionskennung der Dienstpfad-Binärdatei wurden inzwischen lesend als p4d 0.10.2 eingegrenzt: [Live-Server-Abgleich](live-server.md). Heizungsmodell und Firmware sind noch unbekannt. Die ursprüngliche Quellcodeanalyse erfolgte offline; anschließend wurde das reale Datenbankschema mit ausdrücklicher Nur-Lesen-Erlaubnis untersucht: [Live-Abgleich](live-database.md). Die Heizung wurde nicht angesprochen. Die Dokumentation beschreibt **belegtes Verhalten des Referenzcodes**, keine vom Hersteller bestätigte Protokollspezifikation.
 
+## API einfach benutzen
+
+[Schritt-für-Schritt-Anleitung mit curl](api-einstieg.md): Schlüssel verwenden, Heizungsstatus und alle Sensoren lesen, technische Dokumentation öffnen oder herunterladen.
+
 ## Zugangsschutz
 
 Ab 0.7.0 benötigen produktive GUI und API eine Anmeldung. [Benutzer, Rollen, API-Schlüssel und HTTPS einrichten](authentication.md). Die Konsole bleibt der einzige Weg zur Benutzer-/Passwortverwaltung.
