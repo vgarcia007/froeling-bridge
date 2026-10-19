@@ -1,6 +1,7 @@
 """Consistent private catalogue/config backups. Historical MariaDB data is separate."""
 
 import argparse
+from contextlib import closing
 import json
 import os
 from pathlib import Path
@@ -12,7 +13,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 from .errors import ValidationError
 
-NAMES = {"catalogue.sqlite3", "time-programs-cache.json", "settings.json"}
+NAMES = {"catalogue.sqlite3", "auth.sqlite3", "time-programs-cache.json", "settings.json"}
 
 
 def backup(state_dir, config, output):
@@ -23,10 +24,16 @@ def backup(state_dir, config, output):
         if source.is_symlink():
             raise ValidationError("catalogue symlink refused")
         with (
-            sqlite3.connect(source.resolve().as_uri() + "?mode=ro", uri=True) as src,
-            sqlite3.connect(temporary / "catalogue.sqlite3") as dst,
+            closing(sqlite3.connect(source.resolve().as_uri() + "?mode=ro", uri=True)) as src,
+            closing(sqlite3.connect(temporary / "catalogue.sqlite3")) as dst,
         ):
             src.backup(dst)
+        source = state_dir / 'auth.sqlite3'
+        if source.is_symlink():
+            raise ValidationError('authentication database symlink refused')
+        if source.is_file():
+            with closing(sqlite3.connect(source.resolve().as_uri()+'?mode=ro', uri=True)) as src, closing(sqlite3.connect(temporary/'auth.sqlite3')) as dst:
+                src.backup(dst)
         for source, name in (
             (state_dir / "time-programs-cache.json", "time-programs-cache.json"),
             (Path(config), "settings.json"),
@@ -72,6 +79,13 @@ def restore(archive_path, state_dir, config):
             ):
                 raise ValidationError("unsupported or damaged catalogue backup")
         settings = None
+        if 'auth.sqlite3' in names:
+            with closing(sqlite3.connect(temporary/'auth.sqlite3')) as db:
+                if db.execute('PRAGMA quick_check').fetchone()[0] != 'ok' or db.execute('PRAGMA user_version').fetchone()[0] != 1:
+                    raise ValidationError('unsupported or damaged authentication backup')
+                db.execute('DELETE FROM sessions')
+                db.commit()
+                db.execute('PRAGMA wal_checkpoint(TRUNCATE)')
         if "settings.json" in names:
             from .configure import validate_settings
 

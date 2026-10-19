@@ -78,7 +78,7 @@ def snapshot_preview(snapshot, directory, source_url=None):
     repo.configurable=False
     repo.source='read-only-api-preview'
     service=BridgeService(repo,mode='database',autostart=False)
-    app=create_app(service)
+    app=create_app(service, authentication=False)  # Isolated read-only preview, never production.
     original_health=app.view_functions['health']
     def preview_health():
         response,status=original_health()

@@ -37,7 +37,7 @@ fi
 command -v fuser >/dev/null || { apt-get update; apt-get install -y psmisc; }
 id froeling-bridge >/dev/null 2>&1 || useradd --system --home /var/lib/froeling-bridge --shell /usr/sbin/nologin froeling-bridge
 usermod -a -G dialout froeling-bridge
-release=/opt/froeling-bridge/0.6.0
+release=/opt/froeling-bridge/0.7.0
 if [[ -e "$release" && ! -f "$release/source.sha256" ]]; then
   echo 'An unrecognized release directory exists; preserved.' >&2; exit 2
 fi
@@ -59,7 +59,7 @@ else
 fi
 python3 -m venv "$release/venv"
 if [[ -d "$source_root/wheels" ]]; then
-  "$release/venv/bin/python" -I -m pip install --no-index --find-links "$source_root/wheels" 'froeling-bridge[service]==0.6.0'
+  "$release/venv/bin/python" -I -m pip install --no-index --find-links "$source_root/wheels" 'froeling-bridge[service]==0.7.0'
 else
   "$release/venv/bin/python" -I -m pip install "$source_root[service]"
 fi
@@ -94,8 +94,12 @@ PY
 install -d -m 0700 -o froeling-bridge -g froeling-bridge /var/lib/froeling-bridge
 # Existing 0.4 state has a different service user; preserve private caches and transfer ownership.
 chown -R froeling-bridge:froeling-bridge /var/lib/froeling-bridge
-printf '%s\n' '#!/bin/sh' 'exec /opt/froeling-bridge/0.6.0/venv/bin/python -I -m froeling_bridge.lifecycle "$@"' > "$release/control"
+"$release/venv/bin/python" -I -c 'import json; from pathlib import Path; s=json.loads(Path("/etc/froeling-bridge/settings.json").read_text()); assert s.get("auth",{}).get("public_origin"), "Configure auth.public_origin with the HTTPS address before starting production"'
+"$release/venv/bin/python" -I -m froeling_bridge.auth_setup
+printf '%s\n' '#!/bin/sh' 'exec /opt/froeling-bridge/0.7.0/venv/bin/python -I -m froeling_bridge.lifecycle "$@"' > "$release/control"
 install -m 0755 "$release/control" /usr/local/sbin/froeling-bridge-control
+printf '%s\n' '#!/bin/sh' 'exec /opt/froeling-bridge/0.7.0/venv/bin/python -I -m froeling_bridge.auth "$@"' > "$release/users"
+install -m 0755 "$release/users" /usr/local/sbin/froeling-bridge-users
 for unit in "$source_root"/deploy/standalone/*; do
   if [[ -f /etc/systemd/system/${unit##*/} && ! -e $release/${unit##*/}.previous ]]; then
     cp -p "/etc/systemd/system/${unit##*/}" "$release/${unit##*/}.previous"

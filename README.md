@@ -2,7 +2,7 @@
 
 Heizungsüberwachung und Parameterbedienung für Fröling-Steuerungen der **Lambdatronic-S3200-Familie**: ein Python-Dienst mit Webmenü und HTTP-API, der direkt über den seriellen Adapter mit der Heizung kommuniziert.
 
-Die Bridge kann eigenständig starten, ohne vorhandene p4d-Installation und ohne MariaDB. Wer bereits eine p4d-Datenbank hat, kann deren Historie und Einstellungen weiterverwenden. Aktueller Quellstand: **0.6.0**.
+Die Bridge kann eigenständig starten, ohne vorhandene p4d-Installation und ohne MariaDB. Wer bereits eine p4d-Datenbank hat, kann deren Historie und Einstellungen weiterverwenden. Aktueller Quellstand: **0.7.0**.
 
 - Eigene [Anlagenübersicht](docs/plant-overview.md) mit zusammengehörigen Temperaturen, Pumpen und Schaltbedingungen.
 - Live-Status und ausgewählte Messwerte automatisch abfragen.
@@ -11,6 +11,7 @@ Die Bridge kann eigenständig starten, ohne vorhandene p4d-Installation und ohne
 - Fehlerspeicher regelmäßig abgleichen, einschließlich Auftreten, Ende und Quittierung.
 - Optional Messwerte in MariaDB aufzeichnen, Aufzeichnung je Sensor auswählen und ältere Daten verdichten.
 - Dieselben Funktionen über eine dokumentierte API für eigene Clients nutzen.
+- Anmeldung mit zwei Rollen und benutzergebundene API-Schlüssel; Benutzer und Passwörter ausschließlich auf der Konsole verwalten. [Zugang einrichten](docs/authentication.md).
 
 ## Grundlage und Dank
 
@@ -35,21 +36,21 @@ cd froeling-bridge
 sudo bash deploy/install-standalone.sh
 ```
 
-Der Installer richtet Dienstbenutzer, Adapterrechte, Konfiguration, systemd-Dienst und Gesundheitsüberwachung ein. Er wählt einen eindeutig erkannten Adapter, bevorzugt über `/dev/serial/by-id/…`, oder fragt nach dem Gerätepfad. Danach fragt er, ob du MariaDB verwenden möchtest; das Passwort wird verdeckt eingegeben. Er startet die Bridge und aktiviert den Autostart.
+Der Installer richtet Dienstbenutzer, Adapterrechte, Konfiguration, Zugangskonten, systemd-Dienst und Gesundheitsüberwachung ein. Er wählt einen eindeutig erkannten Adapter, bevorzugt über `/dev/serial/by-id/…`, oder fragt nach dem Gerätepfad. Für die Anmeldung fragt er nach der vorgesehenen HTTPS-Adresse. Danach fragt er, ob du MariaDB verwenden möchtest; das Passwort wird verdeckt eingegeben. Er startet die Bridge und aktiviert den Autostart. Für den Browserzugang den [HTTPS-Reverse-Proxy und ersten Login](docs/authentication.md) einrichten.
 
 Beim ersten Start liest die Bridge Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Heizung. Das kann mehrere Minuten dauern. Spätere Starts verwenden den lokal gespeicherten Katalog.
 
-Im Browser öffnen; `SERVER-IP` durch die Adresse des Heizungsrechners ersetzen:
+Nach Einrichtung des HTTPS-Reverse-Proxy im Browser öffnen; Beispiel-Domain ersetzen und anmelden:
 
 | Adresse | Inhalt |
 | --- | --- |
-| `http://SERVER-IP:8000/anlage` | Funktionsübersicht für Kessel, Puffer, Boiler und Heizkreise |
-| `http://SERVER-IP:8000/` | Webmenü mit Sensoren, Parametern, Zeitprogrammen und Fehlerspeicher |
-| `http://SERVER-IP:8000/api/v1/health` | Betriebsart und verfügbare Funktionen |
-| `http://SERVER-IP:8000/api/v1/runtime` | Startfortschritt, Heizungsverbindung, Erfassung und Datenbankstatus |
-| `http://SERVER-IP:8000/api/v1/openapi.json` | OpenAPI-Vertrag für eigene Clients und Entwicklungsagenten |
+| `https://heizung.example.org/anlage` | Funktionsübersicht für Kessel, Puffer, Boiler und Heizkreise |
+| `https://heizung.example.org/` | Webmenü mit Sensoren, Parametern, Zeitprogrammen und Fehlerspeicher |
+| `https://heizung.example.org/api/v1/health` | Betriebsart und verfügbare Funktionen |
+| `https://heizung.example.org/api/v1/runtime` | Startfortschritt, Heizungsverbindung, Erfassung und Datenbankstatus |
+| `https://heizung.example.org/api/v1/openapi.json` | OpenAPI-Vertrag für eigene Clients und Entwicklungsagenten |
 
-Standardmäßig lauscht der Dienst auf `0.0.0.0:8000` und ist damit im LAN erreichbar. Adresse und Port sind konfigurierbar.
+Standardmäßig lauscht das geschützte Backend auf `0.0.0.0:8000`. Browser und externe API-Clients verwenden die HTTPS-Adresse; die direkte Portfreigabe ersetzt keinen HTTPS-Proxy. Adresse und Port sind konfigurierbar.
 
 ### Wenn auf dem Rechner bereits p4d läuft
 
@@ -91,6 +92,10 @@ Vollständiges Beispiel mit MariaDB; Gerätepfad und Zugangsdaten anpassen:
   "host": "0.0.0.0",
   "port": 8000,
   "interval": 60,
+  "auth": {
+    "public_origin": "https://heizung.example.org",
+    "trusted_proxy": "192.0.2.20"
+  },
   "history": {
     "host": "127.0.0.1",
     "port": 3306,
@@ -102,6 +107,8 @@ Vollständiges Beispiel mit MariaDB; Gerätepfad und Zugangsdaten anpassen:
 ```
 
 Die äußeren Felder `host` und `port` gehören zur **HTTP-API**. Unter `history` stehen Host, Port, Datenbankname, Benutzer und Passwort der **MariaDB**. Ein entfernter MariaDB-Server wird ebenfalls hier eingetragen. `interval` bestimmt den Messwertdurchlauf in Sekunden; Standard ist 60.
+
+Ab 0.7.0 benötigen produktive GUI und API eine Anmeldung. `auth.public_origin` ist die HTTPS-Adresse, `auth.trusted_proxy` die tatsächliche Proxy-IP. Der Installer hinterlegt den ersten Benutzer `operator` mit zufälligem Passwort in `/var/lib/froeling-bridge-installer/initial-login.json` (nur root lesbar). Benutzer und API-Schlüssel verwaltet `sudo froeling-bridge-users …`. API-Clients verwenden `Authorization: Bearer …`. Details, Apache-Vorlage und Schutzgrenzen stehen in der [Anmeldeanleitung](docs/authentication.md).
 
 | Gewünschter Betrieb | Konfiguration und Verhalten |
 | --- | --- |
@@ -190,12 +197,12 @@ Weitere Modi für bestehende Installationen und Entwicklung:
 
 ## API für eigene Clients
 
-Einstieg für einen Client oder Entwicklungsagenten: `http://SERVER-IP:8000/api/v1/openapi.json`. Der maschinenlesbare Vertrag liegt auch im Repository unter [openapi.json](src/froeling_bridge/openapi.json).
+Einstieg für einen Client oder Entwicklungsagenten: `https://heizung.example.org/api/v1/openapi.json` mit einem benutzergebundenen API-Schlüssel. Der maschinenlesbare Vertrag liegt auch im Repository unter [openapi.json](src/froeling_bridge/openapi.json).
 
 ```bash
-curl -sS http://SERVER-IP:8000/api/v1/sensors
-curl -sS http://SERVER-IP:8000/api/v1/runtime
-curl -sS http://SERVER-IP:8000/api/v1/errors
+GET /api/v1/sensors HTTP/1.1
+Host: heizung.example.org
+Authorization: Bearer DEIN_API_SCHLUESSEL
 ```
 
 `/sensors` liefert den Katalog **mit den letzten Werten**. Suche den gewünschten Sensor über `title` beziehungsweise `usrtitle`, etwa die Kesseltemperatur, und verwende dessen Kombination aus `type` und `address`. Keine fest angenommenen Adressen oder Menüzeilen-IDs verwenden. In `latest` stehen Wert, Beobachtungszeit, Herkunft und `stale`; `latest=null` bedeutet, dass noch kein Wert vorliegt. Nach einem Neustart wird ein lokal gespeicherter Stand ausdrücklich als solcher gekennzeichnet.

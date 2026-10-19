@@ -1,0 +1,29 @@
+# Replace example domain, certificate paths and backend IP. The backend must
+# trust only this Apache host's IP for forwarded scheme/client headers.
+<VirtualHost *:80>
+    ServerName heizung.example.org
+    Redirect permanent / https://heizung.example.org/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName heizung.example.org
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/example.org/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/example.org/privkey.pem
+    SSLProtocol -all +TLSv1.2 +TLSv1.3
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyAddHeaders On
+    RequestHeader unset Forwarded
+    RequestHeader unset X-Forwarded-For
+    RequestHeader unset X-Forwarded-Proto
+    RequestHeader unset X-Forwarded-Host
+    RequestHeader set X-Forwarded-Proto "https"
+    LimitRequestBody 16384
+    Header always set Strict-Transport-Security "max-age=31536000"
+    ProxyPass / http://192.0.2.10:8000/ connectiontimeout=5 timeout=30 retry=0
+    ProxyPassReverse / http://192.0.2.10:8000/
+    ErrorLog ${APACHE_LOG_DIR}/froeling-bridge-error.log
+    # Do not log query strings, credentials or request bodies.
+    CustomLog ${APACHE_LOG_DIR}/froeling-bridge-access.log "%h %l %u %t \"%m %U %H\" %>s %b"
+</VirtualHost>

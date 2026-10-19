@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fröling Bridge API",
-    "version": "0.6.0",
-    "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation."
+    "version": "0.7.0",
+    "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation. Production endpoints require a console-issued Bearer API key or a browser session. Keys inherit the intersection of their scope and current user role. Browser mutations require X-CSRF-Token and same Origin. Time-program writes also require separate hardware authorization; they remain disabled on the production controller."
   },
   "servers": [
     {
@@ -45,6 +45,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         }
       }
@@ -82,6 +91,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         }
       }
@@ -119,6 +137,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         },
         "parameters": [
@@ -169,6 +196,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         },
         "summary": "Discover all sensors and their latest known values",
@@ -218,6 +254,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         },
         "summary": "Read cached observations",
@@ -257,6 +302,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         },
         "parameters": [
@@ -367,6 +421,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         },
         "parameters": [
@@ -444,6 +507,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         }
       }
@@ -461,6 +530,18 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
+          },
+          "503": {
+            "description": "Service or authentication storage unavailable"
           }
         }
       }
@@ -496,6 +577,15 @@
           },
           "503": {
             "description": "Database unavailable"
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         }
       }
@@ -532,6 +622,18 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
+          },
+          "503": {
+            "description": "Service or authentication storage unavailable"
           }
         },
         "operationId": "time_programs"
@@ -591,6 +693,15 @@
           },
           "403": {
             "description": "Sensor configuration unavailable in this mode"
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
+          },
+          "503": {
+            "description": "Service or authentication storage unavailable"
           }
         }
       }
@@ -649,6 +760,18 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
+          },
+          "503": {
+            "description": "Service or authentication storage unavailable"
           }
         }
       }
@@ -792,6 +915,15 @@
           },
           "503": {
             "description": "Explicit source=history requested, but history database is unavailable or not configured."
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         },
         "parameters": [
@@ -856,6 +988,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
           }
         }
       }
@@ -916,6 +1057,133 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Browser login with console-managed username and password",
+        "security": [],
+        "description": "Obtain the signed CSRF value and pre-login cookie from GET /login over HTTPS. API clients use a console-issued Bearer key instead.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password",
+                  "csrf"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "csrf": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password",
+                  "csrf"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "csrf": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON login succeeded; Secure HttpOnly session cookie set"
+          },
+          "303": {
+            "description": "HTML form login succeeded; redirects to plant overview"
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
+          },
+          "503": {
+            "description": "Service or authentication storage unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "summary": "Current effective user role and browser CSRF token",
+        "responses": {
+          "200": {
+            "description": "username, role (read/write), authenticated, csrf (null for API keys)"
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
+          },
+          "503": {
+            "description": "Service or authentication storage unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "summary": "Revoke current browser session",
+        "description": "Session only, requires CSRF. API keys are revoked on the server console.",
+        "responses": {
+          "200": {
+            "description": "Session revoked"
+          },
+          "401": {
+            "description": "Authentication required or credentials rejected"
+          },
+          "403": {
+            "description": "Role, CSRF or hardware authorization denied"
+          },
+          "429": {
+            "description": "Rate limit reached; respect Retry-After"
+          },
+          "503": {
+            "description": "Service or authentication storage unavailable"
           }
         }
       }
@@ -1824,6 +2092,27 @@
           "history_selection_changed"
         ]
       }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Console-issued per-user API key; never put keys in URLs."
+      },
+      "SessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-froeling_session",
+        "description": "HTTPS browser session; unsafe requests additionally require X-CSRF-Token from /auth/me and matching Origin."
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    },
+    {
+      "SessionCookie": []
+    }
+  ]
 }

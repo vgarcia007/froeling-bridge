@@ -105,7 +105,7 @@ class ProductionTests(unittest.TestCase):
         transport = MemoryTransport()
         service = BridgeService(MemoryRepository(), mode='hardware-live', client=ReadOnlyHeatingClient(ProtocolSession(transport)), autostart=False)
         self.addCleanup(service.close)
-        http = create_app(service).test_client()
+        http = create_app(service, authentication=False).test_client()
         health = http.get('/api/v1/health').get_json()
         self.assertEqual(health['mode'], 'hardware-live')
         self.assertFalse(health['capabilities']['heating_write'])

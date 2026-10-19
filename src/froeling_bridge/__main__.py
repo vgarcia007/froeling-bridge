@@ -56,6 +56,10 @@ def demo():
 
 
 def main(argv=None):
+    arguments = sys.argv[1:] if argv is None else argv
+    if arguments and arguments[0] == 'users':
+        from .auth import main as users
+        return users(arguments[1:])
     parser = argparse.ArgumentParser(description="Fröling Bridge: protocol tools, collector, web menu and API")
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -76,6 +80,8 @@ def main(argv=None):
     server.add_argument("--history-config", help="optional MariaDB configuration; empty DB initialized automatically")
     server.add_argument("--write-validation", help="explicit hardware validation record for enabling heating writes")
     server.add_argument("--time-cache-file", help="persistent controller time cache")
+    server.add_argument("--public-origin", help="HTTPS origin used for browser login")
+    server.add_argument("--trusted-proxy", help="explicit reverse proxy IP")
     server.add_argument("--host", default="0.0.0.0", help="listen address (default: all IPv4 interfaces)")
     server.add_argument("--port", type=int, default=8000)
     server.add_argument("--interval", type=float, default=60)
@@ -164,6 +170,8 @@ def run_service(args):
         from pathlib import Path
         time_cache_file = Path(args.time_cache_file) if args.time_cache_file else (Path(args.trace_file).parent / "time-programs-cache.json" if args.trace_file else None)
         service = BridgeService(repository, args.mode, args.interval, client=client, time_cache_file=time_cache_file)
+        service.auth_state_dir = args.state_dir or '/var/lib/froeling-bridge'
+        service.auth_config = dict(public_origin=args.public_origin or '', trusted_proxy=args.trusted_proxy)
         service.read_connection_verified = args.mode in ("hardware-read", "hardware-live")
         try:
             print(f"Fröling Bridge: {args.mode} on http://{args.host}:{args.port}", flush=True)
@@ -181,7 +189,9 @@ def run_service(args):
                         if service.fatal.is_set():
                             os.kill(os.getpid(), signal.SIGTERM)
                     Thread(target=abort_test, name="fatal-exit", daemon=True).start()
-                serve(create_app(service), host=args.host, port=args.port, threads=4)
+                from .auth_web import proxy_options
+                serve(create_app(service), host=args.host, port=args.port, threads=4,
+                      **proxy_options(service.auth_config))
             finally:
                 signal.signal(signal.SIGTERM, previous)
         finally:

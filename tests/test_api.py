@@ -147,7 +147,7 @@ class APITests(unittest.TestCase):
     def test_read_only_mode_has_no_controller_or_collector(self):
         service = BridgeService(mode='database', autostart=False)
         self.addCleanup(service.close)
-        http = create_app(service).test_client()
+        http = create_app(service, authentication=False).test_client()
         self.assertFalse(http.get('/api/v1/collector').get_json()['enabled'])
         self.assertEqual(http.post('/api/v1/jobs', json={'operation':'status'}).status_code, 409)
         self.assertEqual(http.get('/api/v1/values').status_code, 409)

@@ -12,7 +12,7 @@ from . import __version__
 from .recording import automatic_recording
 
 
-def create_app(service):
+def create_app(service, *, authentication=None):
     from flask import Flask, jsonify, request, render_template
     from werkzeug.exceptions import HTTPException
     app = Flask(__name__)
@@ -21,6 +21,9 @@ def create_app(service):
         raise ImportError("Flask 3.1 service dependencies required")
     app.json.ensure_ascii = False
     prefix = "/api/v1"
+    from .auth_web import WebAuth
+    auth = WebAuth(app, service, authentication if authentication is not None else
+                   service.mode not in ("demo", "demo-db", "standalone-demo"))
 
     def response(value, status=200):
         return jsonify(public(value)), status
@@ -42,7 +45,8 @@ def create_app(service):
     def headers(result):
         result.headers["X-Content-Type-Options"] = "nosniff"
         result.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
-        if request.path.startswith(prefix):
+        result.headers["Referrer-Policy"] = "same-origin"
+        if request.path.startswith(prefix) or request.path in ("/", "/anlage", "/login"):
             result.headers["Cache-Control"] = "no-store"
         return result
 
@@ -95,12 +99,13 @@ def create_app(service):
                              fatal_reason=service.fatal_reason,
                              controller_connection=service.runtime.client.status() if getattr(service, "runtime", None) else None,
                              startup_phase=service.runtime.phase if getattr(service, "runtime", None) else None,
-                             capabilities=dict(controller_read=service.worker is not None, heating_write=service.can_write,
-                                               sensor_configuration=getattr(service.repository, "configurable", False)),
+                             user={k: auth.actor()[k] for k in ("username", "role")} if auth.actor() else None,
+                             capabilities=dict(controller_read=service.worker is not None, heating_write=service.can_write and auth.writer(),
+                                               sensor_configuration=getattr(service.repository, "configurable", False) and auth.writer()),
                              worker="unavailable" if not service.worker else (
                                  "running" if service.worker.thread.is_alive() else "stopped"),
                              database_available=service.repository.available,
-                             write_operations=sorted(getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range"))) if service.can_write else [],
+                             write_operations=sorted(getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range"))) if service.can_write and auth.writer() else [],
                              jobs_persistent=False, timezone="Europe/Berlin"))
 
     @app.get(prefix + "/runtime")
@@ -141,7 +146,7 @@ def create_app(service):
             raise ValidationError("invalid menu parent")
         items = visible_menu(service.repository.menu(parent))
         for item in items:
-            item["editable"] = service.can_write and "write_parameter" in getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range")) and item["type"] in set(ParameterType)
+            item["editable"] = auth.writer() and service.can_write and "write_parameter" in getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range")) and item["type"] in set(ParameterType)
         return response(dict(source=service.repository.source, parent=parent, items=items,
                              cached=True, timezone="Europe/Berlin"))
 
@@ -153,7 +158,7 @@ def create_app(service):
             raise ValidationError("search query must contain 1..100 characters")
         items = visible_menu(service.repository.search_menu(query))
         for item in items:
-            item["editable"] = service.can_write and "write_parameter" in getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range")) and item["type"] in set(ParameterType)
+            item["editable"] = auth.writer() and service.can_write and "write_parameter" in getattr(service, "allowed_write_operations", ("write_parameter", "write_time_range")) and item["type"] in set(ParameterType)
         return response(dict(source=service.repository.source, items=items))
 
     @app.get(prefix + "/time-programs")
@@ -182,7 +187,9 @@ def create_app(service):
     @app.get(prefix + "/plant")
     def plant():
         args_only()
-        return response(service.plant.snapshot(sensor_items()))
+        view = service.plant.snapshot(sensor_items())
+        view['activation_available'] = view['activation_available'] and auth.writer()
+        return response(view)
 
     @app.post(prefix + "/plant/activate")
     def activate_plant():
@@ -216,7 +223,7 @@ def create_app(service):
         if service.mode == "database":
             return response(dict(error=dict(code="controller_unavailable", message="database mode is read-only")), 409)
         data = request.get_json()
-        identifier = service.submit_job(data)
+        identifier = service.submit_job(data, actor=auth.actor())
         result, code = response(dict(id=identifier, url=prefix + "/jobs/" + identifier), 202)
         result.headers["Location"] = prefix + "/jobs/" + identifier
         return result, code

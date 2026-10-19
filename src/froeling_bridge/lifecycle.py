@@ -6,7 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 import time
-from urllib.request import build_opener, ProxyHandler
+from urllib.request import build_opener, ProxyHandler, Request
+from urllib.error import HTTPError
 
 from .host_test import System, TestControlError, atomic_json
 
@@ -114,8 +115,10 @@ def control(action, system=None):
             if not system.active(LIVE):
                 raise TestControlError("bridge stopped during startup")
             try:
+                key = Path('/etc/froeling-bridge/monitor-api-key')
+                headers = {'Authorization': 'Bearer ' + key.read_text().strip()} if key.exists() else {}
                 with opener.open(
-                    f"http://127.0.0.1:{state['port']}/api/v1/runtime", timeout=2
+                    Request(f"http://127.0.0.1:{state['port']}/api/v1/runtime", headers=headers), timeout=2
                 ) as response:
                     runtime = json.load(response)
                 failure = runtime.get("last_failure")
@@ -136,6 +139,9 @@ def control(action, system=None):
                         raise TestControlError("startup cancelled by rollback request")
                     system.stop(GUARD)
                     return control("status", system)
+            except HTTPError as exc:
+                if exc.code in (401, 403):
+                    raise TestControlError('startup monitor requires a valid console-managed API key') from None
             except (OSError, ValueError):
                 pass
             time.sleep(1)

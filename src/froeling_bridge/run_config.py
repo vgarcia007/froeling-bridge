@@ -32,6 +32,7 @@ def main():
             history_config=str(history_path) if config.get("history") else None,
             reply_profile=str(profile_path),
             write_validation=config.get("write_validation"),
+            auth=config.get("auth", {}),
         )
     )
 

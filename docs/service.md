@@ -1,5 +1,7 @@
 # API und kontinuierlicher Datensammler
 
+Ab 0.7.0 benötigen alle produktiven Modi die [Anmeldung und API-Schlüssel](authentication.md). Für CLI-Starts `--state-dir`, `--public-origin` und bei Bedarf `--trusted-proxy` verwenden und Benutzer vorher mit dem Konsolenwerkzeug anlegen. Unangemeldete Beispiele unten gelten ausschließlich für fiktive Demo-Modi. Vorhandene Hardware-Schreibfreigaben bleiben unabhängig von Benutzerrechten erhalten.
+
 Ab 0.5.0 ist der [eigenständige Betrieb ohne p4d/MariaDB](standalone.md) der neue Hauptweg. `GET /sensors` liefert nun Metadaten zusammen mit letzten Werten; siehe dort auch Sensor-Konfiguration und Historienstatus. Die folgenden Abschnitte beschreiben zusätzlich die weiterhin verfügbaren älteren Modi.
 
 Der Dienst sammelt regelmäßig Werte vom Simulator oder der realen Heizung und bietet das Webmenü und die HTTP-API. `demo-db` zeichnet ausschließlich in separater Test-MariaDB auf, `database` zeigt den Bestand ausschließlich lesend. `hardware-read` nutzt den begrenzten Lesetest mit separater Aufzeichnung; `hardware-live` führt mit ausdrücklicher Freigabe die bestehende p4d-Datenbank fort. Siehe [Dauerbetrieb und Rückkehr](production.md). Heizungsparameter schreiben bleibt auf Simulator-Modi begrenzt.

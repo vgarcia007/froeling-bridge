@@ -147,7 +147,7 @@ class MariaDBTests(unittest.TestCase):
         self.assertEqual(service.collector_status()['errors'],[])
         view=BridgeService(ReadOnlyDatabase(self.config),mode='database')
         self.addCleanup(view.close)
-        http=create_app(view).test_client()
+        http=create_app(view, authentication=False).test_client()
         r=http.get('/api/v1/history?address=43&type=VA&start=2023-11-14&end=2023-11-16')
         self.assertEqual(r.status_code,200)
         self.assertEqual([row['value'] for row in r.get_json()['items']],['-1.2','-1.2'])

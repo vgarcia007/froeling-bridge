@@ -9,6 +9,22 @@ from froeling_bridge.errors import ValidationError
 
 
 class BackupTests(unittest.TestCase):
+    def test_auth_backup_preserves_accounts_keys_but_invalidates_sessions(self):
+        from froeling_bridge.auth import AuthStore
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);state=root/'state'
+            LocalRepository(state/'catalogue.sqlite3')
+            auth=AuthStore(state/'auth.sqlite3')
+            auth.add_user('test-user','Fictional backup password for testing!','read')
+            key=auth.create_key('test-user','backup-test')
+            session=auth.login('test-user','Fictional backup password for testing!','test')
+            config=root/'config.json';config.write_text(json.dumps(dict(device='/dev/ttyUSB0')))
+            backup(state,config,root/'backup.zip')
+            restore(root/'backup.zip',root/'restored',root/'new-config.json')
+            recovered=AuthStore(root/'restored/auth.sqlite3')
+            self.assertEqual(recovered.authenticate(key,'key')['username'],'test-user')
+            self.assertIsNone(recovered.authenticate(session,'session'))
+
     def test_consistent_roundtrip_preserves_preferences_and_removes_write_authorization(
         self,
     ):

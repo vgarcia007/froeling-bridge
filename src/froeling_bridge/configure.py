@@ -41,6 +41,7 @@ def main(argv=None):
         settings = json.loads(Path(args.config).read_text())
     else:
         settings = dict(device=choose_device(), host="0.0.0.0", port=8000, interval=60)
+        settings['auth'] = dict(public_origin=input('HTTPS-Adresse der GUI (z. B. https://heizung.example.org): ').strip())
         legacy = Path("/etc/froeling-bridge-test/source-db.json")
         if legacy.is_file():
             settings["history"] = json.loads(legacy.read_text())
@@ -89,8 +90,19 @@ def validate_settings(settings):
         "history",
         "reply_profile",
         "write_validation",
+        "auth",
     }:
         raise ValidationError("unknown installation configuration fields")
+    if 'auth' in settings:
+        from urllib.parse import urlsplit
+        from .auth_web import proxy_options
+        auth = settings['auth']
+        if not isinstance(auth, dict) or set(auth) - {'public_origin', 'trusted_proxy'}:
+            raise ValidationError('invalid authentication settings')
+        origin = urlsplit(auth.get('public_origin', ''))
+        if origin.scheme != 'https' or not origin.hostname or origin.username or origin.password or origin.path not in ('', '/') or origin.query or origin.fragment:
+            raise ValidationError('public_origin must be an HTTPS origin without path or credentials')
+        proxy_options(auth)
     if (
         not isinstance(settings.get("device"), str)
         or not settings["device"].startswith("/dev/")

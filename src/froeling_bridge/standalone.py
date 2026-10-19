@@ -456,6 +456,9 @@ def serve_standalone(args):
         initialize_history=True,
     )
     runtime.service.allowed_write_operations = allowed_operations
+    runtime.service.auth_state_dir = args.state_dir
+    runtime.service.auth_config = getattr(args, 'auth', None) or dict(
+        public_origin=getattr(args, 'public_origin', ''), trusted_proxy=getattr(args, 'trusted_proxy', None))
     previous = signal.getsignal(signal.SIGTERM)
 
     def terminate(signum, frame):
@@ -466,7 +469,9 @@ def serve_standalone(args):
         print(
             f"Fröling Bridge: {args.mode} on http://{args.host}:{args.port}", flush=True
         )
-        serve(create_app(runtime.service), host=args.host, port=args.port, threads=4)
+        from .auth_web import proxy_options
+        serve(create_app(runtime.service), host=args.host, port=args.port, threads=4,
+              **proxy_options(runtime.service.auth_config))
     except KeyboardInterrupt:
         pass
     finally:

@@ -14,7 +14,7 @@ sys.path.insert(0, "/source/src")
 from froeling_bridge.codec import StreamDecoder, encode_frame
 from froeling_bridge.simulator import demo_heater
 from froeling_bridge.messages import MenuItem
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 # This file runs inside a disposable container. Only systemd calls are simulated;
 # installer/package/user/permissions/TTY/HTTP are real. Separate spare-unit test covers real systemd.
@@ -32,7 +32,7 @@ for name in ("src", "deploy"):
         ignore=shutil.ignore_patterns("__pycache__", "*.egg-info"),
     )
 shim = """#!/usr/local/bin/python3
-import os,json,sys,subprocess,signal
+import os,json,sys,subprocess,signal,time
 from pathlib import Path
 p=Path('/tmp/native-unit-state.json');state=json.loads(p.read_text()) if p.exists() else {}
 a=sys.argv[1];units=[x for x in sys.argv[2:] if not x.startswith('--')];u=units[-1] if units else ''
@@ -43,13 +43,19 @@ if a=='start':
  state.setdefault(u,{})['active']=True
  if u=='froeling-bridge.service':
   log=open('/tmp/native-service.log','a')
-  proc=subprocess.Popen(['runuser','-u','froeling-bridge','--','/opt/froeling-bridge/0.6.0/venv/bin/python','-I','-m','froeling_bridge.run_config','/etc/froeling-bridge/settings.json'],stdout=log,stderr=log,start_new_session=True)
+  proc=subprocess.Popen(['runuser','-u','froeling-bridge','--','/opt/froeling-bridge/0.7.0/venv/bin/python','-I','-m','froeling_bridge.run_config','/etc/froeling-bridge/settings.json'],stdout=log,stderr=log,start_new_session=True)
   state[u]['pid']=proc.pid
 if a=='stop':
  unit=state.setdefault(u,{})
  if unit.get('pid'):
   try:os.killpg(unit['pid'],signal.SIGTERM)
   except ProcessLookupError:pass
+  # Match real systemctl stop: wait until the service releases the serial port.
+  for _ in range(150):
+   proc=Path('/proc')/str(unit['pid'])/'stat'
+   if not proc.exists() or proc.read_text().split()[2]=='Z':break
+   time.sleep(.1)
+  else:raise SystemExit('simulated systemctl stop timed out')
  unit['active']=False
 p.write_text(json.dumps(state))
 """
@@ -91,7 +97,7 @@ def respond():
 
 Thread(target=respond, daemon=True).start()
 config = Path("/tmp/native-settings.json")
-config.write_text(json.dumps(dict(device=device, host="127.0.0.1", port=8000)))
+config.write_text(json.dumps(dict(device=device, host="127.0.0.1", port=8000,auth=dict(public_origin='https://bridge.example.test'))))
 os.close(slave)
 slave = None
 try:
@@ -110,9 +116,10 @@ try:
             else ""
         )
         raise AssertionError("native installer failed")
-    with urlopen("http://127.0.0.1:8000/api/v1/runtime") as r:
+    headers={'Authorization':'Bearer '+Path('/etc/froeling-bridge/monitor-api-key').read_text().strip()}
+    with urlopen(Request("http://127.0.0.1:8000/api/v1/runtime",headers=headers)) as r:
         runtime = json.load(r)
-    with urlopen("http://127.0.0.1:8000/api/v1/sensors") as r:
+    with urlopen(Request("http://127.0.0.1:8000/api/v1/sensors",headers=headers)) as r:
         sensors = json.load(r)["items"]
     assert (
         runtime["phase"] == "ready" and runtime["collector"]["successful_cycles"] >= 1

@@ -1,4 +1,4 @@
-# Eigenständiger Betrieb (Quellstand 0.6.0)
+# Eigenständiger Betrieb (Quellstand 0.7.0)
 
 Die Bridge kann ohne p4d und ohne MariaDB starten. Sie liest Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Steuerung. SQLite speichert den Arbeitskatalog und Einstellungen lokal; MariaDB ist ausschließlich die optionale p4d-kompatible Historie. Protokoll und Darstellung orientieren sich an linux-p4d von Jörg Wendel und Mitwirkenden.
 
@@ -42,7 +42,7 @@ sudo bash deploy/install-standalone.sh --take-over-p4d
 
 Aktive alte Testfenster werden abgewiesen. Das Skript prüft Port und Prozessinspektion, hält vor der Umschaltung einen unabhängigen Rückkehrtimer bereit und wartet auf abgeschlossene Discovery sowie mindestens einen erfolgreichen Sammeldurchlauf. Originaldateien und alte Releases bleiben erhalten. Ein fremdes Releaseverzeichnis wird nicht übernommen; identische abgebrochene Einrichtung kann fortgesetzt werden.
 
-Webmenü/API: `http://SERVER-IP:8000`. Beim ersten Start kann der Aufbau großer Menükataloge mehrere Minuten benötigen; `/api/v1/runtime` zeigt die aktuelle Phase. Eine unvollständige Discovery ersetzt keinen vollständigen Katalog.
+Webmenü/API ab 0.7.0 über den [HTTPS-Zugang mit Anmeldung](authentication.md) verwenden. Der Installer fragt nach `auth.public_origin`; bei vorhandenen privaten Konfigurationsdateien diesen Abschnitt ergänzen und bei vorgeschaltetem Proxy dessen genaue IP als `auth.trusted_proxy` angeben. Benutzer und API-Schlüssel verwaltet die Konsole. Beim ersten Start kann der Aufbau großer Menükataloge mehrere Minuten benötigen; das geschützte `/api/v1/runtime` zeigt die aktuelle Phase. Eine unvollständige Discovery ersetzt keinen vollständigen Katalog.
 
 ## Laufender Betrieb und Fehler
 

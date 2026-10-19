@@ -13,6 +13,21 @@ spec.loader.exec_module(guard)
 
 
 class HealthGuardTests(unittest.TestCase):
+    def test_authentication_failure_never_restarts_healthy_collector(self):
+        from urllib.error import HTTPError
+        from io import BytesIO
+        for code in (401,403,503):
+            with self.subTest(code=code), tempfile.TemporaryDirectory() as directory:
+                state=Path(directory)
+                (state/'installation.json').write_text(json.dumps(dict(p4d_fallback=False)))
+                original_read=Path.read_text
+                def read(path,*args,**kwargs):
+                    return '{}' if str(path)=='/etc/froeling-bridge/settings.json' else original_read(path,*args,**kwargs)
+                opener=Mock();opener.open.side_effect=HTTPError('http://localhost',code,'denied',None,BytesIO(b'{"error":{"code":"authentication_unavailable"}}'))
+                with patch.object(guard,'STATE',state),patch.object(guard,'active',side_effect=[True,False]),patch.object(Path,'read_text',read),patch.object(guard,'build_opener',return_value=opener),patch.object(guard.subprocess,'run') as run:
+                    self.assertEqual(guard.main(),2)
+                    run.assert_not_called()
+
     def test_fresh_controller_status_does_not_hide_stale_measurements(self):
         now = datetime.now(timezone.utc)
         runtime = dict(phase='ready', connection=dict(connected=True, last_success=now.isoformat()))

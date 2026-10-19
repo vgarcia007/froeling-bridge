@@ -1,6 +1,7 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 const state = {
+  auth: null,
   health: null,
   parent: 1,
   crumbs: [{ parent: 1, title: "Heizung" }],
@@ -71,11 +72,13 @@ async function api(path, options = {}) {
       signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
+        ...(state.auth?.csrf ? {"X-CSRF-Token": state.auth.csrf} : {}),
         ...(options.headers || {}),
       },
     });
     const data = await response.json();
     if (!response.ok) {
+      if (response.status === 401) location.replace("/login");
       const error = new Error(explain(data.error));
       error.code = data.error?.code;
       throw error;
@@ -312,7 +315,7 @@ async function loadMenu(parent = state.parent, search = "") {
   }
 }
 function canWrite(operation) {
-  return state.health?.write_operations ? state.health.write_operations.includes(operation) : !!state.health?.capabilities.heating_write;
+  return Array.isArray(state.health?.write_operations) && state.health.write_operations.includes(operation);
 }
 function readOnlyLabel() {
   return ["hardware-read", "hardware-live", "standalone"].includes(state.health?.mode)
@@ -713,6 +716,9 @@ async function loadTimes() {
 function renderTimes() {
   const container = $("time-programs");
   container.replaceChildren();
+  if (!canWrite("write_time_range")) container.append(element("p",
+    state.auth?.role === "read" ? "Nur-Lesen-Zugang: Zeitprogramme können nicht geändert werden." :
+    "Zeitprogramme sind schreibgeschützt. Das Schreiben ist auf dieser Anlage noch nicht freigegeben.", "muted"));
   const byAddress = new Map(state.times.map((program) => [program.address, program]));
   const devices = new Map();
   for (const label of state.timeCatalog) {
@@ -795,7 +801,7 @@ function renderTimes() {
     });
     device.append(section);
   }
-  if (!container.children.length)
+  if (!devices.size)
     container.append(element("p", "Keine Zeitprogramme gefunden.", "empty"));
 }
 function switchView(view, timeGroupFilter = null, navigate = true) {
@@ -836,6 +842,12 @@ async function healthLoop() {
     const health = await api("/health");
     const first = !state.health;
     state.health = health;
+    if (health.user) {
+      state.auth = {...state.auth, ...health.user};
+      $("account-panel").hidden = false;
+      $("account-name").textContent = health.user.username;
+      $("account-role").textContent = health.user.role === "write" ? "Lesen + Schreiben" : "Nur Lesen";
+    }
     $("version").textContent = health.version || "";
     const heatingDisconnected = health.controller_connection && !health.controller_connection.connected;
     $("connection").textContent = health.fatal_reason
@@ -872,4 +884,13 @@ async function healthLoop() {
     setTimeout(healthLoop, delay);
   }
 }
-healthLoop();
+$("logout").addEventListener("click", async () => {
+  try { await api("/auth/logout", {method: "POST", body: "{}"}); location.replace("/login"); }
+  catch (error) { notice(explain(error), true); }
+});
+async function initializeAccess() {
+  try { state.auth = await api("/auth/me"); }
+  catch (error) { notice(explain(error), true); return; }
+  healthLoop();
+}
+initializeAccess();

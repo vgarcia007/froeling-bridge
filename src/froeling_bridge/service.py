@@ -444,7 +444,7 @@ class BridgeService:
             return lambda: self.client.set_time_range(data["address"], data["index"], interval, timeout=10)
         raise ValidationError("unknown operation")
 
-    def submit_job(self, data):
+    def submit_job(self, data, *, actor=None):
         if self.fatal.is_set() or self.stop.is_set():
             raise ServiceStopped()
         if isinstance(data, dict) and data.get('operation') == 'refresh_component':
@@ -464,10 +464,16 @@ class BridgeService:
             if data["operation"] == "time_ranges":
                 self.time_refresh_job_id = identifier
         def execute():
+            if data['operation'] in ('write_parameter', 'write_time_range') and getattr(self, 'authentication_required', False):
+                if not getattr(self, 'auth_store', None):
+                    raise ReadOnlyViolation('authentication unavailable')
+                self.auth_store.assert_writer(actor)
+                self.auth_store.event('heating_write_attempt', actor, data['operation'])
             with self.lock:
                 self.jobs[identifier]["state"] = "running"
             if data["operation"] in ("write_parameter", "write_time_range") and hasattr(self.repository, 'audit_write'):
-                self.repository.audit_write(identifier, dict(state='attempting', request=data))
+                self.repository.audit_write(identifier, dict(state='attempting', request=data,
+                    actor={k: actor[k] for k in ('user_id','username','kind','id')} if actor else None))
             return action()
         try:
             future = self.worker.submit(execute)
@@ -488,7 +494,8 @@ class BridgeService:
                     except DatabaseUnavailable:
                         logging.getLogger(__name__).warning('Plant parameter cache unavailable')
                 if data["operation"] in ("write_parameter", "write_time_range") and hasattr(self.repository, 'audit_write'):
-                    self.repository.audit_write(identifier, dict(state='completed', request=data, result=result))
+                    self.repository.audit_write(identifier, dict(state='completed', request=data, result=result,
+                        actor={k: actor[k] for k in ('user_id','username','kind','id')} if actor else None))
                 if data["operation"] == "time_ranges":
                     self._store_time_cache(raw_result, datetime.now(ZONE).isoformat())
                 elif data["operation"] == "write_time_range":
@@ -502,7 +509,8 @@ class BridgeService:
                 update = dict(state="failed", error=failure(exc))
                 if data["operation"] in ("write_parameter", "write_time_range") and hasattr(self.repository, 'audit_write'):
                     try:
-                        self.repository.audit_write(identifier, dict(state='failed', request=data, error=failure(exc)))
+                        self.repository.audit_write(identifier, dict(state='failed', request=data, error=failure(exc),
+                            actor={k: actor[k] for k in ('user_id','username','kind','id')} if actor else None))
                     except DatabaseUnavailable:
                         pass
                 if self.mode in ("hardware-read", "hardware-live") and isinstance(exc, (ProtocolError, DatabaseUnavailable)):

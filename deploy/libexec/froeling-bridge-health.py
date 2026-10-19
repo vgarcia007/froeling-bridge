@@ -5,10 +5,15 @@ import os
 from pathlib import Path
 import subprocess
 import time
-from urllib.request import build_opener, ProxyHandler
+from urllib.request import build_opener, ProxyHandler, Request
+from urllib.error import HTTPError
 
 STATE = Path('/var/lib/froeling-bridge-installer')
 HELPER = '/usr/local/sbin/froeling-bridge-control'
+
+
+class MonitorCredentialsError(Exception):
+    pass
 
 
 def active(unit):
@@ -60,13 +65,35 @@ def main():
     maximum = max(180, 3 * float(config.get('interval', 60)))
     opener = build_opener(ProxyHandler({}))
     def get(path):
-        with opener.open('http://127.0.0.1:' + str(config.get('port', 8000))
-                         + '/api/v1/' + path, timeout=3) as response:
+        key = Path('/etc/froeling-bridge/monitor-api-key')
+        headers = {}
+        if key.exists():
+            try:
+                token = key.read_text().strip()
+                if not token.startswith('fbk_') or len(token)>160 or any(c.isspace() for c in token):
+                    raise ValueError()
+                headers = {'Authorization':'Bearer '+token}
+            except (OSError, ValueError):
+                raise MonitorCredentialsError() from None
+        request = Request('http://127.0.0.1:' + str(config.get('port', 8000)) + '/api/v1/' + path, headers=headers)
+        with opener.open(request, timeout=3) as response:
             return json.load(response)
     runtime = None
     try:
         runtime = get('runtime')
         ok = healthy(runtime, get('sensors')['items'], datetime.now(timezone.utc), maximum)
+    except MonitorCredentialsError:
+        print('Health monitor key unavailable or invalid; not restarting the heating service.', flush=True)
+        return 2
+    except HTTPError as exc:
+        auth_unavailable = False
+        if exc.code == 503:
+            try:auth_unavailable = json.load(exc).get('error',{}).get('code')=='authentication_unavailable'
+            except (ValueError, OSError):pass
+        if exc.code in (401, 403) or auth_unavailable:
+            print('Health monitor credentials rejected; not restarting the heating service.', flush=True)
+            return 2
+        ok = False
     except Exception:
         ok = False  # No exception details: connection settings and operating values stay private.
     previous = None
