@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fröling Bridge API",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "description": "Discover the controller catalogue through /sensors, match its title, then read latest on the same sensor. latest is a cached observation, never a new controller request. POST a measurement/status job for an explicit fresh read. Standalone operation does not require MariaDB. Heating writes require separate hardware validation. Production endpoints require a console-issued Bearer API key or a browser session. Keys inherit the intersection of their scope and current user role. Browser mutations require X-CSRF-Token and same Origin. Time-program writes also require separate hardware authorization; they remain disabled on the production controller."
   },
   "servers": [
@@ -1071,7 +1071,7 @@
       "post": {
         "summary": "Browser login with console-managed username and password",
         "security": [],
-        "description": "Obtain the signed CSRF value and pre-login cookie from GET /login over HTTPS. API clients use a console-issued Bearer key instead.",
+        "description": "Obtain the signed CSRF value and pre-login cookie from GET /login at the configured access address (direct LAN HTTP or HTTPS). API clients use a console-issued Bearer key instead.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1123,7 +1123,7 @@
         },
         "responses": {
           "200": {
-            "description": "JSON login succeeded; Secure HttpOnly session cookie set"
+            "description": "JSON login succeeded; HttpOnly SameSite=Strict session cookie set; Secure in HTTPS mode"
           },
           "303": {
             "description": "HTML form login succeeded; redirects to plant overview"
@@ -2099,6 +2099,12 @@
         "scheme": "bearer",
         "description": "Console-issued per-user API key; never put keys in URLs."
       },
+      "LanSessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "froeling_lan_session",
+        "description": "Direct LAN HTTP browser session; unsafe requests additionally require X-CSRF-Token from /auth/me and matching Origin."
+      },
       "SessionCookie": {
         "type": "apiKey",
         "in": "cookie",
@@ -2113,6 +2119,9 @@
     },
     {
       "SessionCookie": []
+    },
+    {
+      "LanSessionCookie": []
     }
   ]
 }

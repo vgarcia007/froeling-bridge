@@ -43,7 +43,7 @@ if a=='start':
  state.setdefault(u,{})['active']=True
  if u=='froeling-bridge.service':
   log=open('/tmp/native-service.log','a')
-  proc=subprocess.Popen(['runuser','-u','froeling-bridge','--','/opt/froeling-bridge/0.7.0/venv/bin/python','-I','-m','froeling_bridge.run_config','/etc/froeling-bridge/settings.json'],stdout=log,stderr=log,start_new_session=True)
+  proc=subprocess.Popen(['runuser','-u','froeling-bridge','--','/opt/froeling-bridge/0.7.1/venv/bin/python','-I','-m','froeling_bridge.run_config','/etc/froeling-bridge/settings.json'],stdout=log,stderr=log,start_new_session=True)
   state[u]['pid']=proc.pid
 if a=='stop':
  unit=state.setdefault(u,{})
@@ -97,12 +97,13 @@ def respond():
 
 Thread(target=respond, daemon=True).start()
 config = Path("/tmp/native-settings.json")
-config.write_text(json.dumps(dict(device=device, host="127.0.0.1", port=8000,auth=dict(public_origin='https://bridge.example.test'))))
+config.write_text(json.dumps(dict(device=device, host="127.0.0.1", port=8000,auth=dict(mode='lan'))))
 os.close(slave)
 slave = None
 try:
     result = subprocess.run(
-        ["bash", "/tmp/project/deploy/install-standalone.sh", "--config", str(config)],
+        ["bash", "/tmp/project/deploy/install-standalone.sh"],
+        input=device+"\nn\n",
         capture_output=True,
         text=True,
         timeout=240,
@@ -116,6 +117,28 @@ try:
             else ""
         )
         raise AssertionError("native installer failed")
+    assert 'Weboberfläche: http://' in result.stdout and ':8000' in result.stdout
+    assert 'initial-login.json' in result.stdout and 'froeling-bridge-users add' in result.stdout
+    installed=json.loads(Path('/etc/froeling-bridge/settings.json').read_text())
+    assert installed['auth']=={'mode':'lan'}
+    initial=json.loads(Path('/var/lib/froeling-bridge-installer/initial-login.json').read_text())
+    assert initial['username']=='operator' and initial['password'] not in result.stdout
+    import re
+    from http.cookiejar import CookieJar
+    from urllib.request import build_opener,HTTPCookieProcessor
+    from urllib.parse import urlencode
+    browser=build_opener(HTTPCookieProcessor(CookieJar()))
+    def login(name,password):
+        with browser.open('http://127.0.0.1:8000/login') as response:
+            csrf=re.search(r'name="csrf" value="([^"]+)"',response.read().decode())[1]
+        body=urlencode(dict(username=name,password=password,csrf=csrf)).encode()
+        with browser.open(Request('http://127.0.0.1:8000/api/v1/auth/login',data=body,headers={'Origin':'http://127.0.0.1:8000'})) as response:
+            assert response.status==200
+        with browser.open('http://127.0.0.1:8000/api/v1/auth/me') as response:
+            return json.load(response)
+    assert login(initial['username'],initial['password'])['role']=='write'
+    added=subprocess.run(['/usr/local/sbin/froeling-bridge-users','add','personal-user','--role','read','--generate-password'],check=True,capture_output=True,text=True)
+    assert login('personal-user',added.stdout.strip())['role']=='read'
     headers={'Authorization':'Bearer '+Path('/etc/froeling-bridge/monitor-api-key').read_text().strip()}
     with urlopen(Request("http://127.0.0.1:8000/api/v1/runtime",headers=headers)) as r:
         runtime = json.load(r)

@@ -2,7 +2,7 @@
 
 Mit der API kann ein anderes Programm Heizungsdaten abfragen. `curl` ist ein kleines Terminalprogramm, das solche Anfragen stellt. Die Antwort kommt als JSON: eine Textdarstellung mit benannten Feldern und Werten.
 
-Diese Anleitung verwendet unsere laufende Anlage **https://heizung.example.org**. Bei einer anderen Installation ersetzt du diese Adresse durch deren HTTPS-Adresse. Alle Beispiele lesen ausschließlich Daten.
+Diese Anleitung verwendet als Beispiel **http://192.168.178.50:8000**. Ersetze diese Adresse durch die IP deines Heizungsrechners. Wenn du selbst HTTPS eingerichtet hast, verwendest du stattdessen deine HTTPS-Adresse. Alle Beispiele lesen ausschließlich Daten.
 
 ## 1. Einen API-Schlüssel besorgen
 
@@ -21,7 +21,7 @@ Die folgenden Befehle sind für ein **Bash-Terminal unter Linux**, beispielsweis
 Diese drei Zeilen kopieren:
 
 ```bash
-API_URL="https://heizung.example.org"
+API_URL="http://192.168.178.50:8000"
 read -r -s -p 'API-Schlüssel einfügen und Enter drücken: ' API_KEY
 printf '\n'
 ```
@@ -109,9 +109,9 @@ Das ist ein Abruf des Katalogs mit den bereits vorliegenden Werten, kein Befehl,
 
 ## 5. API-Dokumentation ansehen oder herunterladen
 
-Im Browser zuerst auf **https://heizung.example.org** anmelden. Danach diese Adresse öffnen:
+Im Browser zuerst auf deiner Bridge anmelden. Danach an dieselbe Adresse `/api/v1/openapi.json` anhängen, beispielsweise:
 
-**https://heizung.example.org/api/v1/openapi.json**
+`http://192.168.178.50:8000/api/v1/openapi.json`
 
 Dort steht die technische Beschreibung aller Routen, Eingaben und Antworten im OpenAPI-Format. Es ist eine JSON-Datei, keine interaktive Swagger-Oberfläche. Du kannst sie einem Entwicklungsagenten zusammen mit dieser Anleitung geben. Ein API-Schlüssel gehört in dessen private Clientkonfiguration, nicht in die Dokumentationsdatei.
 
@@ -153,7 +153,7 @@ Bei Fehlern bedeutet `active: true` bestätigt aktiv, `false` bestätigt nicht a
 | HTTP `403` | Der Zugriff ist für diesen Schlüssel nicht erlaubt. |
 | HTTP `429` | Zu viele Anfragen; eine Pause einlegen. |
 | HTTP `503` | Dienst vorübergehend nicht verfügbar; Serverbetreiber informieren. |
-| Zertifikats- oder Verbindungsfehler | HTTPS-Adresse, Netzwerk und Zertifikat prüfen. |
+| Zertifikats- oder Verbindungsfehler | Verwendete Adresse, Netzwerk und gegebenenfalls HTTPS-Zertifikat prüfen. |
 | Zusätzlicher JSON-Fehler nach einer curl-Fehlermeldung | Zuerst den curl-Fehler beheben: Ohne gültige Antwort kann Python nichts darstellen. |
 
 Für diese Abfragen genügt ein Nur-Lesen-Schlüssel. Die normale Browser-Anmeldung ersetzt in curl keinen API-Schlüssel.

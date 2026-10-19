@@ -256,3 +256,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - Benutzer wählt ein nach unten aufklappendes Menü statt horizontaler Navigation. Bis 650 Pixel alle Ziele untereinander, nach Auswahl schließen; Desktop-Seitenleiste erhalten. Benutzer/Rolle/Abmelden unter die eigentliche Navigation verschieben. Tastatur, Fokus und ausreichende Touchflächen berücksichtigen.
 - Reine Frontendänderung ohne Dienstneustart direkt live ausrollen. Alte im Flask-Prozess zwischengespeicherte HTML-Vorlage durch JavaScript-Strukturergänzung unterstützen; neue Vorlage ebenfalls paketieren. Sicherung und Dateirechte erhalten.
 - Fünf Breiten, beide Rollen und beide Vorlagen isoliert geprüft; zusätzliche Prüfung auf der echten HTTPS-Domain ohne Heizungs-Schreibtests. API-PID, Sensorflags und 67 Historienpunkte erhalten.
+
+## 19.10.2026 — Einfacher Heimnetzstart als Standard
+
+- Benutzer stellt klar: Raspberry installieren und im Heimnetz direkt über IP zum Login; Domain/Reverse Proxy richtet sich bei Bedarf jeder selbst ein. README muss alle nötigen Schritte einschließlich Erstpasswort und eigener Benutzer erklären und Erweiterungen verlinken.
+- Neue interaktive Installation nutzt ab 0.7.1 explizit auth.mode=lan mit HTTP im lokalen Netz. Anmeldung, Rollen, CSRF und Ratenbegrenzungen erhalten; eigene HTTP-Cookienamen ohne Secure, keine pauschale Abschaltung von Authentifizierung. Öffentliche Hosts/Client-IPs werden im LAN-Modus abgewiesen.
+- Bestehende HTTPS-Konfigurationen behalten ihre Vorgaben. Bestehende Installationen bleiben ohne gesonderten Auftrag unverändert; konkrete Betriebsadressen stehen nur im privaten Betreiberkontext. Keine ungefragte Umstellung oder Unterbrechung. Neuer Weg einschließlich Dialog, Erstkonto und eigener Benutzeranlage isoliert getestet; keine Hardware-Schreibtests.

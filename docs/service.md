@@ -1,10 +1,10 @@
-# API und kontinuierlicher Datensammler
+# Entwicklung, Demo und ältere Betriebsarten
 
 Ab 0.7.0 benötigen alle produktiven Modi die [Anmeldung und API-Schlüssel](authentication.md). Für CLI-Starts `--state-dir`, `--public-origin` und bei Bedarf `--trusted-proxy` verwenden und Benutzer vorher mit dem Konsolenwerkzeug anlegen. Unangemeldete Beispiele unten gelten ausschließlich für fiktive Demo-Modi. Vorhandene Hardware-Schreibfreigaben bleiben unabhängig von Benutzerrechten erhalten.
 
 Ab 0.5.0 ist der [eigenständige Betrieb ohne p4d/MariaDB](standalone.md) der neue Hauptweg. `GET /sensors` liefert nun Metadaten zusammen mit letzten Werten; siehe dort auch Sensor-Konfiguration und Historienstatus. Die folgenden Abschnitte beschreiben zusätzlich die weiterhin verfügbaren älteren Modi.
 
-Der Dienst sammelt regelmäßig Werte vom Simulator oder der realen Heizung und bietet das Webmenü und die HTTP-API. `demo-db` zeichnet ausschließlich in separater Test-MariaDB auf, `database` zeigt den Bestand ausschließlich lesend. `hardware-read` nutzt den begrenzten Lesetest mit separater Aufzeichnung; `hardware-live` führt mit ausdrücklicher Freigabe die bestehende p4d-Datenbank fort. Siehe [Dauerbetrieb und Rückkehr](production.md). Heizungsparameter schreiben bleibt auf Simulator-Modi begrenzt.
+Der Dienst sammelt regelmäßig Werte vom Simulator oder der realen Heizung und bietet das Webmenü und die HTTP-API. `demo-db` zeichnet ausschließlich in separater Test-MariaDB auf, `database` zeigt den Bestand ausschließlich lesend. `hardware-read` nutzt den begrenzten Lesetest mit separater Aufzeichnung; `hardware-live` führt mit ausdrücklicher Freigabe die bestehende p4d-Datenbank fort. Siehe [Dauerbetrieb und Rückkehr](production.md). In den hier beschriebenen älteren Hardware-Modi bleibt Heizungs-Schreiben gesperrt; für aktuellen eigenständigen Betrieb mit freigegebenen Parametern siehe die Standalone-Anleitung.
 
 ## Installation und Start
 
@@ -17,7 +17,7 @@ python3 -m venv .venv
 .venv/bin/froeling-bridge serve
 ```
 
-Der Dienst ist über `http://SERVER-IP:8000` im LAN erreichbar und bindet standardmäßig an `0.0.0.0`, ohne Debugger/Reload. `--host 127.0.0.1` beschränkt ihn bei Bedarf auf lokale Zugriffe. Das Aufzeichnungsintervall beträgt 60 Sekunden; `--interval 5` und `--port 8001` ändern die lokalen Demo-Einstellungen. SIGINT/SIGTERM beenden den Dienst. Ein Produktions-Authentifizierungsverfahren ist noch offen. Im Defaultmodus gibt es keinen Zugriff auf `/dev/ttyUSB0`.
+Der Dienst ist über `http://SERVER-IP:8000` im LAN erreichbar und bindet standardmäßig an `0.0.0.0`, ohne Debugger/Reload. `--host 127.0.0.1` beschränkt ihn bei Bedarf auf lokale Zugriffe. Das Aufzeichnungsintervall beträgt 60 Sekunden; `--interval 5` und `--port 8001` ändern die lokalen Demo-Einstellungen. SIGINT/SIGTERM beenden den Dienst. Produktive Modi verlangen Anmeldung; dieser ungeschützte Start ist ausschließlich eine Demo. Im Defaultmodus gibt es keinen Zugriff auf `/dev/ttyUSB0`.
 
 | Modus | Datenquelle | Aufzeichnung | Heizungsjobs |
 | --- | --- | --- | --- |
@@ -115,7 +115,7 @@ Joboperationen: `status`, `firmware`, `discover_menu`, `measurement`, `read_para
 
 Erfolgreiche Schreibresultate heißen `confirmed` oder `unchanged`. Fehler unterscheiden `verification_failed` mit tatsächlichem Nachlesewert und `outcome_unknown` mit Phase. Polling des Jobs führt keinen erneuten Schreibversuch aus. Eine erneute POST-Anfrage ist ein neuer Auftrag, keine idempotente Wiederholung.
 
-Die Warteschlange fasst 64 Aufträge; maximal 1.000 Jobresultate bleiben im Speicher. Bei Platzbedarf werden abgeschlossene Resultate entfernt (danach HTTP 404). Neustarts verlieren diese Daten und führen keine Aufträge erneut aus. Authentifizierung, dauerhaftes Auftragsjournal und produktiver Betrieb folgen vor Freigabe einer realen Schreibanbindung.
+Die Warteschlange fasst 64 Aufträge; maximal 1.000 Jobresultate bleiben im Speicher. Bei Platzbedarf werden abgeschlossene Resultate entfernt (danach HTTP 404). Neustarts verlieren diese Daten und führen keine Aufträge erneut aus. Diese Aussage zum flüchtigen Job-Speicher beschreibt die älteren Betriebsarten. Der aktuelle eigenständige Betrieb besitzt Authentifizierung und ein lokales Schreibjournal; siehe Standalone-Anleitung.
 
 Ein ausführbares Beispiel für alle wesentlichen API-Abläufe:
 
@@ -144,3 +144,15 @@ Reale Schreibmitschnitte sind zusätzliche spätere Validierung. Der Quellcode v
 Zeitprogramme werden über `/api/v1/time-programs` mit den Gerätenamen und Wochentagen aus dem vorhandenen Menü angeboten. Die Adresszuordnung folgt p4d. Die Oberfläche lädt beim Öffnen den gemeinsamen Cache; nur ein leerer Cache löst automatisch eine vollständige Heizungsabfrage aus. „Aktualisieren“ liest bewusst neu. Erfolgreiche vollständige Listen ersetzen den Cache; fehlgeschlagene Aktualisierungen erhalten den letzten erfolgreichen Stand. Im Hardwaretest liegt er privat unter `/var/lib/froeling-bridge-test/time-programs-cache.json` und bleibt über Dienstneustarts erhalten. Die Originaldatenbank wird dafür nicht verändert. Die API liefert Lesezeitpunkt und Alter; parallele Aktualisierungen teilen einen Auftrag.
 
 Menüwerte werden wie im Original nach Typ gelesen: Messwerte über `30`, Ein-/Ausgänge über `44`/`45`/`46`, Firmware über `41`, Parameter über `55`. `read_menu_value` adressiert eine bekannte Menü-ID für reine Wertanzeigen; `read_parameter` bleibt für Parametermetadaten. Suchergebnisse nutzen erreichbare Menüpfade und deren Namen. Rohadressen bleiben in der API erhalten, werden im normalen Menü aber nicht als Ersatz für Namen angezeigt.
+
+## Entwicklungstests
+
+Aus dem Checkout mit installiertem Service-Extra:
+
+```sh
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+git submodule update --init --recursive
+python3 docs/tools/verify_protocol_examples.py
+```
+
+Die Protokollprüfung benötigt Git und einen C++17-Compiler und öffnet weder seriellen Port noch Datenbank. Für MariaDB-Tests eine ausdrücklich separate Testdatenbank verwenden.

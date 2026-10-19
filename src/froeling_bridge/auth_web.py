@@ -1,5 +1,7 @@
 """HTTP authentication and deny-by-default operation authorization."""
 import hmac
+import ipaddress
+import re
 from pathlib import Path
 import secrets
 from urllib.parse import urlsplit
@@ -8,19 +10,57 @@ from .auth import AuthStore, AuthUnavailable, Throttled, COOKIE, READ_JOBS, WRIT
 from .errors import ReadOnlyViolation, ValidationError
 
 
+def local_address(value):
+    try:
+        address = ipaddress.ip_address(value)
+        if getattr(address, 'ipv4_mapped', None):
+            address = address.ipv4_mapped
+        return any(address in ipaddress.ip_network(network) for network in (
+            '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', '127.0.0.0/8',
+            '169.254.0.0/16', 'fc00::/7', 'fe80::/10', '::1/128'))
+    except (ValueError, TypeError):
+        return False
+
+
+def local_hostname(value):
+    return local_address(value) or bool(value and re.fullmatch(
+        r'[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.local)?', value, re.IGNORECASE))
+
+
+def validate_auth_config(config):
+    if not isinstance(config, dict) or set(config) - {'mode', 'public_origin', 'trusted_proxy'}:
+        raise ValidationError('invalid authentication settings')
+    mode = config.get('mode', 'https')
+    if mode == 'lan':
+        if set(config) != {'mode'}:
+            raise ValidationError('LAN mode uses the direct local address, without proxy settings')
+        return
+    if mode != 'https':
+        raise ValidationError('authentication mode must be lan or https')
+    origin = urlsplit(config.get('public_origin', ''))
+    if origin.scheme != 'https' or not origin.hostname or origin.username or origin.password or origin.path not in ('', '/') or origin.query or origin.fragment:
+        raise ValidationError('public_origin must be an HTTPS origin without path or credentials')
+    proxy_options(config)
+
+
 class WebAuth:
     def __init__(self, app, service, enabled):
         from flask import g, request, jsonify, redirect, render_template, make_response
         from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
         self.enabled = enabled
         self.store = None
-        self.origin = (getattr(service, "auth_config", None) or {}).get("public_origin", "")
+        config = getattr(service, "auth_config", None) or {}
+        self.lan = config.get("mode") == "lan"
+        self.origin = config.get("public_origin", "")
+        session_cookie = "froeling_lan_session" if self.lan else COOKIE
+        login_cookie = "froeling_lan_login" if self.lan else "__Host-froeling_login"
+        secure_cookie = not self.lan
         signer = URLSafeTimedSerializer(secrets.token_bytes(32), salt="login-csrf")
         if enabled:
             origin = urlsplit(self.origin)
             valid_origin = origin.scheme == "https" and origin.hostname and not origin.username and not origin.password and not origin.query and not origin.fragment and origin.path in ("", "/")
             self.origin = self.origin.rstrip("/") if valid_origin else ""
-            if self.origin:
+            if self.origin and not self.lan:
                 app.config["TRUSTED_HOSTS"] = [origin.hostname, "127.0.0.1", "localhost", "[::1]"]
             state = getattr(service, "auth_state_dir", None)
             if not state and hasattr(service.repository, "path"):
@@ -43,14 +83,17 @@ class WebAuth:
             return result
 
         def require_store():
-            if not self.store or not self.origin:
+            if not self.store or (not self.origin and not self.lan):
                 raise AuthUnavailable()
             return self.store
+
+        def expected_origin():
+            return request.host_url.rstrip("/") if self.lan else self.origin
 
         def login_page(message=None, status=200):
             nonce = secrets.token_urlsafe(32)
             result = make_response(render_template("login.html", csrf=signer.dumps(nonce), message=message), status)
-            result.set_cookie("__Host-froeling_login", nonce, secure=True, httponly=True,
+            result.set_cookie(login_cookie, nonce, secure=secure_cookie, httponly=True,
                               samesite="Strict", path="/", max_age=600)
             return result
 
@@ -72,8 +115,11 @@ class WebAuth:
             if request.path == "/healthz" or request.path.startswith("/static/"):
                 return None
             store = require_store()
+            if self.lan:
+                if not local_address(request.remote_addr) or not local_hostname(urlsplit(request.host_url).hostname):
+                    return error("local_network_required", "Dieser Zugang ist nur im Heimnetz verfügbar.", 403)
             # Forwarded scheme is accepted by Waitress only from the configured peer.
-            if not request.is_secure and request.remote_addr not in ("127.0.0.1", "::1"):
+            if not self.lan and not request.is_secure and request.remote_addr not in ("127.0.0.1", "::1"):
                 if request.method == "GET" and not request.path.startswith("/api/"):
                     return redirect(self.origin + "/login", code=303)
                 return error("https_required", "HTTPS required.", 400)
@@ -87,7 +133,7 @@ class WebAuth:
                     return error("authentication_required", "Anmeldung erforderlich.", 401)
                 actor = store.authenticate(parts[1], "key")
             else:
-                actor = store.authenticate(request.cookies.get(COOKIE), "session")
+                actor = store.authenticate(request.cookies.get(session_cookie), "session")
             if actor is None:
                 if request.method == "GET" and request.path in ("/", "/anlage"):
                     return redirect("/login", code=303)
@@ -95,7 +141,7 @@ class WebAuth:
             g.actor = actor
             store.limit("api:" + actor["kind"] + ":" + actor["id"], 300, 60)
             if request.method not in ("GET", "HEAD", "OPTIONS") and actor["kind"] == "session":
-                if request.headers.get("Origin") != self.origin or not hmac.compare_digest(
+                if request.headers.get("Origin") != expected_origin() or not hmac.compare_digest(
                         request.headers.get("X-CSRF-Token", ""), actor["csrf"]):
                     return error("csrf_failed", "Anfrage nicht bestätigt. Bitte neu anmelden.", 403)
             if request.method == "PATCH" or request.path == "/api/v1/plant/activate":
@@ -126,7 +172,7 @@ class WebAuth:
             if not enabled:
                 return redirect("/")
             require_store()
-            if not request.is_secure:
+            if not self.lan and not request.is_secure:
                 return redirect(self.origin + "/login", code=303)
             return login_page()
 
@@ -135,8 +181,8 @@ class WebAuth:
             if not enabled:
                 return error("authentication_unavailable", "Login is not used in this simulator.", 404)
             store = require_store()
-            if not request.is_secure or request.headers.get("Origin") != self.origin:
-                return error("csrf_failed", "HTTPS and same-origin login required.", 403)
+            if (not self.lan and not request.is_secure) or request.headers.get("Origin") != expected_origin():
+                return error("csrf_failed", "Anmeldung muss von derselben Adresse erfolgen.", 403)
             data = request.get_json() if request.is_json else request.form
             if not data or set(data) != {"username", "password", "csrf"}:
                 raise ValidationError("login requires username, password and csrf")
@@ -144,7 +190,7 @@ class WebAuth:
                 raise ValidationError("login fields must be strings")
             try:
                 nonce = signer.loads(data["csrf"], max_age=600)
-                valid = isinstance(nonce, str) and hmac.compare_digest(nonce, request.cookies.get("__Host-froeling_login", ""))
+                valid = isinstance(nonce, str) and hmac.compare_digest(nonce, request.cookies.get(login_cookie, ""))
             except (BadSignature, SignatureExpired, TypeError):
                 valid = False
             if not valid:
@@ -152,12 +198,12 @@ class WebAuth:
             token = store.login(data["username"], data["password"], request.remote_addr or "unknown")
             if not token:
                 return error("invalid_credentials", "Anmeldung fehlgeschlagen.", 401) if request.is_json else login_page("Anmeldung fehlgeschlagen.", 401)
-            old = store.authenticate(request.cookies.get(COOKIE), "session")
+            old = store.authenticate(request.cookies.get(session_cookie), "session")
             if old:
                 store.logout(old)
             result = jsonify(authenticated=True) if request.is_json else redirect("/anlage", code=303)
-            result.set_cookie(COOKIE, token, secure=True, httponly=True, samesite="Strict", path="/", max_age=43200)
-            result.delete_cookie("__Host-froeling_login", secure=True, httponly=True, samesite="Strict", path="/")
+            result.set_cookie(session_cookie, token, secure=secure_cookie, httponly=True, samesite="Strict", path="/", max_age=43200)
+            result.delete_cookie(login_cookie, secure=secure_cookie, httponly=True, samesite="Strict", path="/")
             return result
 
         @app.get("/api/v1/auth/me")
@@ -173,7 +219,7 @@ class WebAuth:
             if enabled:
                 require_store().logout(g.actor)
             result = jsonify(logged_out=True)
-            result.delete_cookie(COOKIE, secure=True, httponly=True, samesite="Strict", path="/")
+            result.delete_cookie(session_cookie, secure=secure_cookie, httponly=True, samesite="Strict", path="/")
             return result
 
     def writer(self):

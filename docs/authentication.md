@@ -1,8 +1,14 @@
-# Anmeldung und API-Zugang ab 0.7.0
+# Benutzer, API-Schlüssel und optionaler HTTPS-Zugang
 
 Im produktiven Betrieb sind GUI und `/api/v1` geschützt, auch im LAN. Die Browser-Anmeldung verwendet Benutzername und Passwort ohne zweiten Faktor. Benutzer, Passwörter und API-Schlüssel verwaltet ausschließlich der Serverbetreiber auf der Konsole. Es gibt keine Registrierung, Passwortänderung oder Passwortwiederherstellung im Web.
 
-## Einrichtung und HTTPS
+## Normaler Betrieb im Heimnetz
+
+Neue Installationen ab 0.7.1 verwenden direkten Zugang über `http://RECHNER-IP:8000`, ohne Domain oder Reverse Proxy. Der Installer hinterlegt dafür `"auth": {"mode": "lan"}`. Öffne die Adresse von einem Gerät im selben Heimnetz und melde dich an. Die vollständigen ersten Schritte stehen im [README](../README.md).
+
+Dieser HTTP-Zugang ist unverschlüsselt und für ein vertrauenswürdiges Heimnetz bestimmt. Er akzeptiert lokale IP-Adressen sowie Rechnernamen wie `raspberrypi` und `raspberrypi.local`; öffentliche Client-IP-Adressen und öffentliche Hostnamen werden abgewiesen. Anmeldung, Rollen, CSRF-Schutz und Ratenbegrenzung bleiben aktiv. Für einen Internetzugang die optionale HTTPS-Variante unten verwenden.
+
+## Erstes Konto
 
 Der native Installer richtet die lokale Zugangsdatenbank und einen eigenen Leseschlüssel für die Gesundheitsprüfung ein. Bei der Ersteinrichtung erzeugt er `operator` mit Schreibrechten und einem zufälligen Passwort. Auf dem Heizungsrechner abholen:
 
@@ -11,19 +17,6 @@ sudo cat /var/lib/froeling-bridge-installer/initial-login.json
 ```
 
 Nach Übernahme in den Passwortmanager die einmalige rootgeschützte Übergabedatei entfernen. Das Passwort kann jederzeit auf der Konsole ersetzt werden. Gewöhnliche Konten speichern ausschließlich Passwort-Hashes.
-
-Die geschützte Konfiguration erhält zusätzlich:
-
-```json
-"auth": {
-  "public_origin": "https://heizung.example.org",
-  "trusted_proxy": "192.0.2.20"
-}
-```
-
-`public_origin` ist die genaue HTTPS-Adresse ohne Unterpfad. `trusted_proxy` ist genau die IP des Reverse Proxy, niemals `*`. Die [Apache-Vorlage](../deploy/apache/froeling-bridge.conf.example) reicht Authorization/Cookies weiter und bereinigt fremde Proxy-Header. Browser verwenden die HTTPS-Adresse auch im LAN. Unverschlüsselter Browser-Login am Backend ist gesperrt; lokale Monitor-Anfragen dürfen Bearer-Schlüssel über Loopback verwenden.
-
-Bei HTTP zwischen Reverse Proxy und Bridge endet die Verschlüsselung am Proxy: Passwörter, Cookies und API-Schlüssel sind auf diesem internen Abschnitt unverschlüsselt. Diese Variante setzt ein vertrauenswürdiges LAN voraus. Keine zusätzliche öffentliche Portweiterleitung auf den Backend-Port einrichten. Fehlende/defekte Authentifizierung schaltet niemals auf anonymen Zugriff zurück. `/healthz` liefert öffentlich nur `{"status":"ok"}`, keine Heizungsdaten.
 
 ## Benutzer auf der Konsole verwalten
 
@@ -87,10 +80,27 @@ Auf dem Handy öffnet der Knopf „Menü“ die Navigation. Benutzername, Rolle 
 
 ## Sitzungen, Speicherung und Überwachung
 
-Sitzungen liegen serverseitig mit einem Secure/HttpOnly/SameSite-Strict-Cookie. Sie enden nach 30 Minuten ohne Anfragen, spätestens nach zwölf Stunden; GUI-Abfragen zählen als Anfragen. Logout widerruft die Sitzung. Browser-POST/PATCH benötigen zusätzlich den CSRF-Header aus `/api/v1/auth/me` und dieselbe Origin. API-Schlüssel benötigen keinen CSRF-Token.
+Sitzungen liegen serverseitig. Beide Zugangsvarianten verwenden HttpOnly-/SameSite-Strict-Cookies ohne Domainfreigabe; im HTTPS-Modus zusätzlich Secure und den `__Host-`-Präfix. Im LAN-HTTP-Modus sind getrennt benannte Cookies technisch ohne Secure nötig; dort sind Zugangsdaten und Sitzungen auf dem Übertragungsweg unverschlüsselt. Sie enden nach 30 Minuten ohne Anfragen, spätestens nach zwölf Stunden; GUI-Abfragen zählen als Anfragen. Logout widerruft die Sitzung. Browser-POST/PATCH benötigen zusätzlich den CSRF-Header aus `/api/v1/auth/me` und dieselbe Origin. API-Schlüssel benötigen keinen CSRF-Token.
 
 `auth.sqlite3` im privaten Zustandsordner enthält Benutzer, Argon2id-Passwort-Hashes (64 MiB, drei Durchläufe, Parallelität eins), SHA-256-Hashes zufälliger Schlüssel/Sitzungskennungen und Sicherheitsereignisse. Modus 0600; keine Klartextpasswörter oder vollständigen API-Schlüssel darin. Es ist keine Vollverschlüsselung der SQLite-Datei. Sicherungen sind vertraulich und bewahren Benutzer/Schlüssel; Sitzungen werden bei Wiederherstellung verworfen.
 
-Anmeldeversuche sind je Benutzer/IP und IP begrenzt; höchstens zwei Passwortprüfungen laufen gleichzeitig. Authentifizierte Anfragen: 300 pro Minute und Zugang; zusätzliche Heizungsjobs: 120 pro Minute und Benutzer. Sicherheitsereignisse bleiben 30 Tage erhalten. Diese Maßnahmen ersetzen keinen gepflegten Host und keine korrekte HTTPS-/Proxy-Konfiguration.
+Anmeldeversuche sind je Benutzer/IP und IP begrenzt; höchstens zwei Passwortprüfungen laufen gleichzeitig. Authentifizierte Anfragen: 300 pro Minute und Zugang; zusätzliche Heizungsjobs: 120 pro Minute und Benutzer. Sicherheitsereignisse bleiben 30 Tage erhalten. Diese Maßnahmen ersetzen keinen gepflegten Host. Ein Internetzugang benötigt passend eingerichtetes HTTPS.
 
-Die native Überwachung verwendet `bridge-monitor` und `/etc/froeling-bridge/monitor-api-key` (root, 0600). Diesen Benutzer nicht für gewöhnliche Clients verwenden. Abgelehnte Monitor-Anmeldungen und ein ausgefallener Authentifizierungsspeicher lösen keinen Bridge-Neustart aus. Zur Wiederherstellung des Monitorzugangs: `sudo /opt/froeling-bridge/0.7.0/venv/bin/python -I -m froeling_bridge.auth_setup`. Demo-Modi bleiben fiktiv und ohne Anmeldung; sie dürfen keinen produktiven Zugang ersetzen.
+Die native Überwachung verwendet `bridge-monitor` und `/etc/froeling-bridge/monitor-api-key` (root, 0600). Diesen Benutzer nicht für gewöhnliche Clients verwenden. Abgelehnte Monitor-Anmeldungen und ein ausgefallener Authentifizierungsspeicher lösen keinen Bridge-Neustart aus. Zur Wiederherstellung des Monitorzugangs: `sudo /opt/froeling-bridge/0.7.1/venv/bin/python -I -m froeling_bridge.auth_setup`. Demo-Modi bleiben fiktiv und ohne Anmeldung; sie dürfen keinen produktiven Zugang ersetzen.
+
+## Optional: HTTPS und Reverse Proxy
+
+Wer den Dienst per Domain und HTTPS bereitstellen möchte, kann selbst einen Reverse Proxy einrichten. Für die normale Installation im Heimnetz ist das nicht erforderlich. Bei einer neuen LAN-Installation den bisherigen `auth`-Abschnitt in `/etc/froeling-bridge/settings.json` vollständig durch diesen ersetzen:
+
+```json
+"auth": {
+  "public_origin": "https://heizung.example.org",
+  "trusted_proxy": "192.0.2.20"
+}
+```
+
+`public_origin` ist die genaue HTTPS-Adresse ohne Unterpfad. `trusted_proxy` ist genau die IP des Reverse Proxy, niemals `*`. Die [Apache-Vorlage](../deploy/apache/froeling-bridge.conf.example) reicht Authorization/Cookies weiter und bereinigt fremde Proxy-Header. Nach dieser Umstellung verwenden Browser die HTTPS-Adresse auch im LAN. In dieser Variante ist unverschlüsselter Browser-Login am Backend gesperrt; lokale Monitor-Anfragen dürfen Bearer-Schlüssel über Loopback verwenden.
+
+Bei HTTP zwischen Reverse Proxy und Bridge endet die Verschlüsselung am Proxy: Passwörter, Cookies und API-Schlüssel sind auf diesem internen Abschnitt unverschlüsselt. Diese Variante setzt ein vertrauenswürdiges LAN voraus. Keine zusätzliche öffentliche Portweiterleitung auf den Backend-Port einrichten. Fehlende/defekte Authentifizierung schaltet niemals auf anonymen Zugriff zurück. `/healthz` liefert öffentlich nur `{"status":"ok"}`, keine Heizungsdaten.
+
+Die Änderung benötigt einen geplanten Dienstneustart. Der Proxy muss Authorization-Header und Cookies weiterreichen. Der HTTPS-Modus verwendet andere, ausschließlich für HTTPS geeignete Cookies; nach der Umstellung erneut anmelden. Bereits vorhandene HTTPS-Konfigurationen bleiben bei einem Update erhalten und werden nicht auf LAN-Modus umgestellt.

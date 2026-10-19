@@ -17,7 +17,8 @@ from froeling_bridge.menu import demo_time_program_catalog
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--simulate-only',action='store_true',required=True)
-    parser.parse_args()
+    parser.add_argument('--lan', action='store_true', help='test direct HTTP LAN login without proxy/TLS')
+    args=parser.parse_args()
     with tempfile.TemporaryDirectory() as directory:
         root=Path(directory)
         subprocess.run(['openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','1',
@@ -28,9 +29,9 @@ def main():
         runtime.repository.time_programs=demo_time_program_catalog
         service.allowed_write_operations={'write_parameter'}
         server=make_server('127.0.0.1',0,lambda e,s:[],threaded=True,
-                          ssl_context=(str(root/'cert.pem'),str(root/'key.pem')))
-        origin='https://127.0.0.1:'+str(server.server_port)
-        service.auth_config=dict(public_origin=origin)
+                          ssl_context=None if args.lan else (str(root/'cert.pem'),str(root/'key.pem')))
+        origin=('http' if args.lan else 'https')+'://127.0.0.1:'+str(server.server_port)
+        service.auth_config=dict(mode='lan') if args.lan else dict(public_origin=origin)
         service.auth_state_dir=directory
         server.app=create_app(service,authentication=True)
         for role in ['read','write']:service.auth_store.add_user(role,'Fictional browser test password! 19',role)
@@ -38,13 +39,16 @@ def main():
         browser=Browser()
         try:
             browser.call('Page.enable');browser.call('Runtime.enable')
-            browser.call('Security.setIgnoreCertificateErrors',dict(ignore=True))
+            if not args.lan:browser.call('Security.setIgnoreCertificateErrors',dict(ignore=True))
             for role in ['read','write']:
                 browser.call('Page.navigate',dict(url=origin+'/anlage'))
                 browser.wait("location.pathname==='/login' && !!document.querySelector('#username')")
                 browser.js("document.querySelector('#username').value="+repr(role)+";document.querySelector('#password').value='Fictional browser test password! 19';document.querySelector('form').requestSubmit()")
                 browser.wait("location.pathname==='/anlage' && document.querySelectorAll('.plant-card').length===6")
                 browser.wait("document.querySelector('#account-role').textContent==="+repr('Nur Lesen' if role=='read' else 'Lesen + Schreiben'))
+                cookies=browser.call('Network.getCookies',dict(urls=[origin]))['cookies']
+                cookie=next(c for c in cookies if c['name']==('froeling_lan_session' if args.lan else '__Host-froeling_session'))
+                assert cookie['secure']==(not args.lan) and cookie['httpOnly'] and cookie['sameSite']=='Strict'
                 verify_navigation(browser)
                 for width in [390,1440]:
                     browser.call('Emulation.setDeviceMetricsOverride',dict(width=width,height=1000,deviceScaleFactor=1,mobile=width<650))
@@ -73,7 +77,7 @@ def main():
             assert transport.heater.parameter_write_count==0
             assert transport.heater.time_write_count==0
             assert not browser.errors,browser.errors
-            print('Auth browser: real HTTPS, both roles, mobile/desktop, disabled time fields, logout and session revocation; no heater writes.')
+            print('Auth browser: '+('direct LAN HTTP' if args.lan else 'real HTTPS')+', both roles, mobile/desktop, disabled time fields, logout and session revocation; no heater writes.')
         finally:
             browser.close();server.shutdown();server.server_close();runtime.close()
 

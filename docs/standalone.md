@@ -1,18 +1,12 @@
-# Eigenständiger Betrieb (Quellstand 0.7.0)
+# Eigenständiger Betrieb (Quellstand 0.7.1)
 
 Die Bridge kann ohne p4d und ohne MariaDB starten. Sie liest Sensorbeschreibungen, Menü und Zeitprogramme direkt aus der Steuerung. SQLite speichert den Arbeitskatalog und Einstellungen lokal; MariaDB ist ausschließlich die optionale p4d-kompatible Historie. Protokoll und Darstellung orientieren sich an linux-p4d von Jörg Wendel und Mitwirkenden.
 
 ## Neue Installation
 
-Debian/Ubuntu mit systemd, Python >=3.9 und einem seriellen Heizungsadapter:
+Für die vollständige Schrittfolge einschließlich Erstpasswort und Benutzeranlage dem [README](../README.md) folgen. Die folgenden Abschnitte erklären Konfiguration und Betrieb im Detail.
 
-```sh
-git clone --recurse-submodules git@github.com:vgarcia007/froeling-bridge.git
-cd froeling-bridge
-sudo bash deploy/install-standalone.sh
-```
-
-Das Skript richtet Python-Umgebung, Dienstbenutzer, Adapterrechte und Autostart ein. Fehlende Debian/Ubuntu-venv-Unterstützung und fuser werden installiert. Bei eindeutigem Adapter wird dessen dauerhafter `/dev/serial/by-id/…`-Pfad gewählt. Bei mehreren Adaptern muss der richtige ausgewählt werden. Danach kann optional eine MariaDB-Verbindung eingegeben werden; Passwort verdeckt, keine manuellen SQL-Befehle. Eine bestehende Verbindung der bisherigen Bridge-Einrichtung wird automatisch übernommen.
+Der Installer richtet Python-Umgebung, Dienstbenutzer, Adapterrechte, Heimnetzzugang und Autostart ein. Fehlende Debian/Ubuntu-venv-Unterstützung und `fuser` werden installiert. Ein eindeutig erkannter Adapter wird automatisch gewählt, bevorzugt über `/dev/serial/by-id/…`. MariaDB ist optional; ein vorhandener Zugang aus einer älteren Bridge-Einrichtung kann übernommen werden.
 
 Für unbeaufsichtigte Einrichtung eine **private** JSON-Datei vorbereiten und übergeben:
 
@@ -20,19 +14,11 @@ Für unbeaufsichtigte Einrichtung eine **private** JSON-Datei vorbereiten und ü
 sudo bash deploy/install-standalone.sh --config /geschuetzt/bridge-settings.json
 ```
 
-Felder: `device` (absoluter Gerätepfad), optional `host` (Standard `0.0.0.0`), `port` (8000), `interval` (60 Sekunden), `history` mit `host`, `port`, `database`, `user`, `password`. Keine Zugangsdaten in Shellargumente schreiben. Der native Dienst verwendet `/var/lib/froeling-bridge`; CLI-Demos erlauben eigene Zustandsordner.
+Benötigt werden `device` (absoluter Gerätepfad) und `auth` mit `{"mode":"lan"}` für direkten Heimnetzzugang oder der HTTPS-Konfiguration aus der [Zugangsanleitung](authentication.md#optional-https-und-reverse-proxy). Optional: `host` (Standard `0.0.0.0`), `port` (8000), `interval` (60 Sekunden) und `history` mit `host`, `port`, `database`, `user`, `password`. Keine Zugangsdaten in Shellargumente schreiben. Der native Dienst verwendet `/var/lib/froeling-bridge`; CLI-Demos erlauben eigene Zustandsordner.
 
-Das auf dem konkreten Zielhost beobachtete Zeitprogramm-Antwortprofil `43 -> 42` wird bei Einrichtung vorbelegt. `reply_profile` kann es ausdrücklich ersetzen. First/Next-Discovery akzeptiert auf Next sowohl den First- als auch den Next-Antwortcode derselben Liste; fremde Antworten und ungültige Prüfsummen bleiben Fehler. Dies bildet die ursprünglichen p4d-Listenabläufe ab, ohne beliebige Antwortbefehle freizugeben.
+Der erste Start erstellt einen vollständigen lokalen Katalog aus der Heizung; das kann mehrere Minuten dauern. Der Installer wartet auf betriebsbereite Erfassung. Details zu gerätespezifischen Antwortprofilen und Discovery stehen in der [Protokolldokumentation](protocol.md); normalerweise musst du sie nicht konfigurieren.
 
-0.5.1 korrigiert die quellenbasierten Listenabläufe: vor Sensor- und Menülisten jeweils `CHECK` mit `Tescht ;-)`; kurze nicht abschließende Einträge überspringen wie p4d (`wrnEmpty`/`wrnSkip`). Die Höchstzahl zählt auch übersprungene Einträge. Eine einzelne Anfrage/Antwort erhält maximal zwei Sekunden innerhalb der längeren Gesamtfrist; diese Frist wird bei fragmentierten Antworten nicht neu gestartet. Das Original verwendet zwei Sekunden für den Header und eigene Byte-Lesefristen. Die Bridge begrenzt zusätzlich die gesamte einzelne Anfrage/Antwort.
-
-`/api/v1/runtime.last_failure` und das Dienstjournal nennen Phase, Fehlerklasse und bei Listenfehlern Anfragebefehl sowie Eintragsnummer. Beliebige Betriebssystem-/Datenbankfehlermeldungen und rohe Betriebswerte werden nicht ausgegeben. Der letzte Fehler bleibt nach einer Erholung als Diagnose erhalten.
-
-Bei aktivierter automatischer Rückfallpolitik kehrt ein alter p4d-Host beim ersten vom Worker gemeldeten Startfehler sofort zu p4d zurück. `status` bleibt auch während Aktivierung erreichbar; `rollback` signalisiert einen Abbruch, bevor es begrenzt auf die Dienstsperre wartet. Der unabhängige Starttimer bleibt zusätzliche Absicherung. Ein 24-Stunden-Test beobachtet erst funktionierenden Lesebetrieb; er ist keine Wartezeit ohne Monitoring.
-
-0.5.2 behandelt wiederholte Sensordefinitionen wie Original-`initValueFacts`/`addValueFact`: pro Typ und Adresse ein Sensor, spätere Definition aktualisiert die Metadaten; individuelle Auswahl und Aufzeichnungsflags bleiben erhalten. Die echte Steuerung hat beim Erststart 161 wiederholte Definitionen geliefert. Die frühere pauschale Ablehnung war ein Fehler der Bridge.
-
-Der unabhängige `froeling-bridge-health.timer` prüft alle 30 Sekunden ausschließlich die gespeicherten HTTP-Ansichten. Er öffnet weder Adapter noch Datenbank. Eine aktuelle Statusantwort allein genügt bei ausgewählten Messsensoren nicht: mindestens eine ausgewählte Messung muss aus der Steuerung stammen und innerhalb von drei Abfrageintervallen (mindestens 180 Sekunden) gelesen worden sein. Nach 60 Sekunden anhaltendem Fehler kehrt ein vorhandener p4d-Host über den normalen Helfer zum Original zurück; ein neuer Host startet die Bridge neu. Einzelne defekte Sensoren lösen bei sonst aktuellen Messwerten keine vollständige Umschaltung aus. MariaDB-Ausfall löst keine Rückkehr aus, solange das Live-Monitoring funktioniert. Die initiale abgesicherte Umschaltung hat ihren eigenen Starttimer; auf einem neuen Host erhält ein fehlerfreier Katalogneuaufbau ausreichend Zeit.
+## Bestehende p4d-Installation übernehmen
 
 Bei einer vorhandenen laufenden p4d-Installation ist der Wechsel ausdrücklich zu wählen:
 
@@ -42,9 +28,13 @@ sudo bash deploy/install-standalone.sh --take-over-p4d
 
 Aktive alte Testfenster werden abgewiesen. Das Skript prüft Port und Prozessinspektion, hält vor der Umschaltung einen unabhängigen Rückkehrtimer bereit und wartet auf abgeschlossene Discovery sowie mindestens einen erfolgreichen Sammeldurchlauf. Originaldateien und alte Releases bleiben erhalten. Ein fremdes Releaseverzeichnis wird nicht übernommen; identische abgebrochene Einrichtung kann fortgesetzt werden.
 
-Webmenü/API ab 0.7.0 über den [HTTPS-Zugang mit Anmeldung](authentication.md) verwenden. Der Installer fragt nach `auth.public_origin`; bei vorhandenen privaten Konfigurationsdateien diesen Abschnitt ergänzen und bei vorgeschaltetem Proxy dessen genaue IP als `auth.trusted_proxy` angeben. Benutzer und API-Schlüssel verwaltet die Konsole. Beim ersten Start kann der Aufbau großer Menükataloge mehrere Minuten benötigen; das geschützte `/api/v1/runtime` zeigt die aktuelle Phase. Eine unvollständige Discovery ersetzt keinen vollständigen Katalog.
+Neue Installation: `http://RECHNER-IP:8000` im Browser öffnen, Erstpasswort mit `sudo cat /var/lib/froeling-bridge-installer/initial-login.json` anzeigen und als `operator` anmelden. Benutzer und API-Schlüssel verwaltet die Konsole; [Anleitung](authentication.md). HTTPS und Reverse Proxy sind eine optionale eigene Einrichtung, keine Voraussetzung. Vorhandene HTTPS-Konfigurationen bleiben erhalten. Beim ersten Start kann der Aufbau großer Menükataloge mehrere Minuten benötigen; das geschützte `/api/v1/runtime` zeigt die aktuelle Phase. Eine unvollständige Discovery ersetzt keinen vollständigen Katalog.
 
 ## Laufender Betrieb und Fehler
+
+Die Gesundheitsüberwachung prüft alle 30 Sekunden die vorhandenen HTTP-Ansichten, ohne selbst auf den Adapter zuzugreifen. Bei anhaltend veralteten Heizungsdaten wird die Bridge wiederhergestellt; bei ausdrücklich aktivierter p4d-Rückfallpolitik erfolgt stattdessen die Rückkehr zum Original. Ein MariaDB-Ausfall beendet funktionierendes Live-Monitoring nicht. Details zur Richtlinie: [Dauerbetrieb](#verbindlicher-api-dauerbetrieb).
+
+`/api/v1/runtime` und das Dienstjournal zeigen Startphase und Fehler. Ein letzter Startfehler kann nach einer Erholung noch als Diagnose erhalten bleiben; aktuellen Zustand zusätzlich prüfen.
 
 - Statusprüfung alle 10 Sekunden, Messwertdurchlauf standardmäßig alle 60 Sekunden. Zustandswechsel löst einen zusätzlichen Durchlauf aus. Abfragen und Benutzerjobs teilen einen seriellen Besitzer.
 - Alle Sensoren werden katalogisiert, nicht automatisch alle abgefragt. Ohne vorhandene Einstellungen sind erreichbare unterstützte Messwert-/I/O-Menüeinträge und UD 1–3 ausgewählt; Historie zunächst aus. Vorhandene Auswahl und individuelle Titel werden aus p4d übernommen. Ein noch nicht unterstützter Sensortyp bleibt sichtbar.
@@ -87,6 +77,77 @@ Bei 60 Sekunden Sammelintervall entsteht je ausgewähltem Signal normalerweise e
 
 OpenAPI: `/api/v1/openapi.json`. `/values`, `/history` und die vorhandenen Jobs bleiben kompatibel. Bestandsansicht und alte Hardwaretests erlauben keine Sensoränderungen.
 
+## Konfiguration und Speicherorte
+
+Die zentrale Datei einer nativen Installation ist:
+
+```text
+/etc/froeling-bridge/settings.json
+```
+
+Du kannst sie durch den Einrichtungsdialog erstellen lassen oder eine eigene private JSON-Datei übergeben:
+
+```bash
+sudo bash deploy/install-standalone.sh --config /geschuetzt/bridge-settings.json
+```
+
+Vollständiges Beispiel mit MariaDB; Gerätepfad und Zugangsdaten anpassen:
+
+```json
+{
+  "device": "/dev/ttyUSB0",
+  "host": "0.0.0.0",
+  "port": 8000,
+  "interval": 60,
+  "auth": {"mode": "lan"},
+  "history": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "database": "froeling",
+    "user": "froeling",
+    "password": "HIER-DAS-DATENBANKPASSWORT"
+  }
+}
+```
+
+Die äußeren Felder `host` und `port` gehören zur **HTTP-API**. Unter `history` stehen Host, Port, Datenbankname, Benutzer und Passwort der **MariaDB**. Ein entfernter MariaDB-Server wird ebenfalls hier eingetragen. `interval` bestimmt den Messwertdurchlauf in Sekunden; Standard ist 60.
+
+Produktive GUI und API benötigen eine Anmeldung. Eine neue Installation verwendet `"auth": {"mode": "lan"}` für direkten HTTP-Zugang im Heimnetz. Für den optionalen HTTPS-Betrieb hinter einem Reverse Proxy gilt: `auth.public_origin` ist dann die HTTPS-Adresse, `auth.trusted_proxy` die tatsächliche Proxy-IP. Der Installer hinterlegt den ersten Benutzer `operator` mit zufälligem Passwort in `/var/lib/froeling-bridge-installer/initial-login.json` (nur root lesbar). Benutzer und API-Schlüssel verwaltet `sudo froeling-bridge-users …`. API-Clients verwenden `Authorization: Bearer …`. Details, Apache-Vorlage und Schutzgrenzen stehen in der [Anmeldeanleitung](authentication.md).
+
+| Gewünschter Betrieb | Konfiguration und Verhalten |
+| --- | --- |
+| Ohne MariaDB | `history` vollständig weglassen. Live-Werte, Menü, Zeitprogramme und Steuerungsfehlerspeicher funktionieren mit lokalem SQLite-Katalog. Keine Messwerthistorie in MariaDB. |
+| Neue oder leere Datenbank | `history` angeben. Die Bridge legt eine fehlende Datenbank und die benötigten Tabellen automatisch an. MariaDB-Server und Benutzer müssen bereits existieren; der Benutzer benötigt passende Erstellungsrechte. |
+| Bestehende p4d-Datenbank | Deren Zugangsdaten unter `history` eintragen. Das vorhandene kompatible Schema wird geprüft, nicht migriert oder neu initialisiert. Messreihen und Auswahl bleiben erhalten; Aufzeichnung und Fehlerabgleich werden fortgeführt. |
+
+Die Bridge installiert keinen MariaDB-Server und legt keine Datenbankbenutzer an. Bei einer neuen/leeren Datenbank erstellt sie die sieben benötigten Tabellen einschließlich `samples`, `valuefacts` und `errors`; das umfasst die Heizungsfunktionen der Bridge, nicht alle p4d-Nebenfunktionen.
+
+Konfigurationsdateien mit Passwörtern privat halten und nicht ins Repository aufnehmen. Der Installer schützt die installierte Datei für root und den Dienstbenutzer. Bestehende Einstellungen bleiben bei erneuter Einrichtung ohne `--config` erhalten. Es gibt derzeit keinen Webdialog für die Datenbankverbindung.
+
+Für spätere Änderungen:
+
+```bash
+sudoedit /etc/froeling-bridge/settings.json
+```
+
+Vorhandene weitere Felder wie `reply_profile` und `write_validation` erhalten. Änderungen werden beim nächsten Dienststart eingelesen; einen dafür nötigen Neustart in einem bewussten Wartungsfenster durchführen. Der Installer ist kein Werkzeug zum Ändern einer laufenden Installation und weist einen bereits aktiven Bridge-Dienst ab.
+
+### Was wird wo gespeichert?
+
+| Speicher | Zweck |
+| --- | --- |
+| Arbeitsspeicher | Zuletzt abgefragte Werte für schnelle API-Antworten |
+| `/var/lib/froeling-bridge/catalogue.sqlite3` | Dauerhafter Katalog, Sensoreinstellungen, letzte Werte und Schreibjournal |
+| `/var/lib/froeling-bridge/time-programs-cache.json` | Zuletzt vollständig gelesene Zeitprogramme |
+| Optionale MariaDB | Messwerthistorie, Min/Max-Werte, p4d-kompatible Metadaten und gespeicherte Fehlerhistorie |
+
+Statusabfragen erfolgen alle **10 Sekunden**, ausgewählte Messwerte standardmäßig alle **60 Sekunden** und zusätzlich bei erkanntem Zustandswechsel. Sensorübersicht und API zeigen, ob ein Wert vorhanden, aktuell oder veraltet ist. Ein GET auf die Live-API liest den zuletzt erfassten Stand und sendet keine zusätzliche Anfrage an die Heizung. Menü-Leseaufträge und ausdrückliche Aktualisierungen laufen über denselben seriellen Worker.
+
+In der Sensorübersicht kannst du Abfrage und Historienaufzeichnung auswählen. Normale Sensoren erzeugen nur bei aktivierter Aufzeichnung Messpunkte. Status, Betriebsart und Heizungszeit (**UD 1–3**) werden wie beim Original bei konfigurierter MariaDB unabhängig vom sichtbaren Recordflag aufgezeichnet. Ältere Einzelmesspunkte werden nach den übernommenen p4d-Einstellungen verdichtet; Standard sind 91 Tage Einzelwerte und anschließend 30-Minuten-Intervalle.
+
+Ein MariaDB-Ausfall beendet das Live-Monitoring nicht, erzeugt aber sichtbare Aufzeichnungslücken. SQLite ist kein vollständiges Backup der MariaDB-Historie. Details zu Speicherung, Verdichtung und Sicherung: [Eigenständiger Betrieb](standalone.md).
+
+
 ## MariaDB ohne manuelle Tabellenarbeit
 
 Der Historien-Worker verbindet sich unabhängig vom Heizungsworker. Bei nicht vorhandener/leerer DB legt er sieben benötigte p4d-0.10.2-kompatible Tabellen und Indizes aus dem paketierten bereinigten Bestands-Snapshot an. Dies ist kein vollständiger Ersatz sämtlicher p4d-Nebenfunktionen. Erstellen erfordert entsprechende Datenbankberechtigungen; Fehler werden sichtbar, ohne Live-Betrieb zu beenden.
@@ -112,8 +173,8 @@ Erst nach vereinbartem echten Test wird dessen Nachweis über `write_validation`
 ## Sicherung und Wiederherstellung
 
 ```sh
-sudo /opt/froeling-bridge/0.6.0/venv/bin/python -I -m froeling_bridge.state_backup backup --archive /geschuetzt/bridge-backup.zip
-sudo /opt/froeling-bridge/0.6.0/venv/bin/python -I -m froeling_bridge.state_backup restore --archive /geschuetzt/bridge-backup.zip
+sudo /opt/froeling-bridge/0.7.1/venv/bin/python -I -m froeling_bridge.state_backup backup --archive /geschuetzt/bridge-backup.zip
+sudo /opt/froeling-bridge/0.7.1/venv/bin/python -I -m froeling_bridge.state_backup restore --archive /geschuetzt/bridge-backup.zip
 ```
 
 Backup verwendet die SQLite-Backupfunktion und enthält Katalog/Einstellungen, letzte Werte, Zeitcache und die geschützte Konfiguration einschließlich optionaler DB-Zugangsdaten. Datei 0600; privat aufbewahren. **MariaDB-Historie ist nicht enthalten.** Restore nur bei gestopptem Dienst in leere Zielpfade. Heizungs-Schreibfreigaben werden nicht automatisch auf einen anderen Rechner übertragen. Nach Root-Restore führt die erneute Installation die Besitzrechte für den Dienstbenutzer korrekt nach.
@@ -128,7 +189,7 @@ Reproduzierbare Zusatzprüfungen aus dem Checkout:
 ```sh
 PYTHONPATH=src .venv/bin/python docs/tools/verify_standalone_pty.py
 sudo .venv/bin/python docs/tools/verify_standalone_lifecycle.py --run-local-spares
-python3 docs/tools/monitor_standalone.py --url http://SERVER-IP:8000 --report .local/24h-read-report.json
+# Der ältere 24h-Monitor benötigt Anpassung für authentifizierte Zugriffe; kein Schritt der Installation.
 ```
 
 Der Monitor fragt nur HTTP-Zustand/Cache ab, sendet keine Heizungsjobs und speichert keine Messwerte/Zugangsdaten. Standarddauer 24 Stunden; ein abgebrochener oder fehlgeschlagener Lauf wird nicht als bestanden ausgegeben. Vorhandene Berichte werden erhalten. Native Installationsprüfung: `docs/tools/verify_native_install.py --in-container` ausschließlich in einem wegwerfbaren Debian-Container mit Python, psmisc und sudo, Checkout read-only unter `/source`. Sie ersetzt nur dort systemd-Kommandos durch den Testadapter; auf dem Host wird sie ausdrücklich abgewiesen.
@@ -193,6 +254,6 @@ Installer, Lifecycle-Helfer und Health-Guard berücksichtigen dieses Feld gemein
 Alte p4d-Cronjobs müssen nach Sicherung gezielt entfernt werden, andere Jobs erhalten. Nur `systemctl disable p4d` verhindert keine ausdrücklich geplanten Starts. Kein zweiter serieller Dienst parallel. Keine geplanten Stopps oder Updates am laufenden Host ohne neuen Auftrag; notwendige automatische Wiederherstellung kann kurze Unterbrechungen verursachen.
 
 
-## Anlagenübersicht ab 0.6.0
+## Anlagenübersicht
 
 Die eigene Seite `/anlage` gruppiert Messwerte, Pumpenansteuerungen und Parameter nach den Geräteinstanzen im Heizungsmenü. Sie benötigt kein passendes p4d-Schemabild und behauptet keine Rohrverbindungen. Zusätzliche Messwerte werden nur über ausdrückliche Aktivierung zur Abfrage ausgewählt; Historienflags bleiben erhalten. Cache, API, separate Vorschau und Prüfungen: [Anlagenübersicht](plant-overview.md). Der laufende Bestandsdienst bleibt bis zu einem gesonderten Rollout unverändert.

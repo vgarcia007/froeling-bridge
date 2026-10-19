@@ -1,6 +1,18 @@
-# p4d: Bestandsaufnahme für einen Python-Nachbau
+# Dokumentation
 
-Für den Einstieg in die aktuelle Bridge: [README mit Schnellstart und Datenbank-Konfiguration](../README.md) und [eigenständige Installation und Betrieb](standalone.md). Der Hauptweg ist seit 0.5.0 `standalone`: direkte Heizungsverbindung, lokaler Katalog und optionale MariaDB-Historie. Webmenü, API, kontinuierliche Erfassung und Fehlerabgleich sind implementiert und auf der Bestandsanlage in Betrieb. Aktuelle Abnahmen und Grenzen stehen im [Projektkontext](project-context.md).
+Für einen neuen Benutzer ist das [README mit Installation, Erstpasswort und Benutzeranlage](../README.md) der Einstieg. Eine neue Installation ist im Heimnetz direkt per IP erreichbar; Reverse Proxy und MariaDB sind optional.
+
+| Du möchtest … | Anleitung |
+| --- | --- |
+| Installieren und zum ersten Mal anmelden | [Schnellstart](../README.md#1-installieren) |
+| Datenbank, Aufzeichnung und Sicherungen einrichten | [Betrieb und Konfiguration](standalone.md) |
+| Benutzer oder API-Schlüssel verwalten | [Zugänge](authentication.md) |
+| Mit curl Heizungsdaten lesen | [API einfach benutzen](api-einstieg.md) |
+| Optional einen HTTPS-Reverse-Proxy verwenden | [HTTPS einrichten](authentication.md#optional-https-und-reverse-proxy) |
+| Die Funktionsgruppen der Heizung verstehen | [Anlagenübersicht](plant-overview.md) |
+| Entwickeln oder mit fiktiven Daten testen | [Entwicklung und ältere Modi](service.md) |
+
+## Technische Bestandsanalyse
 
 Die folgenden Abschnitte dokumentieren die ursprüngliche p4d-Bestandsanalyse vom 16.10.2026. Angaben zum damaligen Hardwarezugriff sind historische Untersuchungsschritte, nicht der aktuelle Betriebsstand.
 
