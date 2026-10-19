@@ -21,6 +21,14 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Die vollständige Danksagung im README steht direkt nach dem Intro vor der Installation. Bei Vereinfachungen nicht ans Ende verschieben oder kürzen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Näherungsweises Heizungsschaubild vom Benutzer
+
+Benutzer hat lokal `heizung-schaubild.png` bereitgestellt und erklärt ausdrücklich, es entspreche nur ungefähr dem echten Aufbau. Zeichnung trägt „Unverbindlicher Planungsvorschlag“. Als Orientierung nutzen, nicht als bestätigten Bestands-/Rohrleitungsplan oder Basis automatischer Regelungsänderungen.
+
+Bildinhalt: Haus 1 mit Kessel, Rücklaufmischer/Pumpe 0.1, zwei gemischten Heizkreisen und Schichtspeicher (Fühler 0.1/0.2). Verbindungs-/Ladestrecke zwischen Häusern mit eingezeichneter Netzpumpe und Pumpe 1.1. Haus 2 mit zweitem Schichtspeicher (Fühler 1.1/1.2), zwei gemischten Heizkreisen und separat gezeichnetem Warmwasserbereiter mit Pumpe 1.2/Fühler 1.3. Dünne blaue obere Linie verbindet Steuerung/Module, nicht mit dem dickeren blauen Heizungsrücklauf verwechseln. Gezeichnete Modul-/Fühler-/Pumpennummern sind keine bestätigten API-Sensoradressen.
+
+Abweichung zur beschriebenen realen Anlage: Benutzer nennt je Haus einen gemeinsamen isolierten Zylinder für Puffer und Warmwasserteil. Haus-1-Warmwasserteil im Bild nicht gesondert dargestellt, Haus-2-Warmwasserbehälter dort separat. Reale Zuordnung weiterhin Kessel/Puffer1/Boiler1/HK1+2 in Haus1; Puffer2/Boiler2/HK3+4 in Haus2. Tatsächliche Pumpenzuordnung zu API-Signalen, interne Speicherbauart, Rückflussverhinderer und genaue Verrohrung ungeprüft. Das Bild beweist keine Ursache der früheren Abkühlung. Datei unverändert am bereitgestellten Ort belassen, in dieser Runde nicht ins Repository aufgenommen; keine Software-/Live-/Heizungsänderung.
+
 ## Aktuelle Lizenz: GPLv2
 
 Benutzer hat die vorherige MIT-Aufteilung ausdrücklich durch „mach gpl“ ersetzt. Aktueller Projektstand einheitlich GNU GPL Version 2, ausschließlich diese Version (`GPL-2.0-only`): LICENSE enthält den unveränderten GPLv2-Text, README/NOTICE.md und Paketmetadaten stimmen überein. Fremde Copyright-/Lizenzhinweise und die Danksagung direkt nach dem Intro bleiben erhalten. Doppelte GPL-Datei unter LICENSES entfernt; Paket enthält LICENSE und NOTICE.md. Frühere bereits erteilte MIT-Rechte an damaligen eigenen Beiträgen werden nicht rückwirkend widerrufen; dies steht in NOTICE.md. Keine Änderung am laufenden Dienst.
