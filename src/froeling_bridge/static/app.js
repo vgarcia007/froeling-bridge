@@ -804,6 +804,49 @@ function renderTimes() {
   if (!devices.size)
     container.append(element("p", "Keine Zeitprogramme gefunden.", "empty"));
 }
+// A running Flask process can still serve its cached pre-update template.
+// Complete that markup here so this UI update does not require a collector restart.
+if (!$("navigation-toggle")) {
+  const sidebar = document.querySelector(".sidebar");
+  const head = element("div", "", "sidebar-head");
+  const toggle = element("button", "☰ Menü", "navigation-toggle");
+  toggle.id = "navigation-toggle";
+  toggle.type = "button";
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.setAttribute("aria-controls", "sidebar-content");
+  head.append(sidebar.querySelector(".brand"), toggle);
+  const content = element("div", "", "sidebar-content");
+  content.id = "sidebar-content";
+  content.append(...sidebar.children);
+  content.querySelector(".main-nav").after(content.querySelector("#account-panel"));
+  sidebar.append(head, content);
+  $("view-title").tabIndex = -1;
+}
+const mobileNavigation = window.matchMedia("(max-width: 650px)");
+const sidebar = document.querySelector(".sidebar");
+const navigationToggle = $("navigation-toggle");
+function setNavigationOpen(open, returnFocus = false) {
+  sidebar.classList.toggle("navigation-open", open && mobileNavigation.matches);
+  navigationToggle.setAttribute("aria-expanded", String(!mobileNavigation.matches || open));
+  if (returnFocus) navigationToggle.focus();
+}
+navigationToggle.addEventListener("click", () =>
+  setNavigationOpen(!sidebar.classList.contains("navigation-open")));
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && mobileNavigation.matches && sidebar.classList.contains("navigation-open")) {
+    event.preventDefault();
+    setNavigationOpen(false, true);
+  }
+});
+let lastFocusedElement = document.activeElement;
+document.addEventListener("focusin", event => { lastFocusedElement = event.target; });
+mobileNavigation.addEventListener("change", () => {
+  const focusWillHide = mobileNavigation.matches &&
+    ($("sidebar-content").contains(document.activeElement) ||
+     (document.activeElement === document.body && $("sidebar-content").contains(lastFocusedElement)));
+  setNavigationOpen(false, focusWillHide);
+});
+setNavigationOpen(false);
 function switchView(view, timeGroupFilter = null, navigate = true) {
   state.view = view;
   if (view === "times") state.timeGroupFilter = timeGroupFilter;
@@ -812,6 +855,8 @@ function switchView(view, timeGroupFilter = null, navigate = true) {
   for (const [key, description] of Object.entries(views)) {
     $(key + "-view").hidden = key !== view;
     $("nav-" + key).classList.toggle("active", key === view);
+    if (key === view) $("nav-" + key).setAttribute("aria-current", "page");
+    else $("nav-" + key).removeAttribute("aria-current");
   }
   [$("view-title").textContent, $("view-description").textContent] =
     views[view];
@@ -828,7 +873,11 @@ function switchView(view, timeGroupFilter = null, navigate = true) {
   }
 }
 for (const button of document.querySelectorAll("[data-view]"))
-  button.addEventListener("click", () => switchView(button.dataset.view));
+  button.addEventListener("click", () => {
+    switchView(button.dataset.view);
+    setNavigationOpen(false);
+    $("view-title").focus();
+  });
 window.addEventListener("popstate", () => switchView(location.pathname === "/anlage" ? "plant" : "menu", null, false));
 $("search-form").addEventListener("submit", (event) => {
   event.preventDefault();

@@ -8,6 +8,7 @@ from threading import Thread
 
 from werkzeug.serving import make_server
 from verify_menu_browser import Browser
+from verify_navigation_browser import verify_navigation, click
 from preview_plant import fictional_runtime
 from froeling_bridge.api import create_app
 from froeling_bridge.menu import demo_time_program_catalog
@@ -44,6 +45,7 @@ def main():
                 browser.js("document.querySelector('#username').value="+repr(role)+";document.querySelector('#password').value='Fictional browser test password! 19';document.querySelector('form').requestSubmit()")
                 browser.wait("location.pathname==='/anlage' && document.querySelectorAll('.plant-card').length===6")
                 browser.wait("document.querySelector('#account-role').textContent==="+repr('Nur Lesen' if role=='read' else 'Lesen + Schreiben'))
+                verify_navigation(browser)
                 for width in [390,1440]:
                     browser.call('Emulation.setDeviceMetricsOverride',dict(width=width,height=1000,deviceScaleFactor=1,mobile=width<650))
                     assert browser.js('document.documentElement.scrollWidth<=window.innerWidth'),(role,width)
@@ -57,7 +59,9 @@ def main():
                     else:assert browser.js("[...document.querySelectorAll('#values-grid input[type=checkbox]')].some(x=>!x.disabled)")
                     browser.js("document.querySelector('#nav-plant').click()")
                     browser.wait("!document.querySelector('#plant-view').hidden")
-                browser.js("document.querySelector('#logout').click()")
+                if browser.js("matchMedia('(max-width: 650px)').matches"):
+                    click(browser, '#navigation-toggle')
+                click(browser, '#logout')
                 browser.wait("location.pathname==='/login' && !!document.querySelector('#username')")
                 assert browser.js('document.documentElement.scrollWidth<=window.innerWidth')
             # Console password changes invalidate a real browser cookie on next request.

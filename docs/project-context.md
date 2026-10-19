@@ -10,6 +10,14 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
+## Navigation auf Handy und Desktop seit 19.10.2026
+
+Mobiles Aufklappmenü bis einschließlich 650 Pixel: Logo/Menüknopf bleiben sichtbar, sechs Ziele untereinander; nach Auswahl schließen und Fokus auf Ansichtsüberschrift, Escape schließt mit Fokus zurück zum Knopf. Benutzer/Rolle/Abmelden separat unter der Navigation; Desktop-Benutzerbereich unten in der vertikal scrollbar bleibenden Seitenleiste. Verbindungsstatus und Danksagung erhalten, lange Namen/Beschriftungen umbrechen. Kein horizontales Navigationsscrollen. Aktive Ansicht per `aria-current`, Knopfzustand per `aria-expanded`.
+
+Drei Frontenddateien ohne Dienstneustart live ersetzt, Modi/Eigentümer erhalten und Quellenhash aktualisiert; private Sicherung `PRIVATE_SICHERUNG` (Platzhalter; tatsächlicher Ort nur lokal dokumentiert). Laufendes Flask hält die alte HTML-Vorlage im Speicher: JavaScript ergänzt deren Navigationsstruktur bei Bedarf, damit bis zum nächsten regulären Neustart dieselbe Bedienung möglich ist. Diesen Kompatibilitätsweg nicht unbedacht entfernen. Backend/Authentifizierung unverändert, PID und alle Sensorflags erhalten, weiterhin 67 Historienpunkte ohne Erfassungsfehler.
+
+Browserprüfung beider Rollen mit neuer und alter zwischengespeicherter Vorlage, jeweils 320/390/650/768/1440 Pixel: alle sechs Ansichten, echte Maus-/Tastaturbedienung, Escape/Fokus/Viewportwechsel, 64 Zeichen Benutzername, niedrige Desktopfenster, kein seitlicher Überlauf. Live dieselben Navigationsprüfungen und Login/Logout, sichere Cookies, Nur-Lesen-Sperre und deaktivierte Zeitfelder erfolgreich, keine Browser-Ausnahmen. Keine realen Heizungsparameter geändert. Werkzeuge `docs/tools/verify_navigation_browser.py` und erweiterter Auth-Browsercheck; private Nachweise `.local/navigation-*`.
+
 ## Produktiver Zugangsschutz 0.7.0 seit 19.10.2026
 
 Anonymisiertes Beispiel für HTTPS über einen Reverse Proxy: `https://heizung.example.org`, Proxy `192.0.2.20`, Backend `192.0.2.10:8000`. Domain und IPs sind Platzhalter, keine Betriebsadressen. Internes HTTP setzt ein vertrauenswürdiges LAN voraus. Backend vertraut ausschließlich diesem Proxy für weitergereichte Header. GUI und API verlangen Anmeldung, auch im LAN; nur `/healthz` und statische Assets sind öffentlich. Kein zusätzlicher öffentlicher Backend-Port. Eine allgemeine Apache-Vorlage liegt im Repository unter `deploy/apache/`; konkrete Zertifikats- und Sitekonfigurationen bleiben privat.

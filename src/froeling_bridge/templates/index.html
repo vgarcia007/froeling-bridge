@@ -10,18 +10,18 @@
   </head>
   <body>
     <aside class="sidebar">
+      <div class="sidebar-head">
       <a class="brand" href="/" aria-label="Fröling Bridge Startseite"
         ><span class="brand-mark">F<span>↗</span></span
         ><span>Fröling<span class="brand-sub">BRIDGE</span></span></a
       >
-      <p class="section-label">HEIZUNGSSTEUERUNG</p>
-      <div id="account-panel" class="account-panel" hidden>
-        <strong id="account-name"></strong><small id="account-role"></small>
-        <button id="logout" class="button secondary" type="button">Abmelden</button>
+      <button id="navigation-toggle" class="navigation-toggle" type="button" aria-expanded="false" aria-controls="sidebar-content">☰ Menü</button>
       </div>
-      <nav class="main-nav" aria-label="Hauptnavigation">
+      <div id="sidebar-content" class="sidebar-content">
+      <p class="section-label">HEIZUNGSSTEUERUNG</p>
+      <nav id="main-navigation" class="main-nav" aria-label="Hauptnavigation">
         <button id="nav-plant" data-view="plant"><span>♧</span> Anlagenübersicht</button>
-        <button id="nav-menu" class="active" data-view="menu">
+        <button id="nav-menu" class="active" aria-current="page" data-view="menu">
           <span>☷</span> Servicemenü
         </button>
         <button id="nav-values" data-view="values">
@@ -37,12 +37,17 @@
           <span>▤</span> Aufzeichnung
         </button>
       </nav>
+      <div id="account-panel" class="account-panel" hidden>
+        <strong id="account-name"></strong><small id="account-role"></small>
+        <button id="logout" class="button secondary" type="button">Abmelden</button>
+      </div>
       <div class="sidebar-foot">
         <span id="connection-dot" class="dot"></span
         ><span id="connection">Verbindung wird geprüft</span
         ><small
           >Basierend auf linux-p4d<br />von Jörg Wendel & Mitwirkenden</small
         >
+      </div>
       </div>
     </aside>
     <main>
@@ -53,7 +58,7 @@
       <section class="intro">
         <div>
           <p class="eyebrow">FRÖLING BRIDGE</p>
-          <h1 id="view-title">Servicemenü</h1>
+          <h1 id="view-title" tabindex="-1">Servicemenü</h1>
           <p id="view-description">
             Parameter finden, Werte prüfen und Änderungen nachvollziehen.
           </p>

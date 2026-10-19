@@ -81,6 +81,8 @@ with urlopen(request) as response:
 
 Die geschützte OpenAPI-Dokumentation unter `/api/v1/openapi.json` beschreibt denselben Header. Datenrouten bleiben erhalten. 401 bedeutet fehlende/ungültige Anmeldung; 403 fehlende Rechte, CSRF-Schutz oder Hardwarefreigabe; 429 eine Begrenzung mit `Retry-After`; 503 einen vorübergehend nicht verfügbaren Dienst. Unklare Heizungs-Schreibaufträge niemals blind wiederholen: den Wert zuerst neu lesen.
 
+Auf dem Handy öffnet der Knopf „Menü“ die Navigation. Benutzername, Rolle und „Abmelden“ stehen unter den Navigationspunkten; auf dem Desktop unten in der Seitenleiste.
+
 ## Sitzungen, Speicherung und Überwachung
 
 Sitzungen liegen serverseitig mit einem Secure/HttpOnly/SameSite-Strict-Cookie. Sie enden nach 30 Minuten ohne Anfragen, spätestens nach zwölf Stunden; GUI-Abfragen zählen als Anfragen. Logout widerruft die Sitzung. Browser-POST/PATCH benötigen zusätzlich den CSRF-Header aus `/api/v1/auth/me` und dieselbe Origin. API-Schlüssel benötigen keinen CSRF-Token.

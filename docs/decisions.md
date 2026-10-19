@@ -250,3 +250,9 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 - API-Schlüssel gehören zu Benutzern und begrenzen deren aktuelle Rechte. Sitzungen serverseitig, Secure/HttpOnly/SameSite Strict, Origin/CSRF und Ratenbegrenzung. Sicherheitsfehler sperren Webzugang ohne unabhängige Erfassung abzuschalten. Monitor mit eigenem Nur-Lesen-Schlüssel; ungültiger Monitorzugang darf keine Neustartschleife erzeugen.
 - Zeitprogramme sichtbar deaktiviert belassen, solange kein physischer Schreibnachweis vorliegt. Bestehende Parameterfreigabe erhalten; weder Rollen noch API-Schlüssel erweitern sie. Keine realen Heizungs-Schreibtests für diesen Rollout.
 - 0.7.0 nach Sicherung kontrolliert aktiviert, 14,1 Sekunden bis bereit; 67 Historienpunkte und alle Sensorflags erhalten. Apache danach aktiviert. Rückfall auf ungeschützte Altversion nur nach Abschaltung der öffentlichen Proxy-Site; kein automatischer p4d-Start. Dokumentierte Tests einschließlich separater MariaDB und Live-HTTPS-Prüfung erfolgreich.
+
+## 19.10.2026 — Mobile Navigation ohne seitliches Scrollen
+
+- Benutzer wählt ein nach unten aufklappendes Menü statt horizontaler Navigation. Bis 650 Pixel alle Ziele untereinander, nach Auswahl schließen; Desktop-Seitenleiste erhalten. Benutzer/Rolle/Abmelden unter die eigentliche Navigation verschieben. Tastatur, Fokus und ausreichende Touchflächen berücksichtigen.
+- Reine Frontendänderung ohne Dienstneustart direkt live ausrollen. Alte im Flask-Prozess zwischengespeicherte HTML-Vorlage durch JavaScript-Strukturergänzung unterstützen; neue Vorlage ebenfalls paketieren. Sicherung und Dateirechte erhalten.
+- Fünf Breiten, beide Rollen und beide Vorlagen isoliert geprüft; zusätzliche Prüfung auf der echten HTTPS-Domain ohne Heizungs-Schreibtests. API-PID, Sensorflags und 67 Historienpunkte erhalten.
