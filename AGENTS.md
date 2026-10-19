@@ -20,6 +20,10 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung und native Installation sind umgesetzt; neue Projektlizenz bleibt offen. Siehe docs/authentication.md.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
+## Home-Verzeichnis des Heizungsrechners bereinigt (19.10.2026)
+
+Unbenutzte Release-/Testverzeichnisse wurden bei erhaltener Erfassung entfernt. Bestandsaufnahme des Benutzerverzeichnisses und konkrete Sicherungsorte bleiben ausschließlich im privaten Betreiberkontext. Künftig keine Releasekopien oder Einmalhelfer im Benutzer-Home ansammeln; aktive Installation und bestehende Sicherungen erhalten.
+
 ## Navigation auf Handy und Desktop seit 19.10.2026
 
 Mobiles Aufklappmenü bis einschließlich 650 Pixel: Logo/Menüknopf bleiben sichtbar, sechs Ziele untereinander; nach Auswahl schließen und Fokus auf Ansichtsüberschrift, Escape schließt mit Fokus zurück zum Knopf. Benutzer/Rolle/Abmelden separat unter der Navigation; Desktop-Benutzerbereich unten in der vertikal scrollbar bleibenden Seitenleiste. Verbindungsstatus und Danksagung erhalten, lange Namen/Beschriftungen umbrechen. Kein horizontales Navigationsscrollen. Aktive Ansicht per `aria-current`, Knopfzustand per `aria-expanded`.

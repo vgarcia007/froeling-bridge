@@ -10,6 +10,10 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
+## Home-Verzeichnis des Heizungsrechners bereinigt (19.10.2026)
+
+Unbenutzte Release-/Testverzeichnisse wurden bei erhaltener Erfassung entfernt. Bestandsaufnahme des Benutzerverzeichnisses und konkrete Sicherungsorte bleiben ausschließlich im privaten Betreiberkontext. Künftig keine Releasekopien oder Einmalhelfer im Benutzer-Home ansammeln; aktive Installation und bestehende Sicherungen erhalten.
+
 ## Navigation auf Handy und Desktop seit 19.10.2026
 
 Mobiles Aufklappmenü bis einschließlich 650 Pixel: Logo/Menüknopf bleiben sichtbar, sechs Ziele untereinander; nach Auswahl schließen und Fokus auf Ansichtsüberschrift, Escape schließt mit Fokus zurück zum Knopf. Benutzer/Rolle/Abmelden separat unter der Navigation; Desktop-Benutzerbereich unten in der vertikal scrollbar bleibenden Seitenleiste. Verbindungsstatus und Danksagung erhalten, lange Namen/Beschriftungen umbrechen. Kein horizontales Navigationsscrollen. Aktive Ansicht per `aria-current`, Knopfzustand per `aria-expanded`.
