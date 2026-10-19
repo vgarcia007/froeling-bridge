@@ -150,6 +150,6 @@ journalctl -u froeling-bridge.service -n 60
 
 ## Lizenz
 
-Unsere eigenen Beiträge stehen unter der [MIT-Lizenz](LICENSE): Du darfst sie nutzen, verändern, weitergeben und verkaufen – auch kommerziell. Copyright- und Lizenzhinweis müssen erhalten bleiben.
+Fröling Bridge steht unter der [GNU General Public License Version 2 (GPLv2)](LICENSE). Du darfst die Software nutzen, verändern, weitergeben und verkaufen – auch kommerziell. Bei Weitergabe gelten die GPL-Bedingungen, einschließlich der Bereitstellung des zugehörigen Quellcodes.
 
-Für p4d und daraus übernommene oder abgeleitete Bestandteile gelten weiterhin deren ursprüngliche Lizenzen. Einzelheiten: [Lizenzumfang und Herkunft](NOTICE.md).
+Herkunft und Copyright-Hinweise: [NOTICE.md](NOTICE.md).

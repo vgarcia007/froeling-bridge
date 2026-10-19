@@ -7,14 +7,14 @@ name = "froeling-bridge"
 version = "0.7.2"
 description = "Web menu, S3200 reader and continuous p4d-compatible recording"
 readme = "README.md"
-license = {text = "MIT for original contributions; upstream licenses apply to third-party material (see NOTICE.md)"}
+license = {text = "GPL-2.0-only"}
 requires-python = ">=3.9"
 
 [project.scripts]
 froeling-bridge = "froeling_bridge.__main__:main"
 
 [tool.setuptools]
-license-files = ["LICENSE", "NOTICE.md", "LICENSES/*.txt"]
+license-files = ["LICENSE", "NOTICE.md"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

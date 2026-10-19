@@ -10,9 +10,9 @@ Zunächst wurde Analyse und Dokumentation vereinbart. Nach dem Bestandsabgleich 
 
 Das öffentliche Repository ist `https://github.com/vgarcia007/froeling-bridge`. Überprüfte Projektänderungen werden auf `main` gesichert; betreiberspezifische Konfiguration und privater Kontext bleiben lokal. Der Checkout kann in einem beliebigen Arbeitsverzeichnis liegen.
 
-## Lizenzentscheidung vom 19.10.2026
+## Aktuelle Lizenz: GPLv2
 
-Benutzer möchte möglichst freie Nutzung. Eigene, eigenständig geschaffene Beiträge unter MIT freigegeben: Nutzen, Ändern, Weitergeben, kommerzielle Nutzung/Verkauf mit erhaltenem Copyright-/Lizenzhinweis. Root-LICENSE enthält MIT-Text; NOTICE.md beschreibt den begrenzten Rechteumfang. p4d-Referenz und übernommene/urheberrechtlich abgeleitete GPL-Bestandteile werden nicht umlizenziert; GPL-Pflichten eines abgeleiteten Gesamtwerks bleiben ausdrücklich unberührt. Keine pauschale Zusicherung einer ausschließlich MIT-lizenzierten Gesamtanwendung. Unveränderte GPLv2-Kopie in LICENSES/GPL-2.0.txt, Herkunft/Danksagung erhalten. Paketmetadaten erklären diese Aufteilung und enthalten Lizenz-/Hinweisdateien. Keine technische oder produktive Änderung; die offene Lizenzformulierung im README ersetzt.
+Benutzer hat die vorherige MIT-Aufteilung ausdrücklich durch „mach gpl“ ersetzt. Aktueller Projektstand einheitlich GNU GPL Version 2, ausschließlich diese Version (`GPL-2.0-only`): LICENSE enthält den unveränderten GPLv2-Text, README/NOTICE.md und Paketmetadaten stimmen überein. Fremde Copyright-/Lizenzhinweise und die Danksagung direkt nach dem Intro bleiben erhalten. Doppelte GPL-Datei unter LICENSES entfernt; Paket enthält LICENSE und NOTICE.md. Frühere bereits erteilte MIT-Rechte an damaligen eigenen Beiträgen werden nicht rückwirkend widerrufen; dies steht in NOTICE.md. Keine Änderung am laufenden Dienst.
 
 ## Sofort nutzbares Parameterschreiben / öffentliches README 0.7.2
 
