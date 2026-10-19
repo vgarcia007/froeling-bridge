@@ -18,6 +18,7 @@ Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise 
 - Kein dauerhafter Parallelbetrieb zweier unabhängiger serieller Heizungsdienste als Default.
 - Charts, Dashboards, Pelletverwaltung und weitere Integrationen zunächst außerhalb des Kernumfangs.
 - Lokaler API-Prototyp: Flask 3.1/Waitress 3, PyMySQL 1.1 und /api/v1; siehe docs/service.md. Webmenü: paketiertes HTML/CSS/JavaScript. Lesender Hosttest mit Rückkehr: docs/host-test.md. Produktionsauthentifizierung und native Installation sind umgesetzt; neue Projektlizenz bleibt offen. Siehe docs/authentication.md.
+- Die vollständige Danksagung im README steht direkt nach dem Intro vor der Installation. Bei Vereinfachungen nicht ans Ende verschieben oder kürzen.
 - Herkunft und Arbeit von Jörg Wendel und den p4d-Mitwirkenden respektvoll würdigen. Keine unbelegte Kritik oder Behauptung einer offiziellen Zusammenarbeit.
 
 ## Einfacher Erststart und Dokumentation 0.7.1 (noch nicht produktiv ausgerollt)

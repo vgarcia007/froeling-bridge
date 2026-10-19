@@ -4,6 +4,16 @@ Heizung überwachen und bedienen – auf einem Raspberry Pi oder einem anderen L
 
 Der Rechner wird über einen seriellen USB-Adapter mit der Heizung verbunden. Nach der Installation öffnest du im Heimnetz die IP-Adresse des Rechners und meldest dich an. **Eine Domain, ein Reverse Proxy und MariaDB sind dafür nicht nötig.**
 
+## Grundlage und Dank
+
+Dieses Projekt baut auf der Arbeit von Jörg Wendel (horchi) und dem Open-Source-Projekt [linux-p4d](https://github.com/horchi/linux-p4d) auf.
+
+p4d erschließt die Kommunikation mit der Heizungssteuerung und stellt umfangreiche Funktionen zur Überwachung und Bedienung bereit. Der veröffentlichte Quellcode ist eine wesentliche Grundlage für unsere Untersuchung des Protokolls und der Datenbankstruktur. Vielen Dank an den Autor und alle Mitwirkenden dafür.
+
+Als Ausgangspunkt der Bestandsaufnahme verwenden wir den [Fork von vgarcia007](https://github.com/vgarcia007/linux-p4d). Der konkret untersuchte Stand ist in der Dokumentation festgehalten.
+
+Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, API-Zugriff und Parameterbedienung. Es wird unabhängig vom p4d-Projekt und vom Heizungshersteller entwickelt.
+
 ## 1. Installieren
 
 Du brauchst Raspberry Pi OS, Debian oder Ubuntu mit systemd, Python ab 3.9, Internetzugang für die Installation und den angeschlossenen Heizungsadapter. Die Befehle im Terminal **auf dem Heizungsrechner** ausführen.
@@ -114,15 +124,5 @@ journalctl -u froeling-bridge.service -n 60
 - [Anlagenübersicht im Detail](docs/plant-overview.md)
 - [Entwicklung, Demo und ältere Betriebsarten](docs/service.md)
 - [Technische Dokumentation und p4d-Bestandsanalyse](docs/README.md)
-
-## Grundlage und Dank
-
-Dieses Projekt baut auf der Arbeit von Jörg Wendel (horchi) und dem Open-Source-Projekt [linux-p4d](https://github.com/horchi/linux-p4d) auf.
-
-p4d erschließt die Kommunikation mit der Heizungssteuerung und stellt umfangreiche Funktionen zur Überwachung und Bedienung bereit. Der veröffentlichte Quellcode ist eine wesentliche Grundlage für unsere Untersuchung des Protokolls und der Datenbankstruktur. Vielen Dank an den Autor und alle Mitwirkenden dafür.
-
-Als Ausgangspunkt der Bestandsaufnahme verwenden wir den [Fork von vgarcia007](https://github.com/vgarcia007/linux-p4d). Der konkret untersuchte Stand ist in der Dokumentation festgehalten.
-
-Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, API-Zugriff und Parameterbedienung. Es wird unabhängig vom p4d-Projekt und vom Heizungshersteller entwickelt.
 
 Für den Referenzcode gelten dessen Copyright-Hinweise und die [GPLv2-Lizenz](reference/linux-p4d/LICENSE). Eine separate Lizenz für neue Projektteile ist bislang nicht festgelegt. Zugangsdaten und Datenbankdumps gehören nicht ins Repository.
