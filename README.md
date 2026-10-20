@@ -2,21 +2,21 @@
 
 Heizung überwachen und bedienen – auf einem Raspberry Pi oder einem anderen Linux-Rechner, mit Weboberfläche und API. Für Fröling-Steuerungen der **Lambdatronic-S3200-Familie**. Aktuelle Version: **0.7.2**.
 
-Der Rechner wird über einen seriellen USB-Adapter mit der Heizung verbunden. Nach der Installation öffnest du im Heimnetz die IP-Adresse des Rechners und meldest dich an. **Eine Domain, ein Reverse Proxy und MariaDB sind dafür nicht nötig.**
+Der Rechner wird über einen seriellen USB-Adapter mit der Heizung verbunden. Nach der Installation öffnest du im Heimnetz die IP-Adresse des Rechners und meldest dich an.
 
 ## Grundlage und Dank
 
 Dieses Projekt baut auf der Arbeit von Jörg Wendel (horchi) und dem Open-Source-Projekt [linux-p4d](https://github.com/horchi/linux-p4d) auf.
 
-p4d erschließt die Kommunikation mit der Heizungssteuerung und stellt umfangreiche Funktionen zur Überwachung und Bedienung bereit. Der veröffentlichte Quellcode ist eine wesentliche Grundlage für unsere Untersuchung des Protokolls und der Datenbankstruktur. Vielen Dank an den Autor und alle Mitwirkenden dafür.
+p4d erschließt die Kommunikation mit der Heizungssteuerung und stellt umfangreiche Funktionen zur Überwachung und Bedienung bereit. Der veröffentlichte Quellcode ist eine wesentliche Grundlage für die Untersuchung des Protokolls und der Datenbankstruktur. Vielen Dank an den Autor und alle Mitwirkenden dafür.
 
-Als Ausgangspunkt der Bestandsaufnahme verwenden wir den [Fork von vgarcia007](https://github.com/vgarcia007/linux-p4d). Der konkret untersuchte Stand ist in der Dokumentation festgehalten.
+Als Ausgangspunkt der Bestandsaufnahme wurde ein [Fork](https://github.com/vgarcia007/linux-p4d) erstellt. Der konkret untersuchte Stand ist in der Dokumentation festgehalten.
 
 Fröling Bridge ist ein eigenständiges Projekt mit dem Schwerpunkt auf Python, API-Zugriff und Parameterbedienung. Es wird unabhängig vom p4d-Projekt und vom Heizungshersteller entwickelt.
 
 ## 1. Installieren
 
-Du brauchst Raspberry Pi OS, Debian oder Ubuntu mit systemd, Python ab 3.9, Internetzugang für die Installation und den angeschlossenen Heizungsadapter. Die Befehle im Terminal **auf dem Heizungsrechner** ausführen.
+Du brauchst Raspberry Pi OS, Debian oder Ubuntu mit systemd, Python ab 3.9, Internetzugang für die Installation und den angeschlossenen Heizungsadapter.
 
 ```sh
 sudo apt-get update
@@ -29,7 +29,7 @@ sudo bash deploy/install-standalone.sh
 
 Der Installer erledigt Python-Umgebung, Dienstbenutzer, Adapterrechte, Konfiguration, Login und Autostart. Er wählt einen eindeutig erkannten Adapter automatisch; sonst fragt er nach dessen Gerätepfad, beispielsweise `/dev/ttyUSB0`.
 
-Bei **„MariaDB für optionale Historie einrichten?“** für den einfachen Start **Enter drücken**. Live-Werte und Heizungsmenü funktionieren ohne MariaDB. Für gespeicherte Messreihen kannst du sie später einrichten: [Datenbank konfigurieren](docs/standalone.md#konfiguration-und-speicherorte).
+Bei **„MariaDB für optionale Historie einrichten?“** für den einfachen Start **Enter drücken**. Live-Werte und Heizungsmenü funktionieren auch ohne MariaDB. Für gespeicherte Messreihen kannst du sie später einrichten: [Datenbank konfigurieren](docs/standalone.md#konfiguration-und-speicherorte).
 
 **Falls bereits p4d auf diesem Rechner läuft:** Statt des letzten Befehls diesen verwenden:
 
@@ -69,12 +69,12 @@ In der Ausgabe steht das Passwort hinter `"password"`. Im Browser `operator` und
 
 ## 4. Eigene Benutzer anlegen
 
-Benutzer und Passwörter verwaltest du **auf dem Heizungsrechner im Terminal**, in einem beliebigen Verzeichnis. Es gibt dafür keinen Webdialog.
+Benutzer und Passwörter verwaltest du **im Terminal**, in einem beliebigen Verzeichnis. Es gibt dafür keinen Webdialog.
 
-Lege einen persönlichen Benutzer an; `max` durch deinen gewünschten Namen ersetzen:
+Lege einen persönlichen Benutzer an; `MeinBenutzername` durch deinen gewünschten Namen ersetzen:
 
 ```sh
-sudo froeling-bridge-users add max --role write
+sudo froeling-bridge-users add MeinBenutzername --role write
 ```
 
 Das gewünschte Passwort zweimal eingeben, mindestens **15 Zeichen**. Die Eingabe bleibt unsichtbar. Anschließend kannst du dich im Browser mit diesem Benutzer anmelden.
@@ -150,6 +150,7 @@ journalctl -u froeling-bridge.service -n 60
 
 ## Lizenz
 
-Fröling Bridge steht unter der [GNU General Public License Version 2 (GPLv2)](LICENSE). Du darfst die Software nutzen, verändern, weitergeben und verkaufen – auch kommerziell. Bei Weitergabe gelten die GPL-Bedingungen, einschließlich der Bereitstellung des zugehörigen Quellcodes.
+Fröling Bridge steht unter der [GNU General Public License Version 2 (GPLv2)](LICENSE). 
+Bei Weitergabe gelten die GPL-Bedingungen, einschließlich der Bereitstellung des zugehörigen Quellcodes.
 
 Herkunft und Copyright-Hinweise: [NOTICE.md](NOTICE.md).
