@@ -148,9 +148,13 @@ journalctl -u froeling-bridge.service -n 60
 - [Entwicklung, Demo und ältere Betriebsarten](docs/service.md)
 - [Technische Dokumentation und p4d-Bestandsanalyse](docs/README.md)
 
-## KI-Hinweis
+## Entwicklung mit KI-Unterstützung
 
-Dieses Projekt wird mit Unterstützung künstlicher Intelligenz (OpenAI Codex) entwickelt und dokumentiert. Trotz Tests können Fehler enthalten sein. Die KI-Unterstützung ersetzt keine fachliche Prüfung, insbesondere bei Änderungen an Heizungsparametern.
+Dieses Projekt ist mit Unterstützung von OpenAI Codex entstanden.
+
+Als erfahrener Softwareentwickler konnte ich mithilfe von KI eine Idee umsetzen, für deren Realisierung mir im Alltag die zeitlichen Ressourcen gefehlt hätten. Die KI unterstützt mich bei der Implementierung und Dokumentation, während Konzeption, technische Entscheidungen und Verantwortung für das Projekt bei mir liegen.
+
+Für mich zeigt dieses Projekt, wie KI die Möglichkeiten einzelner Entwickler erweitern und Ideen Wirklichkeit werden lassen kann, die sonst vielleicht nie über das Konzeptstadium hinausgekommen wären.
 
 ## Lizenz
 

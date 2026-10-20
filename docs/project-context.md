@@ -2,9 +2,9 @@
 
 Zuletzt aktualisiert: 20.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
 
-## KI-Hinweis im README
+## Entwicklung mit KI-Unterstützung im README
 
-Am 20.10.2026 auf Benutzerwunsch einen ausdrücklichen KI-Hinweis im README ergänzt: Entwicklung und Dokumentation mit OpenAI Codex, mögliche Fehler trotz Tests, fachliche Prüfung insbesondere bei Heizungsparametern. Bei künftigen README-Überarbeitungen zusammen mit der Danksagung erhalten. Der frühere genaue Wortlaut war in der durchsuchten Git-Historie nicht auffindbar; dies ist eine neue Formulierung.
+Am 20.10.2026 hat der Benutzer den Text für „Entwicklung mit KI-Unterstützung“ selbst vorgegeben; er wurde wortgleich ins README übernommen. Er beschreibt OpenAI Codex als Unterstützung bei Implementierung und Dokumentation; Konzeption, technische Entscheidungen und Verantwortung liegen beim Projektbetreiber. Diesen persönlichen Text bei künftigen README-Überarbeitungen zusammen mit der Danksagung erhalten; nicht durch den zuvor verwendeten allgemeinen Fehler-/Prüfungshinweis ersetzen.
 
 ## Ziel und Zusammenarbeit
 
