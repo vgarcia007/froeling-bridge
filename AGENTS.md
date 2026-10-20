@@ -8,6 +8,10 @@
 
 Mit dem Benutzer auf Deutsch und konkret kommunizieren. Er möchte schrittweise einen Python-Nachbau auf Grundlage belegter Protokoll-/Datenbankkenntnisse entwickeln und hat die autonome Umsetzung des Offline-Kerns beauftragt. Routineentscheidungen selbst treffen und dokumentieren; nur bei tatsächlich fehlenden Freigaben oder blockierenden Informationen nachfragen.
 
+## Öffentliche Dokumentation und privater Kontext
+
+Das Repository ist öffentlich. Echte Betriebsadressen, persönliche Abwesenheits-/Nutzungsangaben, individuelle Serverberechtigungen und Sicherungsorte ausschließlich im ignorierten lokalen Betreiberkontext pflegen. Vor einer neu angefragten Veröffentlichungsbereinigung Funde und Umfang mit dem Benutzer abstimmen; eine Freigabe gilt für den vereinbarten Umfang. Git-Historie nur nach gesonderter Freigabe umschreiben. Danksagung, persönliche KI-Erklärung und separaten Eigenverantwortungshinweis im README erhalten.
+
 ## Ziel und feste Grenzen
 
 - p4d ist die verbindliche funktionale Vorlage. Vor Änderungen den vollständigen relevanten Ablauf in Protokoll, Dienst, Datenbank und Webmenü sowie die bestehenden Fachnotizen abgleichen. Namen, Menüpfade, Adress-/Wochentagszuordnung und Cacheverhalten gehören zum Funktionsumfang, nicht zu späteren kosmetischen Extras. Benutzer möchte nicht erneut auf bereits dokumentiertes Originalverhalten hinweisen müssen.

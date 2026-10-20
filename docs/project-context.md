@@ -2,6 +2,10 @@
 
 Zuletzt aktualisiert: 20.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
 
+## Öffentliche Dokumentation und lokaler Betreiberkontext
+
+Seit 20.10.2026 ist das Repository öffentlich. Auf ausdrückliche Freigabe wurden reale Adressen, persönliche Kalenderangaben und individuelle Server-/Berechtigungsdetails aus dem aktuellen Markdown-Stand entfernt oder durch gekennzeichnete Beispiele ersetzt. Für Betreiberarbeiten, falls vorhanden, `.local/operator-context.md` lesen; öffentliche Beispieladressen sind keine Live-Ziele. Ursprüngliche Befunde bleiben ausschließlich lokal erhalten und werden nicht von GitHub gesichert. Die Git-Historie wurde nicht umgeschrieben und kann frühere Angaben weiterhin enthalten. README, Danksagung, KI-Text, Eigenverantwortungshinweis und technische Installationsanleitungen bleiben erhalten.
+
 ## Entwicklung mit KI-Unterstützung im README
 
 Am 20.10.2026 hat der Benutzer den Text für „Entwicklung mit KI-Unterstützung“ selbst vorgegeben; er wurde wortgleich ins README übernommen. Er beschreibt OpenAI Codex als Unterstützung bei Implementierung und Dokumentation; Konzeption, technische Entscheidungen und Verantwortung liegen beim Projektbetreiber. Diesen persönlichen Text bei künftigen README-Überarbeitungen zusammen mit der Danksagung erhalten; nicht durch den zuvor verwendeten allgemeinen Fehler-/Prüfungshinweis ersetzen.

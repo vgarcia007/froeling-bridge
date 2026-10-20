@@ -278,3 +278,8 @@ Produktionsauthentifizierung, endgültiger Deploymentweg und Lizenz für neue Pr
 
 - Benutzer entscheidet ausdrücklich „mach gpl“, nachdem GPLv2 als zur p4d-Grundlage passende Projektlizenz erläutert wurde. Diese Entscheidung ersetzt die vorherige MIT-Aufteilung für den aktuellen Projektstand. Einheitlich GNU GPL Version 2 (`GPL-2.0-only`), einschließlich konsistenter Paketmetadaten und README.
 - Ursprüngliche p4d-/Drittanbieterrechte und Danksagung erhalten. Bereits erteilte MIT-Rechte an früheren eigenen Beiträgen nicht rückwirkend widerrufen; in NOTICE dokumentieren. Vollständigen GPLv2-Text einmal unter LICENSE führen und ins Paket aufnehmen.
+
+## 20.10.2026 — Öffentliche Dokumentation und privater Betreiberkontext
+
+- Benutzer bestätigt die Bereinigung der aktuellen Markdown-Dateien nach vorheriger Auflistung der Funde. Betriebsadressen durch gekennzeichnete Beispiele ersetzen; persönliche Nutzungs-/Kalenderangaben sowie individuelle Zugriffs- und Serverdetails ausschließlich lokal im ignorierten Betreiberkontext erhalten.
+- Technische Dokumentation, Danksagung und persönliche README-Texte erhalten. Keine Änderung am laufenden Dienst oder an der Heizung. Git-Historie bleibt unverändert; eine nachträgliche Historienbereinigung benötigt eine gesonderte Entscheidung. Private Kontextdateien sind nicht durch GitHub gesichert.
