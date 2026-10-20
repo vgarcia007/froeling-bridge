@@ -148,6 +148,10 @@ journalctl -u froeling-bridge.service -n 60
 - [Entwicklung, Demo und ältere Betriebsarten](docs/service.md)
 - [Technische Dokumentation und p4d-Bestandsanalyse](docs/README.md)
 
+## Verantwortung für die eigene Heizungsanlage
+
+Jeder Betreiber bleibt selbst für den sicheren Betrieb seiner Heizungsanlage verantwortlich. Schreibende Zugriffe über die Weboberfläche oder API verändern Einstellungen der echten Heizungssteuerung und erfolgen in eigener Verantwortung. Ändere nur Parameter, deren Bedeutung und Auswirkungen du verstehst, und beachte die Vorgaben des Heizungsherstellers. Ziehe bei Unsicherheit einen Heizungsfachbetrieb hinzu.
+
 ## Entwicklung mit KI-Unterstützung
 
 Dieses Projekt ist mit Unterstützung von OpenAI Codex entstanden.

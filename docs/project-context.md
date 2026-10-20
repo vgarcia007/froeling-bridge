@@ -6,6 +6,10 @@ Zuletzt aktualisiert: 20.10.2026. Diese Datei ist der Einstieg für neue Session
 
 Am 20.10.2026 hat der Benutzer den Text für „Entwicklung mit KI-Unterstützung“ selbst vorgegeben; er wurde wortgleich ins README übernommen. Er beschreibt OpenAI Codex als Unterstützung bei Implementierung und Dokumentation; Konzeption, technische Entscheidungen und Verantwortung liegen beim Projektbetreiber. Diesen persönlichen Text bei künftigen README-Überarbeitungen zusammen mit der Danksagung erhalten; nicht durch den zuvor verwendeten allgemeinen Fehler-/Prüfungshinweis ersetzen.
 
+## Eigenverantwortung beim Heizungsbetrieb
+
+Benutzer verlangt im README einen eigenen Abschnitt zur Verantwortung für die eigene Heizungsanlage: sicherer Betrieb liegt beim Betreiber; schreibende Zugriffe über GUI/API ändern die echte Steuerung und erfolgen in eigener Verantwortung. Dieser Hinweis ist ausdrücklich unabhängig vom persönlichen KI-Text und bleibt als separater Abschnitt erhalten.
+
 ## Ziel und Zusammenarbeit
 
 Der Benutzer betreibt Original-p4d bereits auf einem anderen Rechner. Er möchte eine einfacher installierbare Python-Variante mit einer richtigen API und einem modernen Menü zum Lesen und Schreiben von Heizungsparametern. Andere Webinterfacefunktionen haben geringe Priorität. Die vorhandene MariaDB samt Historie soll weitergeführt werden; p4d bleibt Rückfalloption.
