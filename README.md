@@ -148,6 +148,10 @@ journalctl -u froeling-bridge.service -n 60
 - [Entwicklung, Demo und ältere Betriebsarten](docs/service.md)
 - [Technische Dokumentation und p4d-Bestandsanalyse](docs/README.md)
 
+## KI-Hinweis
+
+Dieses Projekt wird mit Unterstützung künstlicher Intelligenz (OpenAI Codex) entwickelt und dokumentiert. Trotz Tests können Fehler enthalten sein. Die KI-Unterstützung ersetzt keine fachliche Prüfung, insbesondere bei Änderungen an Heizungsparametern.
+
 ## Lizenz
 
 Fröling Bridge steht unter der [GNU General Public License Version 2 (GPLv2)](LICENSE). 

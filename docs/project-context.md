@@ -1,6 +1,10 @@
 # Aktueller Projektkontext
 
-Zuletzt aktualisiert: 19.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
+Zuletzt aktualisiert: 20.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
+
+## KI-Hinweis im README
+
+Am 20.10.2026 auf Benutzerwunsch einen ausdrücklichen KI-Hinweis im README ergänzt: Entwicklung und Dokumentation mit OpenAI Codex, mögliche Fehler trotz Tests, fachliche Prüfung insbesondere bei Heizungsparametern. Bei künftigen README-Überarbeitungen zusammen mit der Danksagung erhalten. Der frühere genaue Wortlaut war in der durchsuchten Git-Historie nicht auffindbar; dies ist eine neue Formulierung.
 
 ## Ziel und Zusammenarbeit
 
