@@ -1,5 +1,11 @@
 # Entscheidungsprotokoll
 
+## 01.11.2026 — Ausschließlich lesender MCP über HTTP
+
+- Benutzer entscheidet für den Aufbau analog Habimetry: separater Streamable-HTTP-Dienst mit Bearer-Token, auf dem vorhandenen MCP-Rechner statt zusätzlichem Dienst auf dem Heizungsrechner. Code, Tests und Anleitung gehören ins `froeling-bridge`-Repository. Er autorisiert Umsetzung und Einrichtung ausdrücklich.
+- Neun feste Lesewerkzeuge über vorhandene GET-API-Routen; keine Jobs, Schreibwerkzeuge, frei wählbaren HTTP-Endpunkte, SQL oder direkte Geräte-/Datenbankzugriffe. Eigener Bridge-Benutzer read und Schlüssel-Scope read. Schreibschlüssel beim Start und vor jedem Datenabruf ablehnen; unabhängiges MCP-Token immer verlangen.
+- Eigene Python-3.11+-Umgebung und systemd-Dienst; Bridge bleibt bei bisheriger Laufzeit und Erfassung. Authentifizierung, Zeitzonen, Frische, Verdichtung, Begrenzung/Fortsetzung und unsichere Fehleraktivität ausdrücklich erhalten. Implementierung und Betrieb separat von der laufenden Heizung prüfen.
+
 Hier stehen dauerhafte Vereinbarungen, keine ungeprüften Annahmen. Neuere Entscheidungen ergänzen oder ersetzen ältere ausdrücklich.
 
 ## 16.10.2026 — Richtung und erster Arbeitsumfang

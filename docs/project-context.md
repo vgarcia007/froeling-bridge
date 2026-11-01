@@ -1,6 +1,16 @@
 # Aktueller Projektkontext
 
-Zuletzt aktualisiert: 20.10.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
+Zuletzt aktualisiert: 01.11.2026. Diese Datei ist der Einstieg für neue Sessions; technische Details stehen in den verlinkten Fachnotizen.
+
+## Separater, ausschließlich lesender HTTP-MCP
+
+Benutzer beauftragt MCP analog zur vorhandenen Habimetry-Lösung: Streamable HTTP, eigener Bearer-Schutz, separater Dienst auf dem MCP-Rechner; Code und Dokumentation gehören ausschließlich in dieses Repository. Kein zusätzlicher serieller Besitzer, keine direkte Datenbankverbindung, keine Schreibwerkzeuge oder allgemeinen HTTP-/SQL-Aufrufe. Der Heizungsdienst bleibt unverändert.
+
+Implementiert in `mcp_api.py` und `mcp_server.py`: neun Lesewerkzeuge für Sensorkatalog/Suche, letzte Werte, Anlagenübersicht, Roh-/verdichtete Historie mit Fortsetzung, Fehler, Menü/Suche und Zeitprogrammcache. Feste GET-Routen, keine Weiterleitungen/Umgebungs-Proxys, begrenzte Antworten/Zeiträume und keine erfundenen Messpunkte. Zeitzone und Grenzen der lokalen p4d-DATETIME-Historie werden mitgeliefert. Beobachtungszeit, Stale-/Ursprungsfelder und Fehleraktivität bleiben erhalten.
+
+Eigener Bridge-Lesebenutzer und Read-Scope; beim Start und vor jedem Datenabruf effektive Leserechte prüfen, Schreibschlüssel ablehnen. Unabhängiges MCP-Token ist auch lokal zwingend. Eigene Python-3.11+-Umgebung mit offiziellem SDK 2.3.0, Standardport 8767 neben bestehenden Diensten. `deploy/install-mcp.sh` installiert ausschließlich `froeling-bridge-mcp.service`, eigenen unprivilegierten Benutzer und geschützte Umgebung; keine Änderung am Heizungsdienst. Gerätezugriff gesperrt. Anleitung [mcp.md](mcp.md), konkrete Betriebsdaten ausschließlich im lokalen Betreiberkontext.
+
+Geprüft: zehn Adaptertests und echte MCP-HTTP-Integration mit simulierter Bridge; alle neun Werkzeuge, Authentifizierung, verweigerte Schreibwerkzeuge und Sperre bei geänderten Rechten. Bestehende Suite: 291 Tests erfolgreich, davon 20 mangels separater Test-MariaDB übersprungen. Separater MCP produktiv gestartet, Autostart aktiv; echter Client hat Livewerte, historische Punkte samt Fortsetzung, Fehler, Menü und Zeitprogramme lesend abgerufen. Unangemeldeter Zugriff 401, effektive Bridge-Rolle read ohne Schreibfähigkeit. Heizungs-PID, Neustartzähler und Dienstzustand vor/nachher gleich. Keine echten Heizungs-Schreibtests. Private Nachweise `.local/mcp-*`.
 
 ## Öffentliche Dokumentation und lokaler Betreiberkontext
 

@@ -144,6 +144,7 @@ journalctl -u froeling-bridge.service -n 60
 - [Betrieb, Datenbankkonfiguration, Speicherung und Sicherungen](docs/standalone.md)
 - [Benutzer, API-Schlüssel und optionaler HTTPS-/Reverse-Proxy-Zugang](docs/authentication.md)
 - [API Schritt für Schritt: Heizungsstatus und alle Sensoren mit curl](docs/api-einstieg.md)
+- [MCP über HTTP: aktuelle Werte und Historie ausschließlich lesen](docs/mcp.md)
 - [Anlagenübersicht im Detail](docs/plant-overview.md)
 - [Entwicklung, Demo und ältere Betriebsarten](docs/service.md)
 - [Technische Dokumentation und p4d-Bestandsanalyse](docs/README.md)

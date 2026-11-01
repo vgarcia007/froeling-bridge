@@ -1,5 +1,7 @@
 # Dokumentation
 
+Für KI-Clients: [MCP über HTTP mit ausschließlich lesendem Zugriff](mcp.md).
+
 Für einen neuen Benutzer ist das [README mit Installation, Erstpasswort und Benutzeranlage](../README.md) der Einstieg. Eine neue Installation ist im Heimnetz direkt per IP erreichbar; Reverse Proxy und MariaDB sind optional.
 
 | Du möchtest … | Anleitung |

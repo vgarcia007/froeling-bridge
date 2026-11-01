@@ -14,6 +14,8 @@ Das Repository ist öffentlich. Echte Betriebsadressen, persönliche Abwesenheit
 
 ## Ziel und feste Grenzen
 
+- Optionaler MCP: separater, ausschließlich lesender Streamable-HTTP-Dienst, Anleitung `docs/mcp.md`, Code `mcp_api.py`/`mcp_server.py`. Kein OAuth, unabhängiges Bearer-Token und eigener Bridge-Leseschlüssel; Schreibschlüssel ablehnen. Nur feste GET-Routen, keine Jobs, Parameter-/Flagänderungen oder direkten DB-/TTY-Zugriffe. Eigenes Python 3.11+ und `froeling-bridge-mcp.service`; Heizungsdienst nicht für MCP neu starten. Betriebsadressen und Tokens ausschließlich privat halten. Benutzer hat Umsetzung und Einrichtung am 01.11.2026 beauftragt.
+
 - p4d ist die verbindliche funktionale Vorlage. Vor Änderungen den vollständigen relevanten Ablauf in Protokoll, Dienst, Datenbank und Webmenü sowie die bestehenden Fachnotizen abgleichen. Namen, Menüpfade, Adress-/Wochentagszuordnung und Cacheverhalten gehören zum Funktionsumfang, nicht zu späteren kosmetischen Extras. Benutzer möchte nicht erneut auf bereits dokumentiertes Originalverhalten hinweisen müssen.
 - Empfangene Heizungsdaten nach dem Original verlustfrei lesen; keine Eingabevalidierung auf Rohantworten anwenden. Abweichungen ausdrücklich belegen, begründen und testen. Moderne Darstellung darf keine namenlosen Rohadressen oder zusätzliche manuelle Leseschritte anstelle vorhandener p4d-Funktionen einführen.
 
